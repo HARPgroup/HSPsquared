@@ -32,7 +32,7 @@ RUN jupyter notebook --generate-config && echo "c.NotebookApp.token = ''" > /hom
 COPY . ${HOME}/HSPsquared
 
 RUN cd ${HOME}/HSPsquared \
-    && rm -r wdmtoolbox \
+#    && rm -r wdmtoolbox \
     && pip install --no-cache --upgrade pip \
     && pip install --no-cache -r requirements.txt \
     && pip install --no-cache wdmtoolbox

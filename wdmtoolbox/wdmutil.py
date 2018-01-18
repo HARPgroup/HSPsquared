@@ -15,8 +15,11 @@ import re
 import sys
 
 import pandas as pd
-
-from . import wdm
+import platform
+if platform.system() =='Windows':
+	from . import wdm
+else
+	import _wdm_lib as wdm
 
 # Load in WDM subroutines
 
