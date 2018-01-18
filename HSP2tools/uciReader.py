@@ -33,7 +33,7 @@ def readUCI(ucifile, hdffile, HSPF=False, metric=False, prefix=dprefix):
        HSPF flag (if False imports only the data needed by HSP2, else imports all data)
        metric flag (if False imports only English unit data, ele imports metric data)'''
 
-    h2name  = HSP2tools.__file__[:-12] + r'\HSP2Data\HSP2.h5'
+    h2name  = HSP2tools.__file__[:-12] + r'/HSP2Data/HSP2.h5'
     df = pd.read_hdf(h2name, 'FLOWEXPANSION')
     df.to_hdf(hdffile, '/HSP2/FLOWEXPANSION',  data_columns=True, format='t')
 

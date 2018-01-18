@@ -11,7 +11,7 @@ import HSP2tools
 
 def makeH5():
     '''creates 'hidden' HDF5 file with UCI parsing information + other useful data '''
-    sitepath = HSP2tools.__file__[:-12] + '\\HSP2Data\\'
+    sitepath = HSP2tools.__file__[:-12] + '/HSP2Data/'
     h2name = sitepath + 'HSP2.h5'
 
     lapse = pd.Series ([ 0.0035, 0.0035, 0.0035, 0.0035, 0.0035, 0.0035, 0.0037,
