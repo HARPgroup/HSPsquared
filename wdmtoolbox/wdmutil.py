@@ -16,9 +16,12 @@ import sys
 
 import pandas as pd
 import platform
+
+# If this is windows, we need to load differently
+# PWS 2018-01-18
 if platform.system() =='Windows':
 	from . import wdm
-else
+else:
 	import _wdm_lib as wdm
 
 # Load in WDM subroutines
