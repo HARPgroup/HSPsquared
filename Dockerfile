@@ -29,6 +29,8 @@ USER root
 RUN jupyter notebook --generate-config && echo "c.NotebookApp.token = ''" > /home/${NB_USER}/.jupyter/jupyter_notebook_config.py
 
 # get HSP2 and build
+# if we want to run this off perm storage, just copy requrements 
+# and remove after install. then start container with -v to the workdir
 COPY . ${HOME}/HSPsquared
 
 RUN cd ${HOME}/HSPsquared \
@@ -38,7 +40,8 @@ RUN cd ${HOME}/HSPsquared \
     && pip install --no-cache wdmtoolbox
 
 RUN chown -R ${NB_USER} ${HOME}
-
+RUN jupyter nbextension enable --py --sys-prefix qgrid
+RUN jupyter nbextension enable --py --sys-prefix widgetsnbextension
 USER ${NB_USER}
 # set python path to include hsp2 modules
 ENV PYTHONPATH ${HOME}/HSPsquared:${PYTHONPATH}
