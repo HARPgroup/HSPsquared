@@ -1,0 +1,170 @@
+RUN
+ 
+GLOBAL
+  A51800     for | P5 | p532sova_2 | VA,SUFFOLK
+  START       1984/ 1/ 1        END    2019/12/31
+  RUN INTERP OUTPUT LEVEL    0    0
+  RESUME     0 RUN     1                   UNIT SYSTEM     1
+END GLOBAL
+
+FILES
+<FILE>  <UN#>***<----FILE NAME------------------------------------------------->
+WDM1       21   met_A51800.wdm
+WDM2       22   prad_A51800.wdm
+WDM4       24   forA51800.wdm
+MESSU      25   forA51800.ech
+           26   forA51800.out
+END FILES
+
+OPN SEQUENCE
+    INGRP              INDELT 01:00
+      PERLND       1
+    END INGRP
+END OPN SEQUENCE
+
+PERLND
+  ACTIVITY
+    #    # ATMP SNOW PWAT  SED  PST  PWG PQAL MSTL PEST NITR PHOS TRAC   ***
+    1         1    1    1    0    0    0    0    0    0    0    0    0
+  END ACTIVITY
+
+  PRINT-INFO
+    #    # ATMP SNOW PWAT  SED  PST  PWG PQAL MSTL PEST NITR PHOS TRAC PIVL***PY
+    1         5    5    5    0    0    0    0    0    0    0    0    0    0   12
+  END PRINT-INFO
+
+  GEN-INFO
+    #    #      NAME          NBLKS  UCI   IN  OUT ENGL METR  ***
+    1      A51800 for             1    1    1    1   26    0
+  END GEN-INFO
+
+  ATEMP-DAT
+    #    #     ELDAT    AIRTMP ***
+    1             0.   23.1476                                                  
+  END ATEMP-DAT
+
+  ICE-FLAG
+    #    # ICFG  ***
+    1         1
+  END ICE-FLAG
+
+  SNOW-PARM1
+    #    #       LAT      ELEV     SHADE    SNOWCF    COVIND  ***
+    1       36.69108     40.46     0.505       1.3      1.06                    
+  END SNOW-PARM1
+
+  SNOW-PARM2
+    #    #     RDCSN     TSNOW    SNOEVP    CCFACT    MWATER    MGMELT  ***
+    1           0.12       32.      0.13       0.5      0.03      0.03          
+  END SNOW-PARM2
+
+  SNOW-INIT1
+    #    # PACK-SNOW  PACK-ICE PACK-WATR    RDENPF      DULL    PAKTMP  ***
+    1             0.        0.        0.      0.15      100.       30.          
+  END SNOW-INIT1
+
+  SNOW-INIT2
+    #    #    COVINX    XLNMLT    SKYCLR  ***
+    1           1.06        0.       0.9                                        
+  END SNOW-INIT2
+
+  PWAT-PARM1
+    #    # CSNO RTOP UZFG  VCS  VUZ  VNN VIFW VIRC  VLE  ***
+    1         1    1    0    1    0    0    0    0    1
+  END PWAT-PARM1
+
+  PWAT-PARM2
+    #*** #    FOREST      LZSN    INFILT      LSUR     SLSUR     KVARY      AGWR
+    1          0.284        8.  0.028571      477.     0.012  0.10E-05  0.920000
+  END PWAT-PARM2
+
+  PWAT-PARM3
+    #*** #    PETMAX    PETMIN    INFEXP    INFILD    DEEPFR   BASETPR    AGWETP
+    1            40.       35.        2.        2.        0.        0.  0.300000
+  END PWAT-PARM3
+
+  PWAT-PARM4
+    #    #     CEPSC      UZSN      NSUR     INTFW       IRC     LZETP  ***
+    1                     0.96       0.4       2.5  0.435477                    
+  END PWAT-PARM4
+
+  MON-INTERCEP
+    #    #  JAN  FEB  MAR  APR  MAY  JUN  JUL  AUG  SEP  OCT  NOV  DEC  ***
+    1       .08  .08  .08  .13   .2   .2   .2   .2   .2  .13  .08  .08          
+  END MON-INTERCEP
+
+  MON-UZSN
+    #    #  JAN  FEB  MAR  APR  MAY  JUN  JUL  AUG  SEP  OCT  NOV  DEC  ***
+    1                                                                           
+  END MON-UZSN
+
+  MON-MANNING
+    #    #  JAN  FEB  MAR  APR  MAY  JUN  JUL  AUG  SEP  OCT  NOV  DEC  ***
+    1                                                                           
+  END MON-MANNING
+
+  MON-LZETPARM
+    #    #  JAN  FEB  MAR  APR  MAY  JUN  JUL  AUG  SEP  OCT  NOV  DEC  ***
+    1        .4   .4   .4 .524   .7   .7   .7   .7   .7 .524   .4   .4          
+  END MON-LZETPARM
+
+  PWAT-STATE1
+    #*** #      CEPS      SURS       UZS      IFWS       LZS      AGWS      GWVS
+    1                                0.6                  5.        1.        0.
+  END PWAT-STATE1
+
+END PERLND
+
+EXT SOURCES
+<-Volume-> <Member> SsysSgap<--Mult-->Tran <-Target vols> <-Grp> <-Member->***
+<Name>   # <Name> # tem strg<-factor->strg <Name>   #   #        <Name> # #***
+*** METEOROLOGY
+WDM1  1000 EVAP     ENGL         1.082SAME PERLND   1     EXTNL  PETINP
+WDM1  1001 DEWP     ENGL              SAME PERLND   1     EXTNL  DTMPG
+WDM1  1002 WNDH     ENGL              SAME PERLND   1     EXTNL  WINMOV
+WDM1  1003 RADH     ENGL              SAME PERLND   1     EXTNL  SOLRAD
+WDM1  1004 ATMP     ENGL              SAME PERLND   1     EXTNL  GATMP
+
+*** PRECIPITATION AND ATMOSPHERIC DEPOSITION LOADS
+WDM2  2000 HPRC     ENGL              SAME PERLND   1     EXTNL  PREC
+WDM2  2001 NO23     ENGL              DIV  PERLND   1     EXTNL  NIADFX 1 2
+WDM2  2002 NH4A     ENGL              DIV  PERLND   1     EXTNL  NIADFX 2 2
+WDM2  2003 NO3D     ENGL              DIV  PERLND   1     EXTNL  NIADFX 1 2
+WDM2  2004 NH4D     ENGL              DIV  PERLND   1     EXTNL  NIADFX 2 2
+END EXT SOURCES
+
+EXT TARGETS
+<-Volume-> <-Grp> <-Member-><--Mult-->Tran <-Volume-> <Member> Tsys Tgap Amd ***
+<Name>   #        <Name> # #<-factor->strg <Name>   # <Name> #  tem strg strg***
+PERLND   1 PWATER SURO                SAME WDM4   111 SURO     ENGL      REPL
+PERLND   1 PWATER IFWO                SAME WDM4   211 IFWO     ENGL      REPL
+PERLND   1 PWATER AGWO                SAME WDM4   411 AGWO     ENGL      REPL
+PERLND   1 SEDMNT SOSED  1            SAME WDM4   121 SEDM     ENGL      REPL
+PERLND   1 PWTGAS SOHT                SAME WDM4   131 SOHT     ENGL      REPL
+PERLND   1 PWTGAS IOHT                SAME WDM4   231 IOHT     ENGL      REPL
+PERLND   1 PWTGAS AOHT                SAME WDM4   431 AOHT     ENGL      REPL
+PERLND   1 PWTGAS SODOXM              SAME WDM4   132 SDOX     ENGL      REPL
+PERLND   1 PWTGAS IODOXM              SAME WDM4   232 IDOX     ENGL      REPL
+PERLND   1 PWTGAS AODOXM              SAME WDM4   432 ADOX     ENGL      REPL
+PERLND   1 PQUAL  SOQS   5            SAME WDM4   152 DPO4     ENGL      REPL
+PERLND   1 PQUAL  SOQO   5            SAME WDM4   153 SPO4     ENGL      REPL
+PERLND   1 PQUAL  IOQUAL 5            SAME WDM4   253 IPO4     ENGL      REPL
+PERLND   1 PQUAL  AOQUAL 5            SAME WDM4   453 APO4     ENGL      REPL
+PERLND   1 NITR   SEDN   2            SAME WDM4   142 DNH3     ENGL      REPL
+PERLND   1 NITR   TSAMS  1            SAME WDM4   144 SNH3     ENGL      REPL
+PERLND   1 NITR   TSAMS  5            SAME WDM4   244 INH3     ENGL      REPL
+PERLND   1 NITR   SSAMS  3            SAME WDM4   444 ANH3     ENGL      REPL
+PERLND   1 NITR   TSNO3  1            SAME WDM4   145 SNO3     ENGL      REPL
+PERLND   1 NITR   TSNO3  5            SAME WDM4   245 INO3     ENGL      REPL
+PERLND   1 NITR   SSNO3  3            SAME WDM4   445 ANO3     ENGL      REPL
+PERLND   1 NITR   SEDN   1            SAME WDM4   141 DLON     ENGL      REPL
+PERLND   1 NITR   TSSLN  1            SAME WDM4   146 SLON     ENGL      REPL
+PERLND   1 NITR   TSSLN  5            SAME WDM4   246 ILON     ENGL      REPL
+PERLND   1 NITR   SSSLN  3            SAME WDM4   446 ALON     ENGL      REPL
+PERLND   1 NITR   SEDN   3            SAME WDM4   143 DRON     ENGL      REPL
+PERLND   1 NITR   TSSRN  1            SAME WDM4   147 SRON     ENGL      REPL
+PERLND   1 NITR   TSSRN  5            SAME WDM4   247 IRON     ENGL      REPL
+PERLND   1 NITR   SSSRN  3            SAME WDM4   447 ARON     ENGL      REPL
+END EXT TARGETS
+
+END RUN
