@@ -99,6 +99,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                 msg(3, f'{activity}')
 
                 ui = uci[(operation, activity, segment)]   # ui is a dictionary
+
                 if operation == 'PERLND' and activity == 'SEDMNT':
                     # special exception here to make CSNOFG available
                     ui['PARAMETERS']['CSNOFG'] = uci[(operation, 'PWATER', segment)]['PARAMETERS']['CSNOFG']
@@ -164,7 +165,9 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                         ui['advectData'] = uci[(operation, 'ADCALC', segment)]['adcalcData']
                         if flags['HYDR']:
                             ui['PARAMETERS']['LKFG'] = uci[(operation, 'HYDR', segment)]['PARAMETERS']['LKFG']
-
+                        # initialize FLAGS holder - happens when no RQUAL
+                        if 'FLAGS' not in ui:
+                            ui['FLAGS'] = {}
                         ui['FLAGS']['HTFG'] = flags['HTRCH']
                         ui['FLAGS']['SEDFG'] = flags['SEDTRN']
                         ui['FLAGS']['GQFG'] = flags['GQUAL']
@@ -207,8 +210,12 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                         errors, errmessages = function(io_manager, siminfo, ui, ts, ftables)
                     elif (activity != 'RQUAL'):
                         errors, errmessages = function(io_manager, siminfo, ui, ts)
-                    else:                    
-                        errors, errmessages = function(io_manager, siminfo, ui, ui_oxrx, ui_nutrx, ui_plank, ui_phcarb, ts, monthdata)
+                    else:
+                        # is RQUAL enabled? If so, there will be more than 1 FLAGS
+                        rq_fg = ui['FLAGS'].values()
+                        rq_ifg = sum([int(i) for i in rq_fg])
+                        if (rq_ifg > 1):
+                            errors, errmessages = function(io_manager, siminfo, ui, ui_oxrx, ui_nutrx, ui_plank, ui_phcarb, ts, monthdata)
                 ###############################################################
 
                 for errorcnt, errormsg in zip(errors, errmessages):
