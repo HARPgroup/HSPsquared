@@ -207,6 +207,10 @@ def readUCI(uciname, hdfname):
                 df['PETMIN'] = 0.35
                 df['PETMAX'] = 40.0
                 df.to_hdf(store, path, data_columns=True)
+            if 'RETS' not in df.columns:   # didn't read IWAT-STATE1 table
+                df['RETS'] = 0.001
+                df['SURS'] = 0.001
+                df.to_hdf(store, path, data_columns=True)
 
         path = '/IMPLND/IWTGAS/PARAMETERS'
         if path in keys:

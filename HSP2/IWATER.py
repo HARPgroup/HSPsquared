@@ -95,7 +95,6 @@ def _iwater_(ui, ts):
     RTOPFG = 0
     if 'RTOPFG' in ui:
         RTOPFG = int(ui['RTOPFG'])
-
     HRFG   = ts['HRFG'].astype(int64)
     HR1FG  = ts['HR1FG'].astype(int64)
     RETSC  = ts['RETSC']  # input parameter could be input monthly
