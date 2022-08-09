@@ -11,7 +11,6 @@ Conversion of no category version of HSPF HRCHHYD.FOR into Python'''
   FTABLE can come from WDM or UCI file based on FTBDSN 1 or 0
 '''
 
-
 from numpy import zeros, any, full, nan, array, int64
 from pandas import DataFrame
 from math import sqrt, log10
@@ -28,7 +27,6 @@ ERRMSGS =('HYDR: SOLVE equations are indeterminate',             #ERRMSG0
 
 TOLERANCE = 0.001   # newton method max loops
 MAXLOOPS  = 100     # newton method exit tolerance
-
 
 def hydr(io_manager, siminfo, uci, ts, ftables):
     ''' find the state of the reach/reservoir at the end of the time interval
@@ -129,6 +127,16 @@ def hydr(io_manager, siminfo, uci, ts, ftables):
     uci['PARAMETERS']['ROS'] = ui['ROS']
     
     return errors, ERRMSGS
+
+def specl(io_manager, siminfo, uci, ts, ftables):
+    to_print = _specl_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels)    
+    to_print = specl(ts)
+
+@njit(cache=True)
+def _specl_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):
+    n_hundredth_step = ts #how to find the step number? maybe use ui (ie. line 146) ui requires UCI to be global
+    to_print = "model run is at step: " + n_hundredth_step 
+    return to_print
 
 
 @njit(cache=True)
