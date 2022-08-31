@@ -604,7 +604,7 @@ def expand_HYDR_masslinks(flags, uci, dat, recs):
         recs.append(rec)
     return recs
 
-def specl(io_manager, siminfo, uci, ts, state):
+def specl(io_manager, siminfo, uci, ts, state, specl_actions):
     ''' process special actions in this domain
 
     CALL: specl(io_manager, siminfo, uci, ts, state)
