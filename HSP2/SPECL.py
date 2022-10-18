@@ -7,10 +7,14 @@ CALL: specl(ui, ts, step, specactions)
     specactions is a dictionary with all SPEC-ACTIONS entries
 '''
 
+from numba import njit
+
+@njit(cache=True)
 def specl(ui, ts, step, specactions):
-    print("specl()")
+    
+    test_withdrawal = 99
 
     # example for modifying ts element
-    # ts['OUTDGT2'][step] = 99
+    # ts['OUTDGT2'][step] = test_withdrawal
 
     # return errors
