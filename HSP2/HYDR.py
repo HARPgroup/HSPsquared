@@ -18,7 +18,7 @@ from math import sqrt, log10
 from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
-
+from HSP2.SPECL import specl, _specl_
 
 ERRMSGS =('HYDR: SOLVE equations are indeterminate',             #ERRMSG0
           'HYDR: extrapolation of rchtab will take place',       #ERRMSG1
@@ -258,6 +258,10 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):
 
     # HYDR (except where noted)
     for step in range(steps):
+
+        # call specl
+        # specl(ui, ts, step, specactions)
+
         convf  = CONVF[step]
         outdgt[:] = OUTDGT[step, :]
         colind[:] = COLIND[step, :]
