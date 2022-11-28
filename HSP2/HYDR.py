@@ -19,7 +19,9 @@ from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
 from HSP2.SPECL import specl, _specl_
-
+import numpy as np
+from numba import types
+from numba.typed import Dict
 
 ERRMSGS =('HYDR: SOLVE equations are indeterminate',             #ERRMSG0
           'HYDR: extrapolation of rchtab will take place',       #ERRMSG1
@@ -72,32 +74,10 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
 
     # OUTDGT timeseries might come in as OUTDGT, OUTDGT0, etc. otherwise UCI default
     names = list(sorted([n for n in ts if n.startswith('OUTDG')], reverse=True))
-    print(names)
     df = DataFrame()
     for i,c in enumerate(ODGTF):
         df[i] = ts[names.pop()][0:steps] if c > 0 else zeros(steps)
     OUTDGT = df.to_numpy()
-
-    print(OUTDGT)
-
-    # OUTDGT replacement testing
-    # OUTDGT = ts[names][0:steps]
-    xkeys = ['OUTDGT1', 'OUTDGT2']
-    # xvalues = list(map(ts.get, xkeys))
-    xvalues = array(ts['OUTDGT1'],ts['OUTDGT2'])
-    # xvalues = array(map(ts.get, xkeys))
-    # xvalues = list(map(ts.get, names))
-    # print(names)
-    print(xvalues)
-    # print(xvalues.shape)
-    # print(xvalues[0][0])
-    # xvalues[0][0] = xvalues[0][0] * 2
-    # print("ts['OUTDGT1']", ts['OUTDGT1'][0])
-    # print("ts['OUTDGT2']", ts['OUTDGT2'][0])
-
-    # List all names in ts, for jk testing purposes only
-    # ts_names = list(sorted([n for n in ts], reverse=True))
-    # print(ts_names)
 
     # generic SAVE table doesn't know nexits for output flows and rates
     if nexits > 1:
@@ -135,10 +115,6 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     ui['nodfv']  = any(ODFVF)
     ui['uunits'] = uunits
 
-    # List all names in ui, for jk testing purposes only
-    # ui_names = list(sorted([n for n in ui], reverse=True))
-    # print(ui_names)
-
     # Numba can't do 'O' + str(i) stuff yet, so do it here. Also need new style lists
     Olabels = List()
     OVOLlabels = List()
@@ -149,7 +125,6 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
     ###########################################################################
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
-#    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels)                  # run reaches simulation code
     ###########################################################################
 
     if 'O'    in ts:  del ts['O']
@@ -286,37 +261,71 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
     # store initial outflow from reach:
     ui['ROS'] = ro
 
+
+    ###########################################################
+    # # jk dev 11.28.22
+    # # ui = make_numba_dict(uci) # Note: all values coverted to float automatically
+    # # ui['steps']  = steps
+    # # ui['delt']   = siminfo['delt']
+    # # ui['nexits'] = nexits
+    # # ui['errlen'] = len(ERRMSGS)
+    # # ui['nrows']  = rchtab.shape[0]
+    # # ui['nodfv']  = any(ODFVF)
+    # # ui['uunits'] = uunits
+
+    # #create an empty dictionary
+    # # state = dict()
+    # # state = make_numba_dict()
+
+
+    # # print(OUTDGT)
+
+    # # Dict.empty() constructs a typed dictionary
+    # # The key and value typed must be explicitly declared
+    # # Dict with keys as string and values of type float
+    # state = Dict.empty(key_type=types.unicode_type, value_type=types.float64)
+    # print('my state dict:', state)
+    # # print(type(state))
+
+    # state['hello'] = 1.5
+    # # print('my state dict:', state)
+
+
+    # # print(type(outdgt))
+    # # print(outdgt)
+    # # print(OUTDGT)
+    # # print(type(OUTDGT))
+
+    # # outdgt[:] = OUTDGT[0,:]
+    # # print(OUTDGT[0,:])
+
+    # state['OUTDGT'] = OUTDGT
+    # print('my state dict:', state)
+
+    # # state['outdgt'] = outdgt
+    # # print(OUTDGT)
+    ############################################################
+
     # HYDR (except where noted)
     for step in range(steps):
-        # print('\n', 'step: ', step, ' of: ', steps, ' steps')
 
-        # ------------------------------------------------------------------------
-        # print('Trying specl')   
-        # OUTDGT2_save = ts['OUTDGT2'][step - 1] # save before calling specl()
-        # OUTDGT1_save = ts['OUTDGT1'][step - 1] 
         # print("OUTDGT[step, :]", OUTDGT[step, :])
-        # print("ro", ro)
-
         # call specl
-        specl(ui, ts, step, specactions)
-        # print("ts['OUTDGT2'][step]", ts['OUTDGT2'][step])
-        # print("ts['OUTDGT1'][step]", ts['OUTDGT1'][step])
-        # print("OUTDGT[step, :]", OUTDGT[step, :])
+        # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions) 
+        errors_specl = specl(ui, ts, OUTDGT, step, specactions)
 
-        # set OUTDGT using the values in the ts object which were set inside specl()
-        OUTDGT[step, :] = [ts['OUTDGT1'][step], ts['OUTDGT2'][step], 0.0]
         # print("OUTDGT[step, :]", OUTDGT[step, :])
-        # ------------------------------------------------------------------------
-        
+        # print(OUTDGT)
+
         convf  = CONVF[step]
         outdgt[:] = OUTDGT[step, :]
         colind[:] = COLIND[step, :]
         roseff = ro
         oseff[:] = o[:]
 
-        # jk test prints
-        # print("roseff", roseff)
-        # print("outdgt[:]", outdgt[:])
+        # print("outdgt[:]      ", outdgt[:])
+        # print("  ts['OUTDGT1'][step]", ts['OUTDGT1'][step])
+        
 
         # vols, sas variables and their initializations  not needed.
         if irexit >= 0:             # irrigation exit is set, zero based number
@@ -657,4 +666,3 @@ def expand_HYDR_masslinks(flags, uci, dat, recs):
         rec['SVOL'] = dat.SVOL
         recs.append(rec)
     return recs
-    
