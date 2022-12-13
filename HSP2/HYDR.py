@@ -20,7 +20,7 @@ from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
 from HSP2.SPECL import specl, _specl_
 import numpy as np
-from numba import types
+from numba import int8, float32, njit, types
 from numba.typed import Dict
 
 ERRMSGS =('HYDR: SOLVE equations are indeterminate',             #ERRMSG0
@@ -261,71 +261,39 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
     # store initial outflow from reach:
     ui['ROS'] = ro
 
-
-    ###########################################################
-    # # jk dev 11.28.22
-    # # ui = make_numba_dict(uci) # Note: all values coverted to float automatically
-    # # ui['steps']  = steps
-    # # ui['delt']   = siminfo['delt']
-    # # ui['nexits'] = nexits
-    # # ui['errlen'] = len(ERRMSGS)
-    # # ui['nrows']  = rchtab.shape[0]
-    # # ui['nodfv']  = any(ODFVF)
-    # # ui['uunits'] = uunits
-
-    # #create an empty dictionary
-    # # state = dict()
-    # # state = make_numba_dict()
-
-
-    # # print(OUTDGT)
-
-    # # Dict.empty() constructs a typed dictionary
-    # # The key and value typed must be explicitly declared
-    # # Dict with keys as string and values of type float
-    # state = Dict.empty(key_type=types.unicode_type, value_type=types.float64)
-    # print('my state dict:', state)
-    # # print(type(state))
-
-    # state['hello'] = 1.5
-    # # print('my state dict:', state)
-
-
-    # # print(type(outdgt))
-    # # print(outdgt)
-    # # print(OUTDGT)
-    # # print(type(OUTDGT))
-
-    # # outdgt[:] = OUTDGT[0,:]
-    # # print(OUTDGT[0,:])
-
-    # state['OUTDGT'] = OUTDGT
-    # print('my state dict:', state)
-
-    # # state['outdgt'] = outdgt
-    # # print(OUTDGT)
-    ############################################################
-
     # HYDR (except where noted)
     for step in range(steps):
 
-        # print("OUTDGT[step, :]", OUTDGT[step, :])
+        ##########################################################################
+        # specl block 12/13/22
+        ##########################################################################
+        print("step", step, "of", steps)
+        
+        # set up state dictionary 
+        state = Dict.empty(key_type=types.int64, value_type=types.float64)
+        state[1] = OUTDGT[step, 0]
+        state[2] = OUTDGT[step, 1]
+        state[3] = OUTDGT[step, 2]
+
+        print("state before specl()")
+        [print(key,':',value) for key, value in state.items()]
+
         # call specl
-        # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions) 
-        errors_specl = specl(ui, ts, OUTDGT, step, specactions)
+        errors_specl = specl(ui, ts, state, step, specactions)
+
+        print("state after specl()")
+        [print(key,':',value) for key, value in state.items()]
 
         # print("OUTDGT[step, :]", OUTDGT[step, :])
-        # print(OUTDGT)
+        OUTDGT[step, :] = [state[1], state[2], state[3]]
+        print("OUTDGT[step, :]", OUTDGT[step, :])
+        ##########################################################################
 
         convf  = CONVF[step]
         outdgt[:] = OUTDGT[step, :]
         colind[:] = COLIND[step, :]
         roseff = ro
-        oseff[:] = o[:]
-
-        # print("outdgt[:]      ", outdgt[:])
-        # print("  ts['OUTDGT1'][step]", ts['OUTDGT1'][step])
-        
+        oseff[:] = o[:]   
 
         # vols, sas variables and their initializations  not needed.
         if irexit >= 0:             # irrigation exit is set, zero based number
