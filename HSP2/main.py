@@ -11,6 +11,7 @@ from datetime import datetime as dt
 import os
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 from HSP2.configuration import activities, noop, expand_masslinks
+from HSP2.utilities_specl import deconstruct_equation, tokenize_eqn, tokenize_constants, find_state_path, get_state_ix, set_state, init_op_tokens, exec_op_tokens, exec_eqn_nall_m, init_sim_dicts
 
 from HSP2IO.io import IOManager, SupportsReadTS, Category
 

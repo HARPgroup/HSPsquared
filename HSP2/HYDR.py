@@ -18,6 +18,7 @@ from math import sqrt, log10
 from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
+from HSP2.utilities_specl import init_sim_dicts
 from HSP2.SPECL import specl, _specl_
 import numpy as np
 from numba import int8, float32, njit, types
@@ -122,7 +123,8 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
         Olabels.append(f'O{i+1}')
         OVOLlabels.append(f'OVOL{i+1}')
 
-    specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
+    # specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
+    op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
     ###########################################################################
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
     ###########################################################################
@@ -268,7 +270,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
         # specl block 12/13/22
         ##########################################################################
         print("step", step, "of", steps)
-        
+
         # set up state dictionary 
         state = Dict.empty(key_type=types.int64, value_type=types.float64)
         state[1] = OUTDGT[step, 0]
