@@ -18,7 +18,7 @@ from math import sqrt, log10
 from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
-from HSP2.utilities_specl import init_sim_dicts
+# from HSP2.utilities_specl import init_sim_dicts
 from HSP2.SPECL import specl, _specl_
 import numpy as np
 from numba import int8, float32, njit, types
@@ -33,8 +33,8 @@ ERRMSGS =('HYDR: SOLVE equations are indeterminate',             #ERRMSG0
 TOLERANCE = 0.001   # newton method max loops
 MAXLOOPS  = 100     # newton method exit tolerance
 
-
 def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
+# def hydr(io_manager, siminfo, uci, ts, ftables):
     ''' find the state of the reach/reservoir at the end of the time interval
     and the outflows during the interval
 
@@ -124,9 +124,10 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
         OVOLlabels.append(f'OVOL{i+1}')
 
     # specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
-    op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
+
     ###########################################################################
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
+    # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels) 
     ###########################################################################
 
     if 'O'    in ts:  del ts['O']
@@ -140,6 +141,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
 
 @njit(cache=True)
 def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
+# def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
     errors = zeros(int(ui['errlen'])).astype(int64)
 
     steps  = int(ui['steps'])            # number of simulation steps
@@ -272,22 +274,25 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
         print("step", step, "of", steps)
 
         # set up state dictionary 
-        state = Dict.empty(key_type=types.int64, value_type=types.float64)
-        state[1] = OUTDGT[step, 0]
-        state[2] = OUTDGT[step, 1]
-        state[3] = OUTDGT[step, 2]
+        # state = Dict.empty(key_type=types.int64, value_type=types.float64)
+        # state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
+        state_ix = specactions['state_ix']
+        state_ix[1] = OUTDGT[step, 0]
+        state_ix[2] = OUTDGT[step, 1]
+        state_ix[3] = OUTDGT[step, 2]
 
-        print("state before specl()")
-        [print(key,':',value) for key, value in state.items()]
+        print("state_ix before specl()")
+        [print(key,':',value) for key, value in state_ix.items()]
 
         # call specl
-        errors_specl = specl(ui, ts, state, step, specactions)
+        # errors_specl = specl(ui, ts, state, step, specactions)
+        errors_specl = specl(ui, ts, state_ix, step)
 
-        print("state after specl()")
-        [print(key,':',value) for key, value in state.items()]
+        print("state_ix after specl()")
+        [print(key,':',value) for key, value in state_ix.items()]
 
         # print("OUTDGT[step, :]", OUTDGT[step, :])
-        OUTDGT[step, :] = [state[1], state[2], state[3]]
+        OUTDGT[step, :] = [state_ix[1], state_ix[2], state_ix[3]]
         print("OUTDGT[step, :]", OUTDGT[step, :])
         ##########################################################################
 

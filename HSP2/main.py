@@ -5,13 +5,15 @@ License: LGPL2
 
 from re import S
 from numpy import float64, float32
+from numba import types
+from numba.typed import Dict
 from pandas import DataFrame, date_range
 from pandas.tseries.offsets import Minute
 from datetime import datetime as dt
 import os
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
+from HSP2.utilities_specl import init_sim_dicts
 from HSP2.configuration import activities, noop, expand_masslinks
-from HSP2.utilities_specl import deconstruct_equation, tokenize_eqn, tokenize_constants, find_state_path, get_state_ix, set_state, init_op_tokens, exec_op_tokens, exec_eqn_nall_m, init_sim_dicts
 
 from HSP2IO.io import IOManager, SupportsReadTS, Category
 
@@ -36,7 +38,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
         raise FileNotFoundError(f'{hdfname} HDF5 File Not Found')
 
     msg = messages()
-    msg(1, f'(specl v0.1) Processing started for file {hdfname}; saveall={saveall}')
+    msg(1, f'Processing started for file {hdfname}; saveall={saveall}')
 
     # read user control, parameters, states, and flags uci and map to local variables
     uci_obj = io_manager.read_uci()
@@ -48,10 +50,22 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     uci = uci_obj.uci
     siminfo = uci_obj.siminfo 
     ftables = uci_obj.ftables
-    specactions = uci_obj.specactions
+    # specactions = uci_obj.specactions
     monthdata = uci_obj.monthdata
-    specactions = {} # placeholder till added to uci parser
+    # specactions = {} # placeholder till added to uci parser
     
+    op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
+    # specactions = Dict.empty(key_type=types.unicode_type, value_type=types.DictType)
+    specactions = {'op_tokens': op_tokens, 
+                    'state_paths': state_paths,
+                    'state_ix': state_ix,
+                    'dict_ix': dict_ix
+                    }
+    specactions['op_tokens'] = op_tokens
+    specactions['state_paths'] = state_paths
+    specactions['state_ix'] = state_ix
+    specactions['dict_ix'] = dict_ix
+
     start, stop = siminfo['start'], siminfo['stop']
 
     copy_instances = {}
@@ -208,6 +222,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                 if operation not in ['COPY','GENER']:
                     if (activity == 'HYDR'):
                         errors, errmessages = function(io_manager, siminfo, ui, ts, ftables, specactions)
+                        # errors, errmessages = function(io_manager, siminfo, ui, ts, ftables)
                     elif (activity != 'RQUAL'):
                         errors, errmessages = function(io_manager, siminfo, ui, ts)
                     else:                    
