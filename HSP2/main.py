@@ -53,37 +53,17 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     # specactions = uci_obj.specactions
     monthdata = uci_obj.monthdata
     # specactions = {} # placeholder till added to uci parser
-    
-    # op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
-    # print(op_tokens)
-    # print(state_paths)
-    # print(state_ix)
-    # print(dict_ix)
 
-    state_ix = init_sim_dicts()
-    # specactions = Dict.empty(key_type=types.unicode_type, value_type=types.DictType(types.int64, types.float64))
-    
+    #######################################################################################
+    # initilize specactions dicts
+    # need to determine the best way to do send these dicts to HYDR, a nested dictionary 
+    # named specactions containing the 4 dicts is an option, but difficult to do a nested 
+    # dict in numba. For this test example, just setting specactions equal to a single dict.
+    op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
     print("state_ix:", state_ix)
-    # specactions = Dict.empty(key_type=types.unicode_type, value_type=types.DictType)
-    # print("specactions:", specactions)
-
-    specactions = typed.Dict.empty(key_type=types.int64, value_type=types.DictType(types.float64, types.float64))
-    print("specactions:", specactions)
-    specactions = {'state_ix': state_ix}
-    print("specactions:", specactions)
-    print("specactions Numba type is", typeof(specactions))
-
-    # specactions = (state_ix)
-
-    # specactions = {'op_tokens': op_tokens, 'state_paths': state_paths,'state_ix': state_ix,'dict_ix': dict_ix}
-    # specactions = {'state_ix': state_ix}
- 
-    # specactions = state_ix
-    # specactions['op_tokens'] = op_tokens
-    # specactions['state_paths'] = state_paths
-    # specactions['state_ix'] = state_ix
-    # specactions['dict_ix'] = dict_ix
-
+    specactions = state_ix
+    #######################################################################################
+    
     start, stop = siminfo['start'], siminfo['stop']
 
     copy_instances = {}

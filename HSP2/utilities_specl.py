@@ -191,10 +191,8 @@ def init_sim_dicts():
     """
     We should get really good at using docstrings...
     """
-    # op_tokens = Dict.empty(key_type=types.int64, value_type=types.i8[:])
-    # state_paths = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
-    # state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
-    state_ix = typed.Dict.empty(key_type=types.int64, value_type=types.float64)
-    # dict_ix = Dict.empty(key_type=types.int64, value_type=types.float32[:,:])
-    # return op_tokens, state_paths, state_ix, dict_ix
-    return state_ix
+    op_tokens = Dict.empty(key_type=types.int64, value_type=types.i8[:])
+    state_paths = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
+    state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
+    dict_ix = Dict.empty(key_type=types.int64, value_type=types.float32[:,:])
+    return op_tokens, state_paths, state_ix, dict_ix
