@@ -276,24 +276,28 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
         # set up state dictionary 
         # state = Dict.empty(key_type=types.int64, value_type=types.float64)
         # state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
-        state_ix = specactions['state_ix']
-        state_ix[1] = OUTDGT[step, 0]
-        state_ix[2] = OUTDGT[step, 1]
-        state_ix[3] = OUTDGT[step, 2]
+        
+        # print("specactions in HYDR.py:", specactions)
+        
+        # state_ix = specactions['state_ix']
+        # # state_ix = specactions
+        # state_ix[1] = OUTDGT[step, 0]
+        # state_ix[2] = OUTDGT[step, 1]
+        # state_ix[3] = OUTDGT[step, 2]
 
-        print("state_ix before specl()")
-        [print(key,':',value) for key, value in state_ix.items()]
+        # # print("state_ix before specl()")
+        # # [print(key,':',value) for key, value in state_ix.items()]
 
-        # call specl
-        # errors_specl = specl(ui, ts, state, step, specactions)
-        errors_specl = specl(ui, ts, state_ix, step)
+        # # call specl
+        # # errors_specl = specl(ui, ts, state, step, specactions)
+        # errors_specl = specl(ui, ts, state_ix, step)
 
-        print("state_ix after specl()")
-        [print(key,':',value) for key, value in state_ix.items()]
+        # # print("state_ix after specl()")
+        # # [print(key,':',value) for key, value in state_ix.items()]
 
+        # # print("OUTDGT[step, :]", OUTDGT[step, :])
+        # OUTDGT[step, :] = [state_ix[1], state_ix[2], state_ix[3]]
         # print("OUTDGT[step, :]", OUTDGT[step, :])
-        OUTDGT[step, :] = [state_ix[1], state_ix[2], state_ix[3]]
-        print("OUTDGT[step, :]", OUTDGT[step, :])
         ##########################################################################
 
         convf  = CONVF[step]

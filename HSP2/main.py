@@ -5,7 +5,7 @@ License: LGPL2
 
 from re import S
 from numpy import float64, float32
-from numba import types
+from numba import types, typed, typeof
 from numba.typed import Dict
 from pandas import DataFrame, date_range
 from pandas.tseries.offsets import Minute
@@ -54,17 +54,35 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     monthdata = uci_obj.monthdata
     # specactions = {} # placeholder till added to uci parser
     
-    op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
+    # op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
+    # print(op_tokens)
+    # print(state_paths)
+    # print(state_ix)
+    # print(dict_ix)
+
+    state_ix = init_sim_dicts()
+    # specactions = Dict.empty(key_type=types.unicode_type, value_type=types.DictType(types.int64, types.float64))
+    
+    print("state_ix:", state_ix)
     # specactions = Dict.empty(key_type=types.unicode_type, value_type=types.DictType)
-    specactions = {'op_tokens': op_tokens, 
-                    'state_paths': state_paths,
-                    'state_ix': state_ix,
-                    'dict_ix': dict_ix
-                    }
-    specactions['op_tokens'] = op_tokens
-    specactions['state_paths'] = state_paths
-    specactions['state_ix'] = state_ix
-    specactions['dict_ix'] = dict_ix
+    # print("specactions:", specactions)
+
+    specactions = typed.Dict.empty(key_type=types.int64, value_type=types.DictType(types.float64, types.float64))
+    print("specactions:", specactions)
+    specactions = {'state_ix': state_ix}
+    print("specactions:", specactions)
+    print("specactions Numba type is", typeof(specactions))
+
+    # specactions = (state_ix)
+
+    # specactions = {'op_tokens': op_tokens, 'state_paths': state_paths,'state_ix': state_ix,'dict_ix': dict_ix}
+    # specactions = {'state_ix': state_ix}
+ 
+    # specactions = state_ix
+    # specactions['op_tokens'] = op_tokens
+    # specactions['state_paths'] = state_paths
+    # specactions['state_ix'] = state_ix
+    # specactions['dict_ix'] = dict_ix
 
     start, stop = siminfo['start'], siminfo['stop']
 
@@ -116,6 +134,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                 msg(3, f'{activity}')
 
                 ui = uci[(operation, activity, segment)]   # ui is a dictionary
+                #print(ui)
                 if operation == 'PERLND' and activity == 'SEDMNT':
                     # special exception here to make CSNOFG available
                     ui['PARAMETERS']['CSNOFG'] = uci[(operation, 'PWATER', segment)]['PARAMETERS']['CSNOFG']
