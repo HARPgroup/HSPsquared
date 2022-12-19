@@ -63,27 +63,6 @@ def tokenize_eqn(ps):
     return tops
 
 
-def tokenize_constants(tops, state_ix):
-    """
-    We should get really good at using docstrings...
-    """
-    # now stash the string vars as new state vars
-    for j in range(len(tops)):
-        if is_float_digit(tops[j]):
-            # must add this to the state array as a constant
-            s_ix = append_state(state_ix, float(tops[j]))
-            tops[j] = s_ix
-        else:
-            # this is a variable, must find it's data path index
-            s_ix = append_state(state_ix, float(tops[j]))
-            tops[j] = s_ix
-      for j in range(len(tops)):
-          if isinstance(tops[j], str):
-              # must add this to the state array as a constant
-              s_ix = append_state(state_ix, float(tops[j]))
-              tops[j] = s_ix
-
-
 def find_state_path(state_paths, parent_path, varname):
     """
     We should get really good at using docstrings...
