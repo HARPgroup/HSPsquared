@@ -20,6 +20,8 @@ from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
 # from HSP2.utilities_specl import init_sim_dicts
 from HSP2.SPECL import specl, _specl_
+from HSP2.modelObject import modelObject
+from HSP2.Equation import Equation, exec_eqn
 import numpy as np
 from numba import int8, float32, njit, types
 from numba.typed import Dict
@@ -124,9 +126,15 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
         OVOLlabels.append(f'OVOL{i+1}')
 
     # specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
-
+    # this is hard-wired but should be passed in via the UCI or perhaps specactions Dict when calling the hydr() function
+    domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
+    op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
+    hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
+    
     ###########################################################################
-    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
+    print("Calling new _hydr_ with specl")
+    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
+    #errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
     # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels) 
     ###########################################################################
 
@@ -141,6 +149,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
 
 @njit(cache=True)
 def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
+#def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 # def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
     errors = zeros(int(ui['errlen'])).astype(int64)
 
@@ -268,16 +277,16 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
     # HYDR (except where noted)
     for step in range(steps):
         
+        
+"""
         ##########################################################################
         # specl block
         ##########################################################################
         print("step", step, "of", steps)
-        
         # set up state_ix dictionary 
         state_ix = specactions
         # if specactions was a nested dict 
         # state_ix = specactions['state_ix']
-
         state_ix[1] = OUTDGT[step, 0]
         state_ix[2] = OUTDGT[step, 1]
         state_ix[3] = OUTDGT[step, 2]
@@ -286,7 +295,9 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
         [print(key,':',value) for key, value in state_ix.items()]
 
         # call specl
-        errors_specl = specl(ui, ts, state_ix, step)
+        #pre_step_model(op_tokens, state_ix, dict_ix, ts_ix) # currently does nothing
+        #errors_specl = step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
+        #errors_specl = specl(ui, ts, state_ix, step)
 
         print("state_ix after specl()")
         [print(key,':',value) for key, value in state_ix.items()]
@@ -294,6 +305,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
         # print("OUTDGT[step, :]", OUTDGT[step, :])
         OUTDGT[step, :] = [state_ix[1], state_ix[2], state_ix[3]]
         print("OUTDGT[step, :]", OUTDGT[step, :])
+"""
         ##########################################################################
         
         convf  = CONVF[step]
