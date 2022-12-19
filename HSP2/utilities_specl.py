@@ -316,5 +316,3 @@ def step_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         elif op_tokens[i][0] == 5:
             return False
     return 
-
-"""
