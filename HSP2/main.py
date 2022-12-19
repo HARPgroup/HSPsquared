@@ -12,7 +12,7 @@ from pandas.tseries.offsets import Minute
 from datetime import datetime as dt
 import os
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
-from HSP2.utilities_specl import init_sim_dicts
+# from HSP2.utilities_specl import init_sim_dicts
 from HSP2.configuration import activities, noop, expand_masslinks
 
 from HSP2IO.io import IOManager, SupportsReadTS, Category
@@ -50,18 +50,18 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     uci = uci_obj.uci
     siminfo = uci_obj.siminfo 
     ftables = uci_obj.ftables
-    # specactions = uci_obj.specactions
+    specactions = uci_obj.specactions
     monthdata = uci_obj.monthdata
-    # specactions = {} # placeholder till added to uci parser
+    specactions = {} # placeholder till added to uci parser
 
     #######################################################################################
     # initilize specactions dicts
     # need to determine the best way to do send these dicts to HYDR, a nested dictionary 
     # named specactions containing the 4 dicts is an option, but difficult to do a nested 
     # dict in numba. For this test example, just setting specactions equal to a single dict.
-    op_tokens, state_paths, state_ix, dict_ix = init_sim_dicts()
-    print("state_ix:", state_ix)
-    specactions = state_ix
+    # op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
+    # print("state_ix:", state_ix)
+    # specactions = state_ix
     #######################################################################################
     
     start, stop = siminfo['start'], siminfo['stop']

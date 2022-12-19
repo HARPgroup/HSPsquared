@@ -1,4 +1,4 @@
-class modelObject:
+class modelObjectX:
     state_ix = {} # Shared Dict with the numerical state of each object 
     state_paths = {} # Shared Dict with the hdf5 path of each object 
     dict_ix = {} # Shared Dict with the hdf5 path of each object 
