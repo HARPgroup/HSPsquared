@@ -219,7 +219,16 @@ def init_sim_dicts():
     dict_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:,:])
     ts_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:])
     return op_tokens, state_paths, state_ix, dict_ix, ts_ix
-    
+
+def hydr_get_ix(state_ix, state_paths, domain):
+    # get a list of keys for all hydr state variables
+    hydr_state = ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
+    hydr_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
+    for i in hydr_state:
+        #var_path = f'{domain}/{i}'
+        var_path = domain + "/" + i
+        hydr_ix[i] = set_state(state_ix, state_paths, var_path, 0.0)
+    return hydr_ix    
 
 def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     modelObject.op_tokens, modelObject.state_paths, modelObject.state_ix, modelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
