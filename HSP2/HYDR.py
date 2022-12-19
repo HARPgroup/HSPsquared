@@ -18,9 +18,9 @@ from math import sqrt, log10
 from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
-# from HSP2.utilities_specl import init_sim_dicts
+from HSP2.utilities_specl import init_sim_dicts
 from HSP2.SPECL import specl, _specl_
-from HSP2.modelObject import modelObject
+from HSP2.modelObject import modelObjectX
 from HSP2.Equation import Equation, exec_eqn
 import numpy as np
 from numba import int8, float32, njit, types
@@ -129,7 +129,8 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     # this is hard-wired but should be passed in via the UCI or perhaps specactions Dict when calling the hydr() function
     domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
     op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
-    hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
+    # hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
+    hydr_ix = 'placeholder'
     
     ###########################################################################
     print("Calling new _hydr_ with specl")
@@ -148,7 +149,8 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
 
 
 @njit(cache=True)
-def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
+def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix):
+#def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 #def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 # def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
     errors = zeros(int(ui['errlen'])).astype(int64)
