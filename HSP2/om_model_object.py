@@ -37,8 +37,8 @@ class ModelObject:
         return self.state_path
     
     def find_var_path(self, var_name):
-        if var_name in self.inputs.keys():
-            return self.inputs[var_name]
+        if var_name in self.inputs_ix.keys():
+            return self.inputs_ix[var_name]
         if not (self.container == False):
             return self.container.find_var_path(var_name)
         return False
@@ -51,7 +51,7 @@ class ModelObject:
         # this should check to see if this object has a parent, and if so, register the name on the parent 
         # as an input?
         if not (self.container == False):
-            self.container.add_input(self.name, self.state_path)
+            return self.container.add_input(self.name, self.state_path)
         return self.ix
     
     def add_input(self, var_name, var_path):
