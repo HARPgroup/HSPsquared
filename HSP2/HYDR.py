@@ -134,6 +134,9 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
     print(hydr_ix)
     load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix)
+    # add things from UCI as needed 
+    # - we will have to auto-detect during parsing/tokenization to come up with a list
+    # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 
     
     ###########################################################################
     print("Calling new _hydr_ with specl")
@@ -206,6 +209,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
 
     # MAIN loop Initialization
     IVOL   = ts['IVOL']  * VFACT           # or sum civol, zeros if no inflow ???
+    IVOL0   = ts['IVOL']                   # the actual inflow in simulation native units for use by SPECL
     POTEV  = ts['POTEV'] / 12.0
     PREC   = ts['PREC']  / 12.0
     CONVF  = ts['CONVF']
@@ -282,11 +286,14 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
     
     # set up specl pointers for slightly faster execution
     o1_ix, o2_ix, o3_ix, ivol_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3'], hydr_ix['IVOL']
+    # add global constants
+    
 
     # HYDR (except where noted)
     for step in range(steps):
         # set state_ix with value of local state variables and/or needed vars 
-        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL[step]
+        # note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
+        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
         
         # we do pre-step (nothing right now, but could be significant at some point)
         pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
