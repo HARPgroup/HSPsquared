@@ -41,7 +41,7 @@ class ModelObject:
             return self.inputs[var_name]
         if not (self.container == False):
             print(self.name,"looking to parent", self.container.name, "for", var_name)
-            self.container.find_var_path(var_name)
+            return self.container.find_var_path(var_name)
         print(self.name, "could not find", var_name)
         print("in inputs", self.inputs)
         return False
