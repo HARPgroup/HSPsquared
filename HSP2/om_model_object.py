@@ -40,7 +40,7 @@ class ModelObject:
         if var_name in self.inputs_ix.keys():
             return self.inputs_ix[var_name]
         if not (self.container == False):
-            return self.container.find_var_path(var_name)
+            self.container.find_var_path(var_name)
         return False
     
     def register_path(self):
