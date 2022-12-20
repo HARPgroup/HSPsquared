@@ -28,6 +28,7 @@ class ModelLinkage(ModelObject):
                 self.ops = [self.optype, self.ix, src_ix, self.link_type]
             else:
                 print("Error: link ", self.name, "does not have a valid source path")
+            print("tokenize() result", self.ops)
 
 # Function for use during model simulations of tokenized objects
 @njit
