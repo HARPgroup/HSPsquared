@@ -200,6 +200,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     river.register_path()
     # 
     river.add_input("Qin", f'{river.state_path}/HYDR/IVOL')
+    print("State after adding river Qin", state_ix, state_paths)
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
@@ -233,7 +234,6 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
         newq.register_path()
         newq.tokenize()
         newq.add_op_tokens()
-    
     # now connect the wd_mgd back to the river with a direct link.  
     # This is not how we'll do it for most simulations as there may be multiple inputs but will do for now
     hydr = ModelObject('HYDR', river)
