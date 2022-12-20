@@ -277,10 +277,21 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
 
     # store initial outflow from reach:
     ui['ROS'] = ro
+    
+    # set up specl pointers for slightly faster execution
+    o1_ix, o2_ix, o3_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3']
 
     # HYDR (except where noted)
     for step in range(steps):
         
+        
+        # we do pre-step, then step
+        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] = outdgt[0], outdgt[1], outdgt[2]
+        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
+        step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
+        # this is only a few tenths of a second slower on a 40 year simulation but interesting
+        #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
+        outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
         
         """
         ##########################################################################
