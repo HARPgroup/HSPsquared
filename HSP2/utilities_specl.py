@@ -8,61 +8,6 @@ from numba import int8, float32, njit, types, typed # import the types
 import random # this is only used for a demo so may be deprecated
 
 
-def deconstruct_equation(eqn):
-    """
-    We should get really good at using docstrings...
-
-    we parse the equation during readuci/pre-processing and break it into njit'able pieces
-    this forms the basis of our object parser code to run at import_uci step 
-    """
-    results = BNF().parseString(eqn, parseAll=True)
-    ps = []
-    ep = exprStack
-    pre_evaluate_stack(ep[:], ps)
-    return ps
-
-def tokenize_ops(ps):
-    '''Translates a set of string operands into integer keyed tokens for faster execution.''' 
-    tops = [len(ps)] # first token is number of ops
-    for i in range(len(ps)):
-        if ps[i][0] == '-': op = 1
-        if ps[i][0] == '+': op = 2
-        if ps[i][0] == '*': op = 3
-        if ps[i][0] == '/': op = 4
-        if ps[i][0] == '^': op = 5
-        # a negative op code indicates null
-        # this should cause no confusion since all op codes are references and none are actual values
-        if ps[i][1] == None: o1 = -1 
-        else: o1 = ps[i][1]
-        if ps[i][2] == None: o2 = -1 
-        else: o2 = ps[i][2]
-        tops.append(op)
-        tops.append(o1)
-        tops.append(o2)
-    return tops
-
-
-def tokenize_eqn(ps):
-    """
-    We should get really good at using docstrings...
-    """
-    tops = [1, 1, len(ps)] # set up the first 2 op class type and state_ix
-    for i in range(len(ps)):
-        if ps[i][0] == '-': op = 1
-        if ps[i][0] == '+': op = 2
-        if ps[i][0] == '*': op = 3
-        if ps[i][0] == '/': op = 4
-        if ps[i][0] == '^': op = 5
-        if ps[i][1] == None: o1 = -1 
-        else: o1 = ps[i][1]
-        if ps[i][2] == None: o2 = -1 
-        else: o2 = ps[i][2]
-        tops.append(op)
-        tops.append(o1)
-        tops.append(o2)
-    return tops
-
-
 def find_state_path(state_paths, parent_path, varname):
     """
     We should get really good at using docstrings...

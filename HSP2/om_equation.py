@@ -135,6 +135,38 @@ def push_unary_minus(toks):
         else:
             break
 
+def deconstruct_equation(eqn):
+    """
+    We should get really good at using docstrings...
+
+    we parse the equation during readuci/pre-processing and break it into njit'able pieces
+    this forms the basis of our object parser code to run at import_uci step 
+    """
+    results = BNF().parseString(eqn, parseAll=True)
+    ps = []
+    ep = exprStack
+    pre_evaluate_stack(ep[:], ps)
+    return ps
+
+def tokenize_ops(ps):
+    '''Translates a set of string operands into integer keyed tokens for faster execution.''' 
+    tops = [len(ps)] # first token is number of ops
+    for i in range(len(ps)):
+        if ps[i][0] == '-': op = 1
+        if ps[i][0] == '+': op = 2
+        if ps[i][0] == '*': op = 3
+        if ps[i][0] == '/': op = 4
+        if ps[i][0] == '^': op = 5
+        # a negative op code indicates null
+        # this should cause no confusion since all op codes are references and none are actual values
+        if ps[i][1] == None: o1 = -1 
+        else: o1 = ps[i][1]
+        if ps[i][2] == None: o2 = -1 
+        else: o2 = ps[i][2]
+        tops.append(op)
+        tops.append(o1)
+        tops.append(o2)
+    return tops
 
 bnf = None
 
