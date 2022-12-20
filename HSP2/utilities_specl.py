@@ -230,7 +230,20 @@ def hydr_get_ix(state_ix, state_paths, domain):
         hydr_ix[i] = set_state(state_ix, state_paths, var_path, 0.0)
     return hydr_ix    
 
-    
+ 
+def op_path_name(operation, id):
+    tid = str(id).zfill(3)
+    path_name = f'{operation}_{operation[0]}{tid}'
+    return path_name
+
+def specl_state_path(operation, id, activity = ''):
+    op_name = op_path_name(operation, id) 
+    if activity == '':
+        op_path = f'/STATE/{op_name}'
+    else:
+        op_path = f'/STATE/{op_name}/{activity}'
+    return op_path
+   
 
 #from HSP2.om_model_object import ModelObject
 #from HSP2.om_equation import Equation, exec_eqn
