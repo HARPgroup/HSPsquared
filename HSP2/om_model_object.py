@@ -79,7 +79,7 @@ class ModelObject:
         # can be customized by subclasses to add multiple lines if needed.
         if self.ops == []:
             self.tokenize()
-        print(self.name, "tokens", ops)
+        print(self.name, "tokens", self.ops)
         self.op_tokens[self.ix] = np.asarray(self.ops, dtype="i8")
 
 
