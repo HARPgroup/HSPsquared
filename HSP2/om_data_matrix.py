@@ -4,7 +4,7 @@ The class DataMatrix is used to translate provide table lookup and interpolation
 from HSP2.om_model_object import ModelObject
 from HSP2.utilities_specl import *
 from numba import njit
-class DataMatrix(modelObject):
+class DataMatrix(ModelObject):
     def __init__(self, name, container = False, matrix_vals = []):
         super(DataMatrix, self).__init__(name, container)
         self.lu_type1 = ""
