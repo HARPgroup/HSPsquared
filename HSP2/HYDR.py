@@ -130,8 +130,9 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     # this is hard-wired but should be passed in via the UCI or perhaps specactions Dict when calling the hydr() function
     domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
     op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
-    # hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
-    hydr_ix = 'placeholder'
+    hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
+    print(hydr_ix)
+    load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix)
     
     ###########################################################################
     print("Calling new _hydr_ with specl")
