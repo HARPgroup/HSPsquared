@@ -7,14 +7,14 @@ from HSP2.om_model_object import ModelObject
 from numba import njit
 class ModelLinkage(ModelObject):
     def __init__(self, name, container = False, source_path = '', link_type = 1):
-        super(modelLinkage, self).__init__(name, container)
+        super(ModelLinkage, self).__init__(name, container)
         if container == False:
             # this is required
             print("Error: a link must have a container object to serve as the destination")
             return False
         self.source_path = source_path
         self.link_type = link_type # 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only)
-        self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - modelLinkage, 4 - broadcastChannel, 5 - ?
+        self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - broadcastChannel, 5 - ?
     
     def tokenize(self):
         self.ops = []
