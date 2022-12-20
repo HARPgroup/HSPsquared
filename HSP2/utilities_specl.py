@@ -207,6 +207,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     river.register_path()
     # 
     river.add_input("Qin", f'{river.state_path}/HYDR/IVOL')
+    river.add_input("VFACT", f'{river.state_path}/HYDR/IVOL')
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
@@ -215,7 +216,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     facility.make_state_path()
     facility.register_path()
     
-    Qintake = Equation('Qintake', facility, "Qin * 1.21")
+    Qintake = Equation('Qintake', facility, "Qin")
     Qintake.make_state_path()
     Qintake.register_path()
     Qintake.tokenize()
