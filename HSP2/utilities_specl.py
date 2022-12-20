@@ -233,6 +233,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     wd_mgd.tokenize() 
     # add a series of rando equations 
     c=["flowby", "wd_mgd", "Qintake"]
+    # add random ops to test scalability
     for k in range(10000):
         eqn = str(25*random.random()) + " * " + c[round((2*random.random()))]
         newq = Equation('eq' + str(k), facility, eqn)
