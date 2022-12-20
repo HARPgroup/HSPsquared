@@ -59,8 +59,8 @@ class ModelObject:
         # requested path gets added to the state/exec stack via an input object if it does 
         # not already exist.
         self.inputs[var_name] = var_path
-        self.inputs_ix[varname] = self.insure_path(var_path)
-        return self.inputs_ix[varname]
+        self.inputs_ix[var_name] = self.insure_path(var_path)
+        return self.inputs_ix[var_name]
     
     def insure_path(self, var_path):
         # if this path can be found in the hdf5 make sure that it is registered in state
