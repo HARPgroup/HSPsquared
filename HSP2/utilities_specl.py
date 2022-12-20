@@ -200,7 +200,6 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     river.register_path()
     # 
     river.add_input("Qin", f'{river.state_path}/HYDR/IVOL')
-    print("State after adding river Qin", state_ix, state_paths)
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
@@ -225,6 +224,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     wd_mgd.register_path()
     wd_mgd.tokenize() 
     print("Facility inputs", facility.inputs, facility.inputs_ix)
+    print("State after adding regular non-rando inputs", state_ix, state_paths)
     # add a series of rando equations 
     c=["flowby", "wd_mgd", "Qintake"]
     #for k in range(100):
