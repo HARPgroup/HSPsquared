@@ -43,7 +43,7 @@ class Equation(ModelObject):
               var_path = self.find_var_path(self.var_ops[j])
               s_ix = get_state_ix(self.state_ix, self.state_paths, var_path)
               if s_ix == False:
-                  print("Error: unknown variable ", self.var_ops[j])
+                  print("Error: unknown variable ", self.var_ops[j], "path", var_path, "index", s_ix)
                   return
               else:
                   self.var_ops[j] = s_ix

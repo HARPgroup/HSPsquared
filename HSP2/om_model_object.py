@@ -42,9 +42,9 @@ class ModelObject:
             print(self.name,"found ", var_name, self.inputs[var_name])
             return self.inputs[var_name]
         if not (self.container == False):
-            print(self.name,"looking to parent", self.container.name, "for", var_name)
+            #print(self.name,"looking to parent", self.container.name, "for", var_name)
             return self.container.find_var_path(var_name)
-        print(self.name, "could not find", var_name)
+        #print(self.name, "could not find", var_name)
         return False
     
     def register_path(self):
