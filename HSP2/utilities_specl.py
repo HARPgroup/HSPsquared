@@ -231,8 +231,8 @@ def hydr_get_ix(state_ix, state_paths, domain):
     return hydr_ix    
 
 def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
-    modelObject.op_tokens, modelObject.state_paths, modelObject.state_ix, modelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
-    river = modelObject('RCHRES_R001')
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
+    river = ModelObject('RCHRES_R001')
     river.state_path = specl_state_path('RCHRES', 1)
     river.register_path()
     # 
@@ -241,7 +241,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
     
-    facility = modelObject('facility', river)
+    facility = ModelObject('facility', river)
     facility.make_state_path()
     facility.register_path()
     
@@ -272,9 +272,9 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     
     # now connect the wd_mgd back to the river with a direct link.  
     # This is not how we'll do it for most simulations as there may be multiple inputs but will do for now
-    hydr = modelObject('HYDR', river)
+    hydr = ModelObject('HYDR', river)
     hydr.register_path()
-    O1 = modelLinkage('O1', hydr, wd_mgd.state_path, 2)
+    O1 = ModelLinkage('O1', hydr, wd_mgd.state_path, 2)
     O1.register_path()
     O1.tokenize() 
     # add tokens to the op_tokens Dict
