@@ -142,6 +142,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     print("Calling new _hydr_ with specl")
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
     print("Final state at end of _hydr_()", state_ix)
+    print("Paths and ix", state_paths)
     #errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
     # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels) 
     ###########################################################################

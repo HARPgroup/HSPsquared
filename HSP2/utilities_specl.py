@@ -227,7 +227,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # add a withdrawal equation 
     # we use "3.0 + 0.0" because the equation parser fails on a single factor (number of variable)
     # so we have to tweak that.  However, we need to handle constants separately, and also if we see a 
-    # single variable equation (such as Qup = Qhydr) we need to rewrite that to a input anhyow for speed
+    # single variable equation (such as Qup = Qhydr) we need to rewrite that to a input anyhow for speed
     wd_mgd = Equation('wd_mgd', facility, "3.0 + 0.0")
     wd_mgd.register_path()
     wd_mgd.tokenize() 
