@@ -305,7 +305,8 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         if step == 1:
             # print("state_ix at step 1:", state_ix)
             print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
-            print("IVOL (with hydr_ix =", ivol_ix, ") at step 1:", IVOL[step])
+            print("state_ix at step 1:", state_ix)
+            print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 1:", IVOL0[step])
             
         # copy writeable state variables back to local state
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
