@@ -17,6 +17,7 @@ class ModelObject:
         self.attribute_path = "/OBJECTS/RCHRES_001" # 
         self.state_path = "" # Ex: "/STATE/RCHRES_001" # the pointer to this object state
         self.inputs = {} # associative array with key=local_variable_name, value=hdf5_path Ex: [ 'Qin' : '/STATE/RCHRES_001/IVOL' ]
+        self.inputs_ix = {} # associative array with key=local_variable_name, value=state_ix integer key
         self.ix = False
         self.default_value = 0.0
         self.ops = []
@@ -58,7 +59,8 @@ class ModelObject:
         # requested path gets added to the state/exec stack via an input object if it does 
         # not already exist.
         self.inputs[var_name] = var_path
-        return self.insure_path(var_path)
+        self.inputs_ix[varname] = self.insure_path(var_path)
+        return self.inputs_ix[varname]
     
     def insure_path(self, var_path):
         # if this path can be found in the hdf5 make sure that it is registered in state
