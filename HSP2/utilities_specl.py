@@ -234,12 +234,14 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # add a series of rando equations 
     c=["flowby", "wd_mgd", "Qintake"]
     # add random ops to test scalability
+    """
     for k in range(10000):
         eqn = str(25*random.random()) + " * " + c[round((2*random.random()))]
         newq = Equation('eq' + str(k), facility, eqn)
         newq.register_path()
         newq.tokenize()
         newq.add_op_tokens()
+    """
     # now connect the wd_mgd back to the river with a direct link.  
     # This is not how we'll do it for most simulations as there may be multiple inputs but will do for now
     hydr = ModelObject('HYDR', river)
