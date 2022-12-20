@@ -216,7 +216,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     facility.make_state_path()
     facility.register_path()
     
-    Qintake = Equation('Qintake', facility, "Qin")
+    Qintake = Equation('Qintake', facility, "Qin * 1.0")
     Qintake.make_state_path()
     Qintake.register_path()
     Qintake.tokenize()
