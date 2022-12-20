@@ -194,8 +194,8 @@ from HSP2.om_model_object import ModelObject
 from HSP2.om_equation import Equation, exec_eqn
 from HSP2.om_model_linkage import ModelLinkage
 def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
     river = ModelObject('RCHRES_R001')
-    river.op_tokens, river.state_paths, river.state_ix, river.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
     river.state_path = specl_state_path('RCHRES', 1)
     river.register_path()
     # 
