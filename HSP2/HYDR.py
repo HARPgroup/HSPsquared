@@ -281,19 +281,23 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
     ui['ROS'] = ro
     
     # set up specl pointers for slightly faster execution
-    o1_ix, o2_ix, o3_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3']
+    o1_ix, o2_ix, o3_ix, ivol_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3'], hydr_ix['IVOL']
 
     # HYDR (except where noted)
     for step in range(steps):
+        # set state_ix with value of local state variables and/or needed vars 
+        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL[step]
         
-        
-        # we do pre-step, then step
-        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] = outdgt[0], outdgt[1], outdgt[2]
+        # we do pre-step (nothing right now, but could be significant at some point)
         pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
+        # we do step: this is where all the major calculations happen
         step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
         #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
+        
+        # copy mutable state variables back to local state
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
+        IVOL[step] = state_ix[ivol_ix]
         
         """
         ##########################################################################
