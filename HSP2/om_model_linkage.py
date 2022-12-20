@@ -4,7 +4,8 @@ It is also used to make an implicit parent child link to insure that an object i
 during a model simulation.
 """
 from HSP2.om_model_object import ModelObject
-from numba import njitclass modelLinkage(modelObject):
+from numba import njit
+class ModelLinkage(modelObject):
     def __init__(self, name, container = False, source_path = '', link_type = 1):
         super(modelLinkage, self).__init__(name, container)
         if container == False:
