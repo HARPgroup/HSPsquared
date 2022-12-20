@@ -194,6 +194,12 @@ from HSP2.om_model_object import ModelObject
 from HSP2.om_equation import Equation, exec_eqn
 from HSP2.om_model_linkage import ModelLinkage
 def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
+    # by setting the state_parhs, opt_tokens, state_ix etc on the abstract class ModelObject
+    # all objects that we create share this as a global referenced variable.  
+    # this may be a good thing or it may be bad?  For now, we leverage this to reduce settings props
+    # but at some point we move all prop setting into a function and this maybe doesn't seem so desirable
+    # since there could be some unintended consequences if we actually *wanted* them to have separate copies
+    # tho since the idea is that they are global registries, maybe that is not a valid concern.
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
     river = ModelObject('RCHRES_R001')
     river.state_path = specl_state_path('RCHRES', 1)
@@ -223,12 +229,9 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     wd_mgd = Equation('wd_mgd', facility, "3.0 + 0.0")
     wd_mgd.register_path()
     wd_mgd.tokenize() 
-    print("Facility inputs", facility.inputs, facility.inputs_ix)
-    print("State after adding regular non-rando inputs", state_ix, state_paths)
     # add a series of rando equations 
     c=["flowby", "wd_mgd", "Qintake"]
-    #for k in range(100):
-    for k in range(2):
+    for k in range(100):
         eqn = str(25*random.random()) + " * " + c[round((2*random.random()))]
         newq = Equation('eq' + str(k), facility, eqn)
         newq.register_path()
