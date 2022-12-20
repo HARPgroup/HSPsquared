@@ -43,6 +43,7 @@ class ModelObject:
             print(self.name,"looking to parent", self.container.name, "for", var_name)
             self.container.find_var_path(var_name)
         print(self.name, "could not find", var_name)
+        print("in inputs", self.inputs_ix)
         return False
     
     def register_path(self):

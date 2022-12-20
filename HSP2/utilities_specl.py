@@ -223,7 +223,7 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     wd_mgd = Equation('wd_mgd', facility, "3.0 + 0.0")
     wd_mgd.register_path()
     wd_mgd.tokenize() 
-    
+    print("Facility inputs", facility.inputs, facility.inputs_ix)
     # add a series of rando equations 
     c=["flowby", "wd_mgd", "Qintake"]
     for k in range(100):
