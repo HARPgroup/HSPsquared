@@ -1,4 +1,10 @@
-class modelLinkage(modelObject):
+"""
+The class ModelLinkage is used to translate copy data from one state location to another.
+It is also used to make an implicit parent child link to insure that an object is loaded
+during a model simulation.
+"""
+from HSP2.om_model_object import ModelObject
+from numba import njitclass modelLinkage(modelObject):
     def __init__(self, name, container = False, source_path = '', link_type = 1):
         super(modelLinkage, self).__init__(name, container)
         if container == False:
