@@ -22,6 +22,7 @@ from HSP2.utilities_specl import *
 from HSP2.SPECL import specl, _specl_
 from HSP2.om_model_object import ModelObject
 from HSP2.om_equation import *
+from HSP2.om_data_matrix import *
 from HSP2.om_model_linkage import ModelLinkage, step_model_link
 import numpy as np
 from numba import int8, float32, njit, types
