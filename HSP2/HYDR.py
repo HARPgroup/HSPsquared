@@ -20,7 +20,7 @@ from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
 from HSP2.utilities_specl import init_sim_dicts
 from HSP2.SPECL import specl, _specl_
-from HSP2.model_object import ModelObject
+from HSP2.om_model_object import ModelObject
 from HSP2.om_equation import Equation, exec_eqn
 import numpy as np
 from numba import int8, float32, njit, types
