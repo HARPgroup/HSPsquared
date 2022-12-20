@@ -44,7 +44,7 @@ class Equation(ModelObject):
               s_ix = get_state_ix(self.state_ix, self.state_paths, var_path)
               if s_ix == False:
                   print("Error: unknown variable ", self.var_ops[j], "path", var_path, "index", s_ix)
-                  print("searched: ", self.state_paths)
+                  print("searched: ", self.state_paths, self.state_ix)
                   return
               else:
                   self.var_ops[j] = s_ix
