@@ -230,6 +230,11 @@ def hydr_get_ix(state_ix, state_paths, domain):
         hydr_ix[i] = set_state(state_ix, state_paths, var_path, 0.0)
     return hydr_ix    
 
+    
+
+from HSP2.om_model_object import ModelObject
+from HSP2.om_equation import Equation, exec_eqn
+from HSP2.om_model_linkage import ModelLinkage
 def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
     river = ModelObject('RCHRES_R001')
