@@ -18,7 +18,7 @@ from math import sqrt, log10
 from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
-from HSP2.utilities_specl import init_sim_dicts, hydr_get_ix
+from HSP2.utilities_specl import init_sim_dicts, hydr_get_ix, load_sim_dicts
 from HSP2.SPECL import specl, _specl_
 from HSP2.om_model_object import ModelObject
 from HSP2.om_equation import Equation, exec_eqn
