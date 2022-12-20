@@ -303,9 +303,8 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
         #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
         if step == 1:
-            # print("state_ix at step 1:", state_ix)
-            print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             print("state_ix at step 1:", state_ix)
+            #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 1:", IVOL0[step])
             
         # copy writeable state variables back to local state
