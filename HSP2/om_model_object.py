@@ -3,6 +3,7 @@ The class ModelObject is the base class upon which all other dynamic model objec
 It handles all Dict management functions, but provides for no runtime execution of it's own.
 All runtime exec is done by child classes.
 """
+from HSP2.utilities_specl import *
 class ModelObject:
     state_ix = {} # Shared Dict with the numerical state of each object 
     state_paths = {} # Shared Dict with the hdf5 path of each object 
