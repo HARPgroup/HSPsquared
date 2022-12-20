@@ -38,7 +38,7 @@ class ModelObject:
     
     def find_var_path(self, var_name):
         if var_name in self.inputs.keys():
-            print("Found", var_name, "on ", self.name, "path=", self.inputs[var_name])
+            #print("Found", var_name, "on ", self.name, "path=", self.inputs[var_name])
             return self.inputs[var_name]
         if not (self.container == False):
             #print(self.name,"looking to parent", self.container.name, "for", var_name)
