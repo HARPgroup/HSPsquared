@@ -37,13 +37,13 @@ class ModelObject:
         return self.state_path
     
     def find_var_path(self, var_name):
-        if var_name in self.inputs_ix.keys():
-            return self.inputs_ix[var_name]
+        if var_name in self.inputs.keys():
+            return self.inputs[var_name]
         if not (self.container == False):
             print(self.name,"looking to parent", self.container.name, "for", var_name)
             self.container.find_var_path(var_name)
         print(self.name, "could not find", var_name)
-        print("in inputs", self.inputs_ix)
+        print("in inputs", self.inputs)
         return False
     
     def register_path(self):
