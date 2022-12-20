@@ -22,7 +22,7 @@ class Equation(ModelObject):
         exprStack = []
         exprStack[:] = []
         self.ps = deconstruct_equation(self.equation)
-        print(exprStack)
+        #print(exprStack)
     
     def tokenize_ops(self):
         self.deconstruct_eqn()
@@ -319,7 +319,7 @@ def pre_evaluate_stack(s, ps):
         return 
     elif op in fns:
         # note: args are pushed onto the stack in reverse order
-        print("s:", s, "op", op)
+        #print("s:", s, "op", op)
         args = []
         for x in range(num_args):
             args.append(pre_evaluate_stack(s, ps))
