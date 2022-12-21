@@ -207,7 +207,6 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     river.register_path()
     # 
     river.add_input("Qin", f'{river.state_path}/HYDR/IVOL')
-    river.add_input("VFACT", f'{river.state_path}/HYDR/IVOL')
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
@@ -231,10 +230,31 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     wd_mgd = Equation('wd_mgd', facility, "3.0 + 0.0")
     wd_mgd.register_path()
     wd_mgd.tokenize() 
-    # add a series of rando equations 
-    c=["flowby", "wd_mgd", "Qintake"]
+    # Runit - unit area runoff
+    Runit = Equation('Runit', facility, "Qin / 592.717")
+    Runit.register_path()
+    Runit.tokenize()
+    # add local subwatersheds to test scalability
+    
+    for k in range(10):
+        subshed_name = 'sw' + str(k)
+        upstream_name = 'sw' + str(k-1)
+        Qout_eqn = str(25*random.random()) + " * Runit "
+        if k > 0:
+            Qout_eqn = Qout_eqn + " + " + upstream_name + "_Qout"
+        Qout_ss = Equation(subshed_name + "_Qout", facility, eqn)
+        Qout_ss.register_path()
+        Qout_ss.tokenize()
+        Qout_ss.add_op_tokens()
+    # now add the output of the final tributary to the inflow to this one
+    Qtotal = Equation("Qtotal", facility, "Qin + " + Qout_ss.name)
+    Qtotal.register_path()
+    Qtotal.tokenize()
+    
     # add random ops to test scalability
+    # add a series of rando equations 
     """
+    c=["flowby", "wd_mgd", "Qintake"]
     for k in range(10000):
         eqn = str(25*random.random()) + " * " + c[round((2*random.random()))]
         newq = Equation('eq' + str(k), facility, eqn)

@@ -309,7 +309,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         # copy writeable state variables back to local state
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
         # note: we don't allow writing of IVOL since that is what happened upstream.  But we *could* write to anything we wanted here.
-        #IVOL[step] = state_ix[ivol_ix]
+        #IVOL[step] = state_ix[ivol_ix] * VFACT
         
         """
         ##########################################################################
