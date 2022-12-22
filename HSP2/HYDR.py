@@ -133,7 +133,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
     print(hydr_ix)
-    load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix)
+    load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
     # add things from UCI as needed 
     # - we will have to auto-detect during parsing/tokenization to come up with a list
     # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 

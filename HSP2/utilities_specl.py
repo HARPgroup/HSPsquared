@@ -194,7 +194,7 @@ from HSP2.om_model_object import *
 from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
 from HSP2.om_data_matrix import *
-def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
+def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # by setting the state_parhs, opt_tokens, state_ix etc on the abstract class ModelObject
     # all objects that we create share this as a global referenced variable.  
     # this may be a good thing or it may be bad?  For now, we leverage this to reduce settings props
@@ -202,6 +202,9 @@ def load_sim_dicts(op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # since there could be some unintended consequences if we actually *wanted* them to have separate copies
     # tho since the idea is that they are global registries, maybe that is not a valid concern.
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
+    # set up the timer
+    sim_timer = siminfo['tindex']
+    print(sim_timer[1])
     river = ModelObject('RCHRES_R001')
     river.state_path = specl_state_path('RCHRES', 1)
     river.register_path()
