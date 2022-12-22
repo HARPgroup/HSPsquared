@@ -205,6 +205,7 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # set up the timer
     sim_timer = siminfo['tindex']
     print(sim_timer[1])
+    print(sim_timer[1].year, sim_timer[1].month, sim_timer[1].day, sim_timer[1].hour, sim_timer[1].minute, sim_timer[1].second)
     river = ModelObject('RCHRES_R001')
     river.state_path = specl_state_path('RCHRES', 1)
     river.register_path()
