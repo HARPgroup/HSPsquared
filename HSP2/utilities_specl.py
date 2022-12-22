@@ -238,7 +238,7 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     Runit.register_path()
     Runit.tokenize()
     # add local subwatersheds to test scalability
-    
+    """
     for k in range(10):
         subshed_name = 'sw' + str(k)
         upstream_name = 'sw' + str(k-1)
@@ -253,7 +253,7 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     Qtotal = Equation("Qtotal", facility, "Qin + " + Qout_ss.name)
     Qtotal.register_path()
     Qtotal.tokenize()
-    
+    """
     # add random ops to test scalability
     # add a series of rando equations 
     """
