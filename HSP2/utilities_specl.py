@@ -6,6 +6,11 @@ from numba.typed import Dict
 from numpy import zeros
 from numba import int8, float32, njit, types, typed # import the types
 import random # this is only used for a demo so may be deprecated
+from HSP2.om_model_object import ModelObject
+from HSP2.om_equation import *
+from HSP2.om_data_matrix import *
+from HSP2.om_sim_timer import *
+from HSP2.om_model_linkage import ModelLinkage, step_model_link
 
 
 def find_state_path(state_paths, parent_path, varname):
@@ -31,6 +36,19 @@ def get_state_ix(state_ix, state_paths, var_path):
 def set_state(state_ix, state_paths, var_path, default_value = 0.0):
     """
     Given an hdf5 style path to a variable, set the value 
+    If the variable does not yet exist, create it.
+    Returns the integer key of the variable in the state_ix Dict
+    """
+    if not (var_path in state_paths.keys()):
+        # we need to add this to the state 
+        state_paths[var_path] = append_state(state_ix, default_value)
+    var_ix = state_paths[var_path]
+    return var_ix
+
+
+def set_dict_state(state_ix, dict_ix, state_paths, var_path, default_value = {}):
+    """
+    Given an hdf5 style path to a variable, set the value in the dict
     If the variable does not yet exist, create it.
     Returns the integer key of the variable in the state_ix Dict
     """
@@ -152,7 +170,6 @@ def exec_eqn_nall_m(op_token, state_ix):
     result = s[s_ix]
     return result 
 
-
 def init_sim_dicts():
     """
     We should get really good at using docstrings...
@@ -188,7 +205,6 @@ def specl_state_path(operation, id, activity = ''):
     else:
         op_path = f'/STATE/{op_name}/{activity}'
     return op_path
-   
 
 from HSP2.om_model_object import *
 from HSP2.om_equation import *
@@ -202,10 +218,10 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # since there could be some unintended consequences if we actually *wanted* them to have separate copies
     # tho since the idea is that they are global registries, maybe that is not a valid concern.
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
-    # set up the timer
-    sim_timer = siminfo['tindex']
-    print(sim_timer[1])
-    print(sim_timer[1].year, sim_timer[1].month, sim_timer[1].day, sim_timer[1].hour, sim_timer[1].minute, sim_timer[1].second)
+    # set up the timer as the first element 
+    timer = SimTimer('timer', False, siminfo['tindex'])
+    timer.make_state_path()
+    timer.register_path()
     river = ModelObject('RCHRES_R001')
     river.state_path = specl_state_path('RCHRES', 1)
     river.register_path()
@@ -319,5 +335,5 @@ def step_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         elif op_tokens[i][0] == 4:
             return False
         elif op_tokens[i][0] == 5:
-            return False
+            step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
     return 

@@ -23,6 +23,7 @@ from HSP2.SPECL import specl, _specl_
 from HSP2.om_model_object import ModelObject
 from HSP2.om_equation import *
 from HSP2.om_data_matrix import *
+from HSP2.om_sim_timer import *
 from HSP2.om_model_linkage import ModelLinkage, step_model_link
 import numpy as np
 from numba import int8, float32, njit, types
@@ -156,7 +157,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
 
 
 @njit(cache=True)
-def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix):
+def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix, sim_timer):
 #def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 #def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 # def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
@@ -296,9 +297,9 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
         
         # we do pre-step (nothing right now, but could be significant at some point)
-        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
+        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix, sim_timer)
         # we do step: this is where all the major calculations happen
-        step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
+        step_model(op_tokens, state_ix, dict_ix, ts_ix, step, sim_timer)
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
         #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
         #if step == 1:

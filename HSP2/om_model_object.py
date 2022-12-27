@@ -8,6 +8,7 @@ class ModelObject:
     state_ix = {} # Shared Dict with the numerical state of each object 
     state_paths = {} # Shared Dict with the hdf5 path of each object 
     dict_ix = {} # Shared Dict with the hdf5 path of each object 
+    ts_ix = {} # Shared Dict with the hdf5 path of each object 
     op_tokens = {} # Shared Dict with the tokenized representation of each object 
     
     def __init__(self, name, container = False):
@@ -37,12 +38,20 @@ class ModelObject:
         return self.state_path
     
     def find_var_path(self, var_name):
+        # check local inputs for name
         if var_name in self.inputs.keys():
             #print("Found", var_name, "on ", self.name, "path=", self.inputs[var_name])
             return self.inputs[var_name]
+        # check parent for name
         if not (self.container == False):
             #print(self.name,"looking to parent", self.container.name, "for", var_name)
             return self.container.find_var_path(var_name)
+        # check for root state vars STATE + var_name
+        if ("/STATE/" + var_name) in self.state_paths.keys():
+            return self.state_paths[("/STATE/" + var_name)]
+        # check for root state vars
+        if var_name in self.state_paths.keys():
+            return self.state_paths[var_name]
         #print(self.name, "could not find", var_name)
         return False
     
@@ -86,5 +95,25 @@ class ModelObject:
             self.tokenize()
         #print(self.name, "tokens", self.ops)
         self.op_tokens[self.ix] = np.asarray(self.ops, dtype="i8")
+    
+    def step(self, step):
+        # this tests the model for a single timestep.
+        # this is not the method that is used for high-speed runs, but can theoretically be used for 
+        # easier to understand demonstrations
+        step_model({self.op_tokens[self.ix]}, self.state_ix, self.dict_ix, self.ts_ix, step)
+    
+    def dddstep_model(op_tokens, state_ix, dict_ix, ts_ix, step):
+        for i in op_tokens.keys():
+            if op_tokens[i][0] == 1:
+                state_ix[i] = exec_eqn(op_tokens[i], state_ix)
+            elif op_tokens[i][0] == 2:
+                state_ix[i] = exec_tbl_eval(op_tokens[i], state_ix, dict_ix)
+            elif op_tokens[i][0] == 3:
+                step_model_link(op_tokens[i], state_ix, ts_ix, step)
+            elif op_tokens[i][0] == 4:
+                return False
+            elif op_tokens[i][0] == 5:
+                step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
+        return 
 
 

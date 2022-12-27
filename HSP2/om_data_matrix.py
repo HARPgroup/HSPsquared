@@ -26,10 +26,37 @@ class DataMatrix(ModelObject):
     def add_op_tokens(self):
         # this puts the tokens into the global simulation queue 
         # can be customized by subclasses to add multiple lines if needed.
-        self.op_tokens[self.ix] = self.ops
-        self.dict_ix[self.ix] = self.op_matrix
+        super().add_op_tokens()
+        self.dict_ix[self.ix] = self.op_matrix.to_numpy()
 
 # njit functions for runtime
+
+@njit
+def om_table_lookup(data_table, mx_type, keyval1, lutype1, keyval2, lutype2):
+    # mx_type = 1d, 1.5d, 2d
+    #  - 1d: look up row based on column 0, return value from column 1
+    #  - 1.5d: look up/interp row based on column 0, return value from column 
+    #  - 2d: look up based on row and column 
+    # lutype: 0 - exact match; 1 - interpolate values; 2 - stair step
+    if mx_type == 1:
+        valcol = 1
+        luval = specl_lookup(data_table, keyval1, lutype1, valcol)
+        return luval
+    if ( (mx_type == 3) or (lutype2 == 0) ): # 1.5d (a 2-d with exact match column functions just like a 1.5d )
+        valcol = keyval2
+        luval = specl_lookup(data_table, keyval1, lutype1, valcol)
+        return luval
+    # must be a 2-d lookup 
+    # 1: get value for all columns based on the row interp/match type 
+    if lutype == 2: #stair-step
+        idx = (data_table[:, 0][0:][(data_table[:, 0][0:]- keyval1) <= 0]).argmax()
+        luval = data_table[:, valcol][0:][idx]
+    elif lutype == 1: # interpolate
+        luval = np.interp(keyval1,data_table[:, 0][0:], data_table[:, valcol][0:])
+        
+    # show value at tis point
+    return luval
+
 
 @njit
 def specl_lookup(data_table, keyval, lutype, valcol):
