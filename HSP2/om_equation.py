@@ -52,20 +52,24 @@ class Equation(ModelObject):
     def tokenize(self):
         self.tokenize_ops() 
         self.tokenize_vars()
+        # call parent to render standard tokens
+        super().tokenize()
         # renders tokens for high speed execution
-        self.ops = [self.optype, self.ix] + self.var_ops
+        self.ops = self.ops + self.var_ops
 
 @njit
 def exec_eqn(op_token, state_ix):
-    op_class = op_token[0] # we actually will use this in the calling function, which will decide what 
+    op_class = op_token[0] # we actually use this in the calling function, which will decide what 
                       # next level function to use 
     result = 0
-    num_ops = op_token[2]
+    num_ops = op_token[2] # this index is equal to the number of ops common to all classes + 1.  See om_model_object for base ops and adjust
     s = np.array([0.0])
     s_ix = -1 # pointer to the top of the stack
     s_len = 1
     #print(num_ops, " operations")
     for i in range(num_ops): 
+        # the number of ops common to all classes + 1 (the counter for math operators) is offset for this
+        # currently 3  (2 common ops (0,1), plus 1 to indicate number of equation operand sets(2), so this is ix 3)      
         op = op_token[3 + 3*i]
         t1 = op_token[3 + 3*i + 1]
         t2 = op_token[3 + 3*i + 2]

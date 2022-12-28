@@ -22,7 +22,7 @@ class ModelObject:
         self.ix = False
         self.default_value = 0.0
         self.ops = []
-        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - ?
+        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional
     
     def load_state_dicts(op_tokens, state_paths, state_ix, dict_ix):
         self.op_tokens = op_tokens

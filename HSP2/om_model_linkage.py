@@ -18,14 +18,14 @@ class ModelLinkage(ModelObject):
         self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - broadcastChannel, 5 - ?
     
     def tokenize(self):
-        self.ops = []
+        super().tokenize()
         # - if this is a data property link then we add op codes to do a copy of data from one state address to another 
         # - if this is simply a parent-child connection, we do not render op-codes, but we do use this for assigning
         # - execution hierarchy
         if self.link_type in (2, 3):
             src_ix = get_state_ix(self.state_ix, self.state_paths, self.source_path)
             if not (src_ix == False):
-                self.ops = [self.optype, self.ix, src_ix, self.link_type]
+                self.ops = self.ops + [src_ix, self.link_type]
             else:
                 print("Error: link ", self.name, "does not have a valid source path")
             #print("tokenize() result", self.ops)
