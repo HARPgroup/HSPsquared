@@ -18,18 +18,18 @@ class SimTimer(ModelObject):
     
     def register_path(self):
         # initialize the path variable if not already set
-        self.ix = set_state(self.state_ix, self.state_paths, self.state_path, self.time_array[0][0])
+        self.ix = set_state(self.state_ix, self.state_paths, self.state_path, float(self.time_array[0][0]))
         # now register all other paths.
         # register "year", "month" "day", ...
-        year_ix = set_state(self.state_ix, self.state_paths, "/STATE/year", self.time_array[0][1])
-        month_ix = set_state(self.state_ix, self.state_paths, "/STATE/month", self.time_array[0][2])
-        day_ix = set_state(self.state_ix, self.state_paths, "/STATE/day", self.time_array[0][3])
-        hr_ix = set_state(self.state_ix, self.state_paths, "/STATE/hour", self.time_array[0][4])
-        min_ix = set_state(self.state_ix, self.state_paths, "/STATE/minute", self.time_array[0][5])
-        sec_ix = set_state(self.state_ix, self.state_paths, "/STATE/second", self.time_array[0][6])
-        wd_ix = set_state(self.state_ix, self.state_paths, "/STATE/weekday", self.time_array[0][7])
-        dt_ix = set_state(self.state_ix, self.state_paths, "/STATE/dt", self.time_array[0][8])
-        jd_ix = set_state(self.state_ix, self.state_paths, "/STATE/jday", self.time_array[0][9])
+        year_ix = set_state(self.state_ix, self.state_paths, "/STATE/year", float(self.time_array[0][1]))
+        month_ix = set_state(self.state_ix, self.state_paths, "/STATE/month", float(self.time_array[0][2]))
+        day_ix = set_state(self.state_ix, self.state_paths, "/STATE/day", float(self.time_array[0][3]))
+        hr_ix = set_state(self.state_ix, self.state_paths, "/STATE/hour", float(self.time_array[0][4]))
+        min_ix = set_state(self.state_ix, self.state_paths, "/STATE/minute", float(self.time_array[0][5]))
+        sec_ix = set_state(self.state_ix, self.state_paths, "/STATE/second", float(self.time_array[0][6]))
+        wd_ix = set_state(self.state_ix, self.state_paths, "/STATE/weekday", float(self.time_array[0][7]))
+        dt_ix = set_state(self.state_ix, self.state_paths, "/STATE/dt", float(self.time_array[0][8]))
+        jd_ix = set_state(self.state_ix, self.state_paths, "/STATE/jday", float(self.time_array[0][9]))
         self.date_path_ix = [year_ix, month_ix, day_ix, hr_ix, min_ix, sec_ix, wd_ix, dt_ix, jd_ix]
         self.dict_ix[self.ix] = self.time_array
         
