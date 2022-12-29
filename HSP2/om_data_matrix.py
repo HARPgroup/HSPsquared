@@ -17,6 +17,7 @@ The class DataMatrix is used to translate provide table lookup and interpolation
   # self.op_matrix = [] # this is the final opcoded matrix for runtime
 """
 from HSP2.om_model_object import ModelObject
+from HSP2.om_constant import *
 from HSP2.utilities_specl import *
 from numba import njit
 import numpy as np

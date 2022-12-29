@@ -211,6 +211,7 @@ from HSP2.om_model_object import *
 from HSP2.om_sim_timer import *
 from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
+from HSP2.om_constant import *
 from HSP2.om_data_matrix import *
 
 def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
