@@ -4,7 +4,7 @@ It is also used to make an implicit parent child link to insure that an object i
 during a model simulation.
 """
 from HSP2.om_model_object import ModelObject
-from HSP2.utilities_specl import set_state
+#from HSP2.utilities_specl import set_state
 from pandas import DataFrame, DatetimeIndex
 from numba import njit
 
