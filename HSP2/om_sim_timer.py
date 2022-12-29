@@ -15,8 +15,9 @@ class SimTimer(ModelObject):
         self.time_array = self.dti_to_time_array(siminfo) # creates numpy formatted array of year, mo, day, ... for each timestep
         self.date_path_ix = [] # where are the are components stored in the state_ix Dict
         self.optype = 5 # 0 - ModelObject, 1 - Equation, 2 - datamatrix, 3 - ModelLinkage, 4 - BroadcastChannel, 5 - SimTimer 
+        self.register_components() # now that we have a time array, we set the basic state and all time comps into state
     
-    def register_path(self):
+    def register_components(self):
         # initialize the path variable if not already set
         self.ix = set_state(self.state_ix, self.state_paths, self.state_path, float(self.time_array[0][0]))
         # now register all other paths.
