@@ -223,40 +223,37 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
     # set up the timer as the first element 
     timer = SimTimer('timer', False, siminfo)
-    timer.make_state_path()
-    timer.register_path()
+    timer.add_op_tokens()
     river = ModelObject('RCHRES_R001')
-    river.state_path = specl_state_path('RCHRES', 1)
-    river.register_path()
-    # 
     river.add_input("Qin", f'{river.state_path}/HYDR/IVOL')
+    river.add_op_tokens() # formally adds this to the simulation
+    
+    # now add a simple table 
+    data_table = np.asarray([ [ 0.0, 5.0, 10.0], [10.0, 15.0, 20.0], [20.0, 25.0, 30.0], [30.0, 35.0, 40.0] ], dtype= "float32")
+    dm = DataMatrix('dm', river, data_table)
+    dm.add_op_tokens()
+
+    
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
     
     facility = ModelObject('facility', river)
-    facility.make_state_path()
-    facility.register_path()
     
     Qintake = Equation('Qintake', facility, "Qin * 1.0")
-    Qintake.make_state_path()
-    Qintake.register_path()
-    Qintake.tokenize()
+    Qintake.add_op_tokens()
     # a flowby
     flowby = Equation('flowby', facility, "Qintake * 0.9")
-    flowby.register_path()
-    flowby.tokenize()
+    flowby.add_op_tokens()
     # add a withdrawal equation 
     # we use "3.0 + 0.0" because the equation parser fails on a single factor (number of variable)
     # so we have to tweak that.  However, we need to handle constants separately, and also if we see a 
     # single variable equation (such as Qup = Qhydr) we need to rewrite that to a input anyhow for speed
     wd_mgd = Equation('wd_mgd', facility, "3.0 + 0.0")
-    wd_mgd.register_path()
-    wd_mgd.tokenize() 
+    wd_mgd.add_op_tokens() 
     # Runit - unit area runoff
     Runit = Equation('Runit', facility, "Qin / 592.717")
-    Runit.register_path()
-    Runit.tokenize()
+    Runit.add_op_tokens()
     # add local subwatersheds to test scalability
     """
     for k in range(10):
@@ -288,16 +285,8 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # now connect the wd_mgd back to the river with a direct link.  
     # This is not how we'll do it for most simulations as there may be multiple inputs but will do for now
     hydr = ModelObject('HYDR', river)
-    hydr.register_path()
+    hydr.add_op_tokens()
     O1 = ModelLinkage('O1', hydr, wd_mgd.state_path, 2)
-    O1.register_path()
-    O1.tokenize() 
-    # add tokens to the op_tokens Dict
-    river.add_op_tokens()
-    facility.add_op_tokens()
-    Qintake.add_op_tokens()
-    flowby.add_op_tokens()
-    wd_mgd.add_op_tokens()
     O1.add_op_tokens()
     
     return
