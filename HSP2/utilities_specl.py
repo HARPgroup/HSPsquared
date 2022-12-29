@@ -42,10 +42,9 @@ def set_state(state_ix, state_paths, var_path, default_value = 0.0):
     if not (var_path in state_paths.keys()):
         # we need to add this to the state 
         state_paths[var_path] = append_state(state_ix, default_value)
-        var_ix = state_paths[var_path]
-    else:
-        var_ix = state_paths[var_path]
-        state_ix[var_ix] = default_value
+    
+    var_ix = state_paths[var_path]
+    state_ix[var_ix] = default_value
     return var_ix
 
 
