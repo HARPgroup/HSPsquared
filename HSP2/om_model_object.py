@@ -142,7 +142,10 @@ class ModelObject:
                 step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
         return 
 
-
+"""
+The class Constant is for storing constants.  It must be loaded here because ModelObject calls it.
+Is this usefuol or just clutter?  Useful I think since there are numerical constants...
+"""
 class Constant(ModelObject):
     def __init__(self, name, container = False, value = 0.0):
         super(Constant, self).__init__(name, container)
