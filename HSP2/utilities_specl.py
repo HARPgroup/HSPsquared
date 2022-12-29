@@ -6,12 +6,6 @@ from numba.typed import Dict
 from numpy import zeros
 from numba import int8, float32, njit, types, typed # import the types
 import random # this is only used for a demo so may be deprecated
-from HSP2.om_model_object import *
-from HSP2.om_sim_timer import *
-from HSP2.om_equation import *
-from HSP2.om_model_linkage import *
-from HSP2.om_data_matrix import *
-
 
 def find_state_path(state_paths, parent_path, varname):
     """
@@ -207,6 +201,17 @@ def specl_state_path(operation, id, activity = ''):
     else:
         op_path = f'/STATE/{op_name}/{activity}'
     return op_path
+
+# set up libraries to import for the load_sim_dicts function
+# later, this will be drawing from the hdf5, but for now we 
+# are hard-wiring a set of components for testing.
+# Note: these import calls must be done down here AFTER the helper functions
+#       defined aove that are called by the object classes
+from HSP2.om_model_object import *
+from HSP2.om_sim_timer import *
+from HSP2.om_equation import *
+from HSP2.om_model_linkage import *
+from HSP2.om_data_matrix import *
 
 def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # by setting the state_parhs, opt_tokens, state_ix etc on the abstract class ModelObject
