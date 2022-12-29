@@ -5,7 +5,6 @@ during a model simulation.
 """
 from HSP2.om_model_object import ModelObject
 from HSP2.utilities_specl import *
-from HSP2.utilities_specl import set_state
 from pandas import DataFrame, DatetimeIndex
 from numba import njit
 
