@@ -157,7 +157,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
 
 
 @njit(cache=True)
-def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix, sim_timer):
+def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix):
 #def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 #def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 # def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
@@ -297,9 +297,9 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
         
         # we do pre-step (nothing right now, but could be significant at some point)
-        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix, sim_timer)
+        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
         # we do step: this is where all the major calculations happen
-        step_model(op_tokens, state_ix, dict_ix, ts_ix, step, sim_timer)
+        step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
         #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
         #if step == 1:
