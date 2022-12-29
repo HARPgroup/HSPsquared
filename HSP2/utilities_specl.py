@@ -217,9 +217,9 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # tho since the idea is that they are global registries, maybe that is not a valid concern.
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
     # set up the timer as the first element 
-    timer = SimTimer('timer', False, siminfo['tindex'])
-    timer.make_state_path()
-    timer.register_path()
+    #timer = SimTimer('timer', False, siminfo['tindex'])
+    #timer.make_state_path()
+    #timer.register_path()
     river = ModelObject('RCHRES_R001')
     river.state_path = specl_state_path('RCHRES', 1)
     river.register_path()
