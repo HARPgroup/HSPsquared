@@ -6,11 +6,11 @@ from numba.typed import Dict
 from numpy import zeros
 from numba import int8, float32, njit, types, typed # import the types
 import random # this is only used for a demo so may be deprecated
-from HSP2.om_model_object import ModelObject
-from HSP2.om_equation import *
-from HSP2.om_data_matrix import *
+from HSP2.om_model_object import *
 from HSP2.om_sim_timer import *
-from HSP2.om_model_linkage import ModelLinkage, step_model_link
+from HSP2.om_equation import *
+from HSP2.om_model_linkage import *
+from HSP2.om_data_matrix import *
 
 
 def find_state_path(state_paths, parent_path, varname):
@@ -41,8 +41,10 @@ def set_state(state_ix, state_paths, var_path, default_value = 0.0):
     """
     if not (var_path in state_paths.keys()):
         # we need to add this to the state 
-        state_paths[var_path] = append_state(state_ix, default_value)
-    var_ix = state_paths[var_path]
+        var_ix = state_paths[var_path] = append_state(state_ix, default_value)
+    else:
+        var_ix = state_paths[var_path]
+        state_ix[var_ix] = default_value
     return var_ix
 
 
@@ -82,7 +84,7 @@ def init_op_tokens(op_tokens, tops, eq_ix):
             # must add this to the state array as a constant
             s_ix = append_state(state_ix, float(tops[j]))
             tops[j] = s_ix
-
+    
     op_tokens[eq_ix] = np.asarray(tops, dtype="i8")
 
 def is_float_digit(n: str) -> bool:
@@ -206,10 +208,6 @@ def specl_state_path(operation, id, activity = ''):
         op_path = f'/STATE/{op_name}/{activity}'
     return op_path
 
-from HSP2.om_model_object import *
-from HSP2.om_equation import *
-from HSP2.om_model_linkage import *
-from HSP2.om_data_matrix import *
 def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # by setting the state_parhs, opt_tokens, state_ix etc on the abstract class ModelObject
     # all objects that we create share this as a global referenced variable.  
@@ -325,15 +323,41 @@ def pre_step_model(op_tokens, state_ix, dict_ix, ts_ix):
 
 @njit 
 def step_model(op_tokens, state_ix, dict_ix, ts_ix, step):
+    val = 0
     for i in op_tokens.keys():
         if op_tokens[i][0] == 1:
             state_ix[i] = exec_eqn(op_tokens[i], state_ix)
         elif op_tokens[i][0] == 2:
-            state_ix[i] = exec_tbl_eval(op_tokens[i], state_ix, dict_ix)
+            state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)
         elif op_tokens[i][0] == 3:
             step_model_link(op_tokens[i], state_ix, ts_ix, step)
         elif op_tokens[i][0] == 4:
-            return False
+            val = 0
         elif op_tokens[i][0] == 5:
             step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
+        elif op_tokens[i][0] == 8:
+            # since this accesses other table objects, gotta pass the entire op_tokens Dict 
+            state_ix[i] = exec_tbl_eval(op_tokens, op_tokens[i], state_ix, dict_ix)
+    return 
+
+
+@njit 
+def test_model(op_tokens, state_ix, dict_ix, ts_ix, step):
+    val = 0
+    for i in op_tokens.keys():
+        print(i)
+        print(op_tokens[i][0])
+        if op_tokens[i][0] == 1:
+            state_ix[i] = exec_eqn(op_tokens[i], state_ix)
+        elif op_tokens[i][0] == 2:
+            state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)
+        elif op_tokens[i][0] == 3:
+            step_model_link(op_tokens[i], state_ix, ts_ix, step)
+        elif op_tokens[i][0] == 4:
+            val = 0
+        elif op_tokens[i][0] == 5:
+            step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
+        elif op_tokens[i][0] == 8:
+            # since this accesses other table objects, gotta pass the entire op_tokens Dict 
+            state_ix[i] = exec_tbl_eval(op_tokens, op_tokens[i], state_ix, dict_ix)
     return 

@@ -22,7 +22,8 @@ class ModelObject:
         self.ix = False
         self.default_value = 0.0
         self.ops = []
-        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional
+        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - Constant (numeric), 8 - matrix accessor
+        self.register_path()
     
     def load_state_dicts(op_tokens, state_paths, state_ix, dict_ix):
         self.op_tokens = op_tokens
@@ -55,6 +56,17 @@ class ModelObject:
         #print(self.name, "could not find", var_name)
         return False
     
+    def constant_or_path(self, keyval, keyname, trust = False):
+        if is_float_digit(keyval):
+            # we are given a constant value, not a variable reference 
+            print("Creating constant ", keyname, " = ", keyval)
+            k = Constant(keyname, self, keyval)
+            kix = k.ix
+        else:
+            print("Adding input ", keyname, " = ", keyval)
+            kix = self.add_input(keyname, keyval, trust)
+        return kix
+    
     def register_path(self):
         # initialize the path variable if not already set
         if self.state_path == '':
@@ -63,15 +75,22 @@ class ModelObject:
         # this should check to see if this object has a parent, and if so, register the name on the parent 
         # as an input?
         if not (self.container == False):
-            return self.container.add_input(self.name, self.state_path)
+            # since this is a request to actually create a new path, we instruct trust = True as last argument
+            return self.container.add_input(self.name, self.state_path, True)
         return self.ix
     
-    def add_input(self, var_name, var_path):
+    def add_input(self, var_name, var_path, trust = False):
         # this will add to the inputs, but also insure that this 
         # requested path gets added to the state/exec stack via an input object if it does 
         # not already exist.
+        # trust = False means fail if the path does not already exist, True means assume it will be OK which is bad policy, except for the case where the path points to an existing location
         self.inputs[var_name] = var_path
-        self.inputs_ix[var_name] = self.insure_path(var_path)
+        var_ix = self.find_var_path(var_path)
+        if var_ix == False:
+            if (trust == False):
+                raise Exception("Cannot find variable path: " + var_path + " ... process terminated.")
+            var_ix = self.insure_path(var_path)
+        self.inputs_ix[var_name] = var_ix
         return self.inputs_ix[var_name]
     
     def insure_path(self, var_path):
@@ -81,8 +100,15 @@ class ModelObject:
         var_ix = set_state(self.state_ix, self.state_paths, var_path, 0.0)
         return var_ix 
     
-    def get_state(self):
+    def get_state(self, ix = -1):
+        if ix >= 0:
+            return self.state_ix[ix]
         return self.state_ix[self.ix]
+    
+    def get_dict_state(self, ix = -1):
+        if ix >= 0:
+            return self.dict_ix[ix]
+        return self.dict_ix[self.ix]
     
     def tokenize(self):
         # renders tokens for high speed execution

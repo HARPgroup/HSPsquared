@@ -6,8 +6,8 @@ during a model simulation.
 from HSP2.om_model_object import ModelObject
 from HSP2.utilities_specl import *
 from pandas import DataFrame, DatetimeIndex
-
 from numba import njit
+
 class SimTimer(ModelObject):
     def __init__(self, name, container, siminfo):
         super(SimTimer, self).__init__(name, container)
