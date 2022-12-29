@@ -143,3 +143,12 @@ class ModelObject:
         return 
 
 
+class Constant(ModelObject):
+    def __init__(self, name, container = False, value = 0.0):
+        super(Constant, self).__init__(name, container)
+        self.optype = 7 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - Constant (numeric)
+        self.default_value = value 
+        self.register_path() #this is one of the few that register a path by default since there are no contingencies to await
+        #set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
+        self.state_ix[self.ix] = self.default_value
+
