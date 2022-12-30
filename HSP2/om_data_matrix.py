@@ -183,10 +183,11 @@ def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     dix = op[2]
     # load the attributes for the data matrix that we are accessing
     tbl_op = op_tokens[dix]
-    print("Target Table ops:", tbl_op)
+    #print("Target Table ops:", tbl_op)
+    nrows = tbl_op[2]
+    ncols = tbl_op[3]
+    # load lookup infor for this accessor 
     mx_type = op[3] # not used yet, what type of table?  in past this was always 1-d or 2-d 
-    nrows = tbl_op[4]
-    ncols = tbl_op[5]
     key1_ix = op[6]
     #print("ix, dict_ix, mx_type, key1_ix", ix, dix, mx_type, key1_ix)
     lu_type1 = op[7]
@@ -195,6 +196,6 @@ def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     data_table = dict_ix[dix]
     keyval1 = state_ix[key1_ix]
     keyval2 = state_ix[key2_ix]
-    print("keyval1, lu_type1, keyval2, lu_type2, ncols", keyval1, lu_type1, keyval2, lu_type2, ncols)
+    #print("keyval1, lu_type1, keyval2, lu_type2, ncols", keyval1, lu_type1, keyval2, lu_type2, ncols)
     result = om_table_lookup(data_table, mx_type, ncols, keyval1, lu_type1, keyval2, lu_type2)
     return result
