@@ -194,6 +194,6 @@ def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     data_table = dict_ix[dix]
     keyval1 = state_ix[key1_ix]
     keyval2 = state_ix[key2_ix]
-    print("keyval1, lu_type1, keyval2, lu_type2", keyval1, lu_type1, keyval2, lu_type2)
+    print("keyval1, lu_type1, keyval2, lu_type2, ncols", keyval1, lu_type1, keyval2, lu_type2, ncols)
     result = om_table_lookup(data_table, mx_type, ncols, keyval1, lu_type1, keyval2, lu_type2)
     return result
