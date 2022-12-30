@@ -136,7 +136,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
     load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
     # debug 
-    dma_ix = get_state_ix(state_ix, state_paths, "/RCHRES_R001/HYDR/dma")
+    dma_ix = get_state_ix(state_ix, state_paths, "/RCHRES_R001/dma")
     print("Op tokens for dma (", dma_ix,")", op_tokens[dma_ix])
     # add things from UCI as needed 
     # - we will have to auto-detect during parsing/tokenization to come up with a list
