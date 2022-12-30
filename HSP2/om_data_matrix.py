@@ -183,6 +183,7 @@ def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     dix = op[2]
     # load the attributes for the data matrix that we are accessing
     tbl_op = op_tokens[dix]
+    print("Target Table ops:", tbl_op)
     mx_type = op[3] # not used yet, what type of table?  in past this was always 1-d or 2-d 
     nrows = tbl_op[4]
     ncols = tbl_op[5]
