@@ -299,6 +299,8 @@ def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
     # Or, skip the save_timeseries wrapper and call write_ts() directly in io.py:
     #  write_ts(self, data_frame:pd.DataFrame, save_columns: List[str], category:Category, operation:Union[str,None]=None, segment:Union[str,None]=None, activity:Union[str,None]=None)
     # see line 317 in utilities.py for use example of write_ts()
+    x = 0 # dummy
+    return
 
 @njit
 def iterate_models(op_tokens, state_ix, dict_ix, ts_ix, steps):
