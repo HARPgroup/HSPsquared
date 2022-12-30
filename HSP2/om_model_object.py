@@ -59,11 +59,11 @@ class ModelObject:
     def constant_or_path(self, keyval, keyname, trust = False):
         if is_float_digit(keyval):
             # we are given a constant value, not a variable reference 
-            print("Creating constant ", keyname, " = ", keyval)
+            #print("Creating constant ", keyname, " = ", keyval)
             k = Constant(keyname, self, keyval)
             kix = k.ix
         else:
-            print("Adding input ", keyname, " = ", keyval)
+            #print("Adding input ", keyname, " = ", keyval)
             kix = self.add_input(keyname, keyval, trust)
         return kix
     

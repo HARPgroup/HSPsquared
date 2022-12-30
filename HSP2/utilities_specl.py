@@ -213,6 +213,7 @@ from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
 from HSP2.om_constant import *
 from HSP2.om_data_matrix import *
+from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
 def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # by setting the state_parhs, opt_tokens, state_ix etc on the abstract class ModelObject
@@ -233,8 +234,8 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     data_table = np.asarray([ [ 0.0, 5.0, 10.0], [10.0, 15.0, 20.0], [20.0, 25.0, 30.0], [30.0, 35.0, 40.0] ], dtype= "float32")
     dm = DataMatrix('dm', river, data_table)
     dm.add_op_tokens()
-
-    
+    dma = DataMatrixLookup('dma', river, dm.state_path, 2, 17.5, 1, 6.8, 1, 0.0)
+    dma.add_op_tokens()    
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
@@ -292,6 +293,12 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     
     return
 
+def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
+    # Decide on using from utilities.py:
+    # - save_timeseries(io_manager, ts, savedict, siminfo, saveall, operation, segment, activity, compress=True)
+    # Or, skip the save_timeseries wrapper and call write_ts() directly in io.py:
+    #  write_ts(self, data_frame:pd.DataFrame, save_columns: List[str], category:Category, operation:Union[str,None]=None, segment:Union[str,None]=None, activity:Union[str,None]=None)
+    # see line 317 in utilities.py for use example of write_ts()
 
 @njit
 def iterate_models(op_tokens, state_ix, dict_ix, ts_ix, steps):
