@@ -131,10 +131,11 @@ def om_table_lookup(data_table, mx_type, ncols, keyval1, lu_type1, keyval2, lu_t
     return luval
 
 @njit 
-def row_interp(data_table, ncols, keyval1, lu_type1):
+def row_interp(data_table, ncols, keyval, lu_type):
     row_vals = data_table[0].copy() # initialize to the first row 
+    print("interping for keyval", keyval, "lutype:", lu_type, "ncols", ncols, "in table", data_table)
     for i in range(ncols):
-        row_vals[i] = table_lookup(data_table, keyval1, lu_type1, i)
+        row_vals[i] = table_lookup(data_table, keyval, lu_type, i)
     return row_vals
 
 @njit

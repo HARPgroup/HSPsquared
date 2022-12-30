@@ -235,11 +235,11 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     dm = DataMatrix('dm', river, data_table)
     dm.add_op_tokens()
     # 2d lookup
-    #dma = DataMatrixLookup('dma', river, dm.state_path, 2, 17.5, 1, 6.8, 1, 0.0)
-    #dma.add_op_tokens()
-    # 1.5d lookup
-    dma = DataMatrixLookup('dma', river, dm.state_path, 3, 17.5, 1, 1, 1, 0.0)
+    dma = DataMatrixLookup('dma', river, dm.state_path, 2, 17.5, 1, 6.8, 1, 0.0)
     dma.add_op_tokens()
+    # 1.5d lookup
+    #dma = DataMatrixLookup('dma', river, dm.state_path, 3, 17.5, 1, 1, 1, 0.0)
+    #dma.add_op_tokens()
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
