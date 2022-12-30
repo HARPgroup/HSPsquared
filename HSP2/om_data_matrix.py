@@ -184,13 +184,13 @@ def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     nrows = tbl_op[4]
     ncols = tbl_op[5]
     key1_ix = op[6]
-    #print("ix, dict_ix, mx_type, key1_ix", ix, dix, mx_type, key1_ix)
+    print("ix, dict_ix, mx_type, key1_ix", ix, dix, mx_type, key1_ix)
     lu_type1 = op[7]
     key2_ix = op[8]
     lu_type2 = op[9]
     data_table = dict_ix[dix]
     keyval1 = state_ix[key1_ix]
     keyval2 = state_ix[key2_ix]
-    #print("Key, ltype, val", keyval, lu_type, valcol)
+    print("keyval1, lu_type1, keyval2, lu_type2", keyval1, lu_type1, keyval2, lu_type2)
     result = om_table_lookup(data_table, mx_type, ncols, keyval1, lu_type1, keyval2, lu_type2)
     return result
