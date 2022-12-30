@@ -234,8 +234,8 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     data_table = np.asarray([ [ 0.0, 5.0, 10.0], [10.0, 15.0, 20.0], [20.0, 25.0, 30.0], [30.0, 35.0, 40.0] ], dtype= "float32")
     dm = DataMatrix('dm', river, data_table)
     dm.add_op_tokens()
-    #dma = DataMatrixLookup('dma', river, dm.state_path, 2, 17.5, 1, 6.8, 1, 0.0)
-    #dma.add_op_tokens()    
+    dma = DataMatrixLookup('dma', river, dm.state_path, 2, 17.5, 1, 6.8, 1, 0.0)
+    dma.add_op_tokens()    
     # alternative, using TIMESERIES: 
     # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
     # river.add_input("ps_mgd", "/TIMESERIES/TS3000")

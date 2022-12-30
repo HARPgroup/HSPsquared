@@ -134,8 +134,10 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
     op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
-    print(hydr_ix)
     load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
+    # debug 
+    dma_ix = get_state_ix(state_ix, state_paths, "/RCHRES_R001/HYDR/dma")
+    print("Op tokens for dma (", dma_ix,")", op_tokens[dma_ix])
     # add things from UCI as needed 
     # - we will have to auto-detect during parsing/tokenization to come up with a list
     # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 
