@@ -144,6 +144,7 @@ def table_row_lookup(data_table, keyval, lu_type):
         idx = (data_table[:, 0][0:][(data_table[:, 0][0:]- keyval) <= 0]).argmax()
     elif (lu_type == 0):
         idx = int(keyval)
+    print("looking for row", idx, "in table", data_table)
     row_vals = data_table[:][0:][idx]
     return row_vals
 
