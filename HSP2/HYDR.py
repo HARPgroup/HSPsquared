@@ -303,8 +303,8 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
         #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
-        #if step == 1:
-            #print("state_ix at step 1:", state_ix[2])
+        if step == 2:
+            print("state_ix at step 2:", state_ix)
             #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             #print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 1:", IVOL0[step])
             
