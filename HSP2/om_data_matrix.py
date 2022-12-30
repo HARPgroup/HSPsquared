@@ -139,6 +139,7 @@ def row_interp(data_table, ncols, keyval1, lu_type1):
 
 @njit
 def table_row_lookup(data_table, keyval, lu_type):
+    print("looking for keyval", keyval, "lutype:", lu_type, "in table", data_table)
     if (lu_type == 2):
         # stair step retrieve whole row 
         idx = (data_table[:, 0][0:][(data_table[:, 0][0:]- keyval) <= 0]).argmax()
