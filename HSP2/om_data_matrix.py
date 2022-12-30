@@ -133,20 +133,20 @@ def om_table_lookup(data_table, mx_type, ncols, keyval1, lu_type1, keyval2, lu_t
 @njit 
 def row_interp(data_table, ncols, keyval, lu_type):
     row_vals = data_table[0].copy() # initialize to the first row 
-    print("interping for keyval", keyval, "lutype:", lu_type, "ncols", ncols, "in table", data_table)
+    #print("interping for keyval", keyval, "lutype:", lu_type, "ncols", ncols, "in table", data_table)
     for i in range(ncols):
         row_vals[i] = table_lookup(data_table, keyval, lu_type, i)
     return row_vals
 
 @njit
 def table_row_lookup(data_table, keyval, lu_type):
-    print("looking for keyval", keyval, "lutype:", lu_type, "in table", data_table)
+    #print("looking for keyval", keyval, "lutype:", lu_type, "in table", data_table)
     if (lu_type == 2):
         # stair step retrieve whole row 
         idx = (data_table[:, 0][0:][(data_table[:, 0][0:]- keyval) <= 0]).argmax()
     elif (lu_type == 0):
         idx = int(keyval)
-    print("looking for row", idx, "in table", data_table)
+    #print("looking for row", idx, "in table", data_table)
     row_vals = data_table[:][0:][idx]
     return row_vals
 
