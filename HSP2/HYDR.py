@@ -18,8 +18,13 @@ from math import sqrt, log10
 from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
-# from HSP2.utilities_specl import init_sim_dicts
+from HSP2.utilities_specl import *
 from HSP2.SPECL import specl, _specl_
+from HSP2.om_model_object import *
+from HSP2.om_equation import *
+from HSP2.om_data_matrix import *
+from HSP2.om_sim_timer import *
+from HSP2.om_model_linkage import ModelLinkage, step_model_link
 import numpy as np
 from numba import int8, float32, njit, types
 from numba.typed import Dict
@@ -124,9 +129,24 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
         OVOLlabels.append(f'OVOL{i+1}')
 
     # specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
-
+    # this is hard-wired but should be passed in via the UCI or perhaps specactions Dict when calling the hydr() function
+    domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
+    op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
+    hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
+    load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
+    # debug 
+    dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/dma")
+    print("Op tokens for dma (", dma_ix,")", op_tokens[dma_ix])
+    # add things from UCI as needed 
+    # - we will have to auto-detect during parsing/tokenization to come up with a list
+    # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 
+    
     ###########################################################################
-    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
+    print("Calling new _hydr_ with specl")
+    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
+    print("Final state value for dma (", dma_ix,")", state_ix[dma_ix])
+    #print("Final state at end of _hydr_()", state_ix[1:20])
+    #errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
     # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels) 
     ###########################################################################
 
@@ -140,7 +160,9 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
 
 
 @njit(cache=True)
-def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
+def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix):
+#def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
+#def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 # def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
     errors = zeros(int(ui['errlen'])).astype(int64)
 
@@ -191,6 +213,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
 
     # MAIN loop Initialization
     IVOL   = ts['IVOL']  * VFACT           # or sum civol, zeros if no inflow ???
+    IVOL0   = ts['IVOL']                   # the actual inflow in simulation native units for use by SPECL
     POTEV  = ts['POTEV'] / 12.0
     PREC   = ts['PREC']  / 12.0
     CONVF  = ts['CONVF']
@@ -264,20 +287,58 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
 
     # store initial outflow from reach:
     ui['ROS'] = ro
+    
+    # set up specl pointers for slightly faster execution
+    o1_ix, o2_ix, o3_ix, ivol_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3'], hydr_ix['IVOL']
+    # add global constants
+    
 
     # HYDR (except where noted)
     for step in range(steps):
+        convf  = CONVF[step]
+        outdgt[:] = OUTDGT[step, :]
+        colind[:] = COLIND[step, :]
+        roseff = ro
+        oseff[:] = o[:]  
+
+        # set state_ix with value of local state variables and/or needed vars 
+        # note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
+        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
         
+        # we do pre-step (nothing right now, but could be significant at some point)
+        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
+        # we do step: this is where all the major calculations happen
+        step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
+        # this is only a few tenths of a second slower on a 40 year simulation but interesting
+        # outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
+        # OUTDGT[step, :] = [state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix]]
+
+        if step == 2:
+            print("OUTDGT[step, :]", OUTDGT[step, :])
+            print("state_ix at step 2:", state_ix)
+            #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
+            #print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 1:", IVOL0[step])
+
+            print("outdgt[:]", outdgt[:]) 
+            print([state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix]])
+
+            print("o1_ix", o1_ix)
+            print("o2_ix", o2_ix)  
+            print("o3_ix", o3_ix)    
+        # copy writeable state variables back to local state
+        outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
+        # note: we don't allow writing of IVOL since that is what happened upstream.  But we *could* write to anything we wanted here.
+        #IVOL[step] = state_ix[ivol_ix] * VFACT
+        
+        """
         ##########################################################################
         # specl block
         ##########################################################################
         print("step", step, "of", steps)
-        
         # set up state_ix dictionary 
         state_ix = specactions
         # if specactions was a nested dict 
         # state_ix = specactions['state_ix']
-
         state_ix[1] = OUTDGT[step, 0]
         state_ix[2] = OUTDGT[step, 1]
         state_ix[3] = OUTDGT[step, 2]
@@ -286,7 +347,9 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
         [print(key,':',value) for key, value in state_ix.items()]
 
         # call specl
-        errors_specl = specl(ui, ts, state_ix, step)
+        #pre_step_model(op_tokens, state_ix, dict_ix, ts_ix) # currently does nothing
+        #errors_specl = step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
+        #errors_specl = specl(ui, ts, state_ix, step)
 
         print("state_ix after specl()")
         [print(key,':',value) for key, value in state_ix.items()]
@@ -294,13 +357,8 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactio
         # print("OUTDGT[step, :]", OUTDGT[step, :])
         OUTDGT[step, :] = [state_ix[1], state_ix[2], state_ix[3]]
         print("OUTDGT[step, :]", OUTDGT[step, :])
-        ##########################################################################
-        
-        convf  = CONVF[step]
-        outdgt[:] = OUTDGT[step, :]
-        colind[:] = COLIND[step, :]
-        roseff = ro
-        oseff[:] = o[:]   
+        """
+        ########################################################################## 
 
         # vols, sas variables and their initializations  not needed.
         if irexit >= 0:             # irrigation exit is set, zero based number
