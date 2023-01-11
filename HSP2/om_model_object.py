@@ -39,6 +39,7 @@ class ModelObject:
         # if overwrite = True replace this and all children, otherwise, just save this.     
         # note: "with" statement helps prevent unclosed resources, see: https://www.geeksforgeeks.org/with-statement-in-python/
         with HDFStore(hdfname, mode = 'a') as store:
+            dummy_var = True
     
     def make_paths(self, base_path = False):
         if base_path == False: # we are NOT forcing paths
