@@ -177,6 +177,6 @@ class Constant(ModelObject):
 # njit functions for runtime
 
 @njit
-def exec_model_object, state_ix, dict_ix):
+def exec_model_object( op, state_ix, dict_ix):
     ix = op[1]
     return 0.0

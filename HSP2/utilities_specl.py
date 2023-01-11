@@ -351,7 +351,7 @@ def test_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         print(i)
         print(op_tokens[i][0])
         if op_tokens[i][0] == 0:
-            state_ix[i] = exec_model_object(op_tokens[i], state_ix)
+            state_ix[i] = exec_model_object(op_tokens[i], state_ix, dict_ix)
         if op_tokens[i][0] == 1:
             state_ix[i] = exec_eqn(op_tokens[i], state_ix)
         elif op_tokens[i][0] == 2:

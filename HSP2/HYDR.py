@@ -295,6 +295,12 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
 
     # HYDR (except where noted)
     for step in range(steps):
+        convf  = CONVF[step]
+        outdgt[:] = OUTDGT[step, :]
+        colind[:] = COLIND[step, :]
+        roseff = ro
+        oseff[:] = o[:]  
+
         # set state_ix with value of local state variables and/or needed vars 
         # note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
         state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
@@ -304,12 +310,21 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         # we do step: this is where all the major calculations happen
         step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
-        #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
+        # outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
+        # OUTDGT[step, :] = [state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix]]
+
         if step == 2:
+            print("OUTDGT[step, :]", OUTDGT[step, :])
             print("state_ix at step 2:", state_ix)
             #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             #print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 1:", IVOL0[step])
-            
+
+            print("outdgt[:]", outdgt[:]) 
+            print([state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix]])
+
+            print("o1_ix", o1_ix)
+            print("o2_ix", o2_ix)  
+            print("o3_ix", o3_ix)    
         # copy writeable state variables back to local state
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
         # note: we don't allow writing of IVOL since that is what happened upstream.  But we *could* write to anything we wanted here.
@@ -343,13 +358,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         OUTDGT[step, :] = [state_ix[1], state_ix[2], state_ix[3]]
         print("OUTDGT[step, :]", OUTDGT[step, :])
         """
-        ##########################################################################
-        
-        convf  = CONVF[step]
-        outdgt[:] = OUTDGT[step, :]
-        colind[:] = COLIND[step, :]
-        roseff = ro
-        oseff[:] = o[:]   
+        ########################################################################## 
 
         # vols, sas variables and their initializations  not needed.
         if irexit >= 0:             # irrigation exit is set, zero based number
