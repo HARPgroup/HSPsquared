@@ -16,8 +16,7 @@ The class DataMatrix is used to translate provide table lookup and interpolation
   # todo: at parse time, we can create these variables as children on this object
   # self.op_matrix = [] # this is the final opcoded matrix for runtime
 """
-from HSP2.om_model_object import ModelObject
-from HSP2.om_constant import *
+from HSP2.om_model_object import *
 from HSP2.utilities_specl import *
 from numba import njit
 import numpy as np
@@ -66,7 +65,7 @@ class DataMatrixLookup(ModelObject):
         self.matrix_path = matrix_path # gets passed in at creation.  Refers to path "/OBJECTS/DataMatrix/RCHRES_0001/stage_storage_discharge/matrix"
         # self.op_matrix = [] # this is the final opcoded matrix for runtime
         self.optype = 8 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - Constant (numeric), 8 - matrix accessor
-        self.add_input('matrix', matrix_path, False)
+        self.add_input('matrix', matrix_path, 2, False)
         self.key1_ix = self.constant_or_path(key1, 'key1')
         self.key2_ix = self.constant_or_path(key2, 'key2')
         matrix = self.get_dict_state(self.inputs_ix['matrix'])

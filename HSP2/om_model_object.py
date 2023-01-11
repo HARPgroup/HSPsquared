@@ -4,6 +4,9 @@ It handles all Dict management functions, but provides for no runtime execution 
 All runtime exec is done by child classes.
 """
 from HSP2.utilities_specl import *
+from pandas import Series, DataFrame, concat, HDFStore, set_option, to_numeric
+from pandas import Timestamp, Timedelta, read_hdf, read_csv
+
 class ModelObject:
     state_ix = {} # Shared Dict with the numerical state of each object 
     state_paths = {} # Shared Dict with the hdf5 path of each object 
@@ -15,7 +18,7 @@ class ModelObject:
         self.name = name
         self.container = container # will be a link to another object
         self.log_path = "" # Ex: "/RESULTS/RCHRES_001/SPECL" 
-        self.attribute_path = "/OBJECTS/RCHRES_001" # 
+        self.attribute_path = "" # 
         self.state_path = "" # Ex: "/STATE/RCHRES_001" # the pointer to this object state
         self.inputs = {} # associative array with key=local_variable_name, value=hdf5_path Ex: [ 'Qin' : '/STATE/RCHRES_001/IVOL' ]
         self.inputs_ix = {} # associative array with key=local_variable_name, value=state_ix integer key
@@ -31,11 +34,24 @@ class ModelObject:
         self.state_ix = state_ix
         self.dict_ix = dict_ix
     
-    def make_state_path(self):
-        if not (self.container == False):
-            self.state_path = self.container.state_path + "/" + self.name
+    def save_object_hdf(self, hdfname, overwrite = False ):
+        # save the object in the full hdf5 path
+        # if overwrite = True replace this and all children, otherwise, just save this.     
+        # note: "with" statement helps prevent unclosed resources, see: https://www.geeksforgeeks.org/with-statement-in-python/
+        with HDFStore(hdfname, mode = 'a') as store:
+    
+    def make_paths(self, base_path = False):
+        if base_path == False: # we are NOT forcing paths
+            if not (self.container == False):
+                self.state_path = self.container.state_path + "/" + self.name
+                self.attribute_path = self.container.attribute_path + "/" + self.name
+            else:
+                self.state_path = "/STATE/" + self.name
+                self.attribute_path = "/OBJECTS/" + self.name
         else:
-            self.state_path = "/STATE/" + self.name
+            # base_path is a Dict with state_path and attribute_path set 
+            self.state_path = base_path['STATE'] + self.name
+            self.attribute_path = base_path['OBJECTS'] + self.name
         return self.state_path
     
     def find_var_path(self, var_name):
@@ -64,26 +80,29 @@ class ModelObject:
             kix = k.ix
         else:
             #print("Adding input ", keyname, " = ", keyval)
-            kix = self.add_input(keyname, keyval, trust)
+            kix = self.add_input(keyname, keyval, 2, trust)
         return kix
     
     def register_path(self):
         # initialize the path variable if not already set
         if self.state_path == '':
-            self.make_state_path()
+            self.make_paths()
         self.ix = set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
         # this should check to see if this object has a parent, and if so, register the name on the parent 
-        # as an input?
+        # default is as a child object. 
         if not (self.container == False):
             # since this is a request to actually create a new path, we instruct trust = True as last argument
-            return self.container.add_input(self.name, self.state_path, True)
+            return self.container.add_input(self.name, self.state_path, 1, True)
         return self.ix
     
-    def add_input(self, var_name, var_path, trust = False):
+    def add_input(self, var_name, var_path, input_type = 1, trust = False):
         # this will add to the inputs, but also insure that this 
         # requested path gets added to the state/exec stack via an input object if it does 
         # not already exist.
-        # trust = False means fail if the path does not already exist, True means assume it will be OK which is bad policy, except for the case where the path points to an existing location
+        # - var_name = the local name for this linked entity/attribute 
+        # - var_path = the full path of the entity/attribute we are linking to 
+        # - input types: 1: parent-child link, 2: state property link, 3: timeseries object property link 
+        # - trust = False means fail if the path does not already exist, True means assume it will be OK which is bad policy, except for the case where the path points to an existing location
         self.inputs[var_name] = var_path
         var_ix = self.find_var_path(var_path)
         if var_ix == False:
@@ -151,7 +170,12 @@ class Constant(ModelObject):
         super(Constant, self).__init__(name, container)
         self.optype = 7 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - Constant (numeric)
         self.default_value = value 
-        self.register_path() #this is one of the few that register a path by default since there are no contingencies to await
         #set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
         self.state_ix[self.ix] = self.default_value
 
+# njit functions for runtime
+
+@njit
+def exec_model_object, state_ix, dict_ix):
+    ix = op[1]
+    return 0.0

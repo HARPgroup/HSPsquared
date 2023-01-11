@@ -45,13 +45,27 @@ def exec_conditional(op, state_ix, dict_ix):
     ix = op[1]
     dix = op[2]
     # these indices must be adjusted to reflect the number of common op tokens
-    mx_type = op[3] # not used yet, what type of table?  in past this was always 1-d or 2-d 
-    key1_ix = op[4]
-    #print("ix, dict_ix, mx_type, key1_ix", ix, dix, mx_type, key1_ix)
-    lutype = op[5]
-    valcol = op[8]
-    data_table = dict_ix[dix]
-    keyval = state_ix[key1_ix]
-    #print("Key, ltype, val", keyval, lutype, valcol)
-    result = specl_lookup(data_table, keyval, lutype, valcol)
+    # Conditional has:
+    # - type of condition (>, <, ...)
+    # - operand 1 (left side)
+    # - operand 2 (right side)
+    # - ix of value if left side
+    # - ix of value if right side 
+    op = op[3] # not used yet, what type of table?  in past this was always 1-d or 2-d 
+    op1 = op[4]
+    op2 = op[5]
+    ix1 = op[6]
+    ix2 = op[7]
+    if op == 0:
+      if op1 > op2:
+        result = state_ix[ix1]
+      else:
+        result = state_ix[ix2]
+    if op == 1:
+      if op1 < op2:
+        result = state_ix[ix1]
+      else:
+        result = state_ix[ix2]
+        
     return result
+

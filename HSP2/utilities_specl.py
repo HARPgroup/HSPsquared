@@ -211,7 +211,6 @@ from HSP2.om_model_object import *
 from HSP2.om_sim_timer import *
 from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
-from HSP2.om_constant import *
 from HSP2.om_data_matrix import *
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
@@ -227,7 +226,11 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     timer = SimTimer('timer', False, siminfo)
     timer.add_op_tokens()
     river = ModelObject('RCHRES_R001')
-    river.add_input("Qin", f'{river.state_path}/HYDR/IVOL')
+    # upon object creation river gets added to state with path "/STATE/RCHRES_R001"
+    river.add_input("Qin", f'{river.state_path}/HYDR/IVOL', 2)
+    # alternative, using TIMESERIES: 
+    # river.add_input("Qin", "/TIMESERIES/TS011", 3)
+    # river.add_input("ps_mgd", "/TIMESERIES/TS3000", 3)
     river.add_op_tokens() # formally adds this to the simulation
     
     # now add a simple table 
@@ -240,9 +243,6 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # 1.5d lookup
     #dma = DataMatrixLookup('dma', river, dm.state_path, 3, 17.5, 1, 1, 1, 0.0)
     #dma.add_op_tokens()
-    # alternative, using TIMESERIES: 
-    # river.inputs["Qin"] = ["/TIMESERIES/TS011"]
-    # river.add_input("ps_mgd", "/TIMESERIES/TS3000")
     
     facility = ModelObject('facility', river)
     
@@ -269,12 +269,9 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
         if k > 0:
             Qout_eqn = Qout_eqn + " + " + upstream_name + "_Qout"
         Qout_ss = Equation(subshed_name + "_Qout", facility, eqn)
-        Qout_ss.register_path()
-        Qout_ss.tokenize()
         Qout_ss.add_op_tokens()
     # now add the output of the final tributary to the inflow to this one
     Qtotal = Equation("Qtotal", facility, "Qin + " + Qout_ss.name)
-    Qtotal.register_path()
     Qtotal.tokenize()
     """
     # add random ops to test scalability
@@ -284,8 +281,6 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     for k in range(10000):
         eqn = str(25*random.random()) + " * " + c[round((2*random.random()))]
         newq = Equation('eq' + str(k), facility, eqn)
-        newq.register_path()
-        newq.tokenize()
         newq.add_op_tokens()
     """
     # now connect the wd_mgd back to the river with a direct link.  
@@ -355,6 +350,8 @@ def test_model(op_tokens, state_ix, dict_ix, ts_ix, step):
     for i in op_tokens.keys():
         print(i)
         print(op_tokens[i][0])
+        if op_tokens[i][0] == 0:
+            state_ix[i] = exec_model_object(op_tokens[i], state_ix)
         if op_tokens[i][0] == 1:
             state_ix[i] = exec_eqn(op_tokens[i], state_ix)
         elif op_tokens[i][0] == 2:

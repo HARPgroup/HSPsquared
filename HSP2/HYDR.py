@@ -20,8 +20,7 @@ from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
 from HSP2.utilities_specl import *
 from HSP2.SPECL import specl, _specl_
-from HSP2.om_model_object import ModelObject
-from HSP2.om_constant import *
+from HSP2.om_model_object import *
 from HSP2.om_equation import *
 from HSP2.om_data_matrix import *
 from HSP2.om_sim_timer import *
