@@ -341,6 +341,15 @@ def step_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         elif op_tokens[i][0] == 8:
             # since this accesses other table objects, gotta pass the entire op_tokens Dict 
             state_ix[i] = exec_tbl_eval(op_tokens, op_tokens[i], state_ix, dict_ix)
+        elif op_tokens[i][0] == 9:
+            # maybe this can be a Timeseries data input? 
+            # not identical to local state value links since their ts can be relative past/future
+            # op_tokens should contain a number of steps in the past or future if we wanted?
+            # would have to calculate that based on the timestep and input time frame to lag or forecast
+            # value = ts_ix[op_token[2]][step + ts_offset]
+            # to aggregate we would need to combine this ts lookup with a stack object
+            # state_ix[op_token[1]] = value 
+            val = 0 
     return 
 
 

@@ -25,7 +25,16 @@ class ModelObject:
         self.ix = False
         self.default_value = 0.0
         self.ops = []
-        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - Constant (numeric), 8 - matrix accessor
+        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor
+        # this is replaceable. to replace state_path/re-regiser the index :
+        # - remove the old PATH from state_paths: del state_paths[self.state_path]
+        # you should never creeate an object without knowing its container, but if you do
+        # you can TRY to do the following:
+        # - set this objects new path based on containment and call:
+        #         [my_object].make_paths()
+        # - add this manually to state_paths:
+        #   state_paths[[my_object].state_path] = [my_object].ix 
+        # - call [my_object].register_path()   
         self.register_path()
     
     def load_state_dicts(op_tokens, state_paths, state_ix, dict_ix):
@@ -77,7 +86,7 @@ class ModelObject:
         if is_float_digit(keyval):
             # we are given a constant value, not a variable reference 
             #print("Creating constant ", keyname, " = ", keyval)
-            k = Constant(keyname, self, keyval)
+            k = ModelConstant(keyname, self, keyval)
             kix = k.ix
         else:
             #print("Adding input ", keyname, " = ", keyval)
@@ -163,13 +172,13 @@ class ModelObject:
         return 
 
 """
-The class Constant is for storing constants.  It must be loaded here because ModelObject calls it.
-Is this usefuol or just clutter?  Useful I think since there are numerical constants...
+The class ModelConstant is for storing constants.  It must be loaded here because ModelObject calls it.
+Is this useful or just clutter?  Useful I think since there are numerical constants...
 """
-class Constant(ModelObject):
+class ModelConstant(ModelObject):
     def __init__(self, name, container = False, value = 0.0):
-        super(Constant, self).__init__(name, container)
-        self.optype = 7 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - Constant (numeric)
+        super(ModelConstant, self).__init__(name, container)
+        self.optype = 7 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric)
         self.default_value = value 
         #set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
         self.state_ix[self.ix] = self.default_value
