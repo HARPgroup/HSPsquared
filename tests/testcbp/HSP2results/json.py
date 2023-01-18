@@ -9,6 +9,9 @@ import pandas as pd
 # get model class  to guess object type in this lib 
 # the parent object must be known
 def model_class_loader(model_name, model_props, container = False):
+    # todo: check first to see if the model_name is an attribute on the container
+    # Use: if hasattr(container, model_name):
+    # if so, we set the value on the container, if not, we create a new subcomp on the container 
     if model_props == None:
         return False
     if type(model_props) is str:
@@ -22,6 +25,8 @@ def model_class_loader(model_name, model_props, container = False):
       if object_class == None:
           # return as this is likely an attribute that is used for the containing class as attribute 
           # and is handled by the container 
+          # todo: we may want to handle this here?  Or should this be a method on the class?
+          # Use: if hasattr(container, model_name):
           return False
       model_object = False
       # Note: this routine uses the ".get()" method of the dict class type 
@@ -29,7 +34,7 @@ def model_class_loader(model_name, model_props, container = False):
       #       ".get()" will return NoValue if it does not exist or the value. 
       if object_class == 'Equation':
           eqn = model_props.get('equation')
-          model_object = Equation(model_props.get('name'), container, eqn )
+          model_object = Equation(model_props.get('name'), container, eqn.get('value') )
           #remove_used_keys(model_props, 
       elif object_class == 'Constant':
           model_object = Constant(model_props.get('name'), container, model_props.get('value') )
@@ -52,6 +57,8 @@ def model_loader_recursive(model_data, container, loaded_model_objects):
         model_props = model_data[object_name]
         if type(model_props) is dict:
             if not ('object_class' in model_props):
+                # this is either a class attribute or an un-handleable meta-data 
+                # if the class atttribute exists, we should pass it to container to load 
                 print("Skipping un-typed", object_name)
                 continue
             print("Trying to load", object_name)
@@ -145,6 +152,10 @@ loaded_model_objects = {}
 container = False 
 # call it!
 model_loader_recursive(model_data, container, loaded_model_objects)
-
-
+ 
+# components tests
+chez = model_data['0. Impoundment - Lake Chesdin']
+discharge = model_data['0. Impoundment - Lake Chesdin']['discharge']
+m_class = model_class_loader(chez['name'], chez, container = False)
+d_class = model_class_loader(discharge['name'], discharge, m_class)
     
