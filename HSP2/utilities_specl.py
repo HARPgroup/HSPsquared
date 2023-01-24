@@ -301,6 +301,25 @@ def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
     x = 0 # dummy
     return
 
+def load_sim_ts(f, state_ix, ts_ix):
+  tsq = f['TIMESERIES/'] # f is the hdf5 file 
+  # this code replicates a piece of the function of get_timeseries, and loads the full timeseries into a Dict
+  # the dict will be keyed by a simple integer, and have values at the time step only.  The actual time 
+  # at that step will be contained in ts_ts 
+  ts_tables = list(tsq.keys())
+  for i in ts_tables:
+      if i == 'SUMMARY': continue # skip this non-numeric table
+      var_path = '/TIMESERIES/' + i
+      ix = set_state(state_ix, state_paths, var_path, 0.0)
+      ts_ix[ix] = np.asarray(tsq[i]['table']['values'], dtype="float32")
+
+@njit
+def pre_step_timeseries(state_ix, ts_ix, step):
+    for idx in ts_ix.keys():
+        state_ix[idx] = ts_ix[idx][step] # the timeseries inputs state get set here. must a special type of object to do this
+
+
+
 @njit
 def iterate_models(op_tokens, state_ix, dict_ix, ts_ix, steps):
     checksum = 0.0

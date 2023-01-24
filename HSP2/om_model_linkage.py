@@ -7,14 +7,22 @@ from HSP2.om_model_object import ModelObject
 from HSP2.utilities_specl import *
 from numba import njit
 class ModelLinkage(ModelObject):
-    def __init__(self, name, container = False, source_path = '', link_type = 1):
+    def __init__(self, name, container = False, right_path = '', link_type = 1, left_path = False):
         super(ModelLinkage, self).__init__(name, container)
+        # left_path is only valid for pushes (type 5), since it copies a values from left to right 
+        # other variations assume that the link name itself is what receives the data 
+        # and copies from right to left 
+        # the push is functionally equivalent to a pull whose path resolves to the same right_path 
+        # but the push allows the potential for multiple objects to set a single state 
+        # This can be dangerous or difficult to debug, but essential to replicate old HSPF behaviour
+        # especially in the case of If/Then type structures.
         if container == False:
             # this is required
             print("Error: a link must have a container object to serve as the destination")
             return False
-        self.source_path = source_path
-        self.link_type = link_type # 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only)
+        self.right_path = right_path
+        self.left_path = left_path 
+        self.link_type = link_type # 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
         self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - broadcastChannel, 5 - ?
     
     def tokenize(self):
@@ -23,11 +31,20 @@ class ModelLinkage(ModelObject):
         # - if this is simply a parent-child connection, we do not render op-codes, but we do use this for assigning
         # - execution hierarchy
         if self.link_type in (2, 3):
-            src_ix = get_state_ix(self.state_ix, self.state_paths, self.source_path)
+            src_ix = get_state_ix(self.state_ix, self.state_paths, self.right_path)
             if not (src_ix == False):
                 self.ops = self.ops + [src_ix, self.link_type]
             else:
                 print("Error: link ", self.name, "does not have a valid source path")
+            #print("tokenize() result", self.ops)
+        if self.link_type == 4:
+            # we push to the remote path in this one 
+            left_ix = get_state_ix(self.state_ix, self.state_paths, self.left_path)
+            right_ix = get_state_ix(self.state_ix, self.state_paths, self.right_path)
+            if (left_ix != False) and (right_ix != False):
+                self.ops = self.ops + [left_ix, self.link_type, right_ix]
+            else:
+                print("Error: link ", self.name, "does not have valid paths", "(left = ", self.left_path, left_ix, "right = ", self.right_path, right_ix, ")")
             #print("tokenize() result", self.ops)
 
 # Function for use during model simulations of tokenized objects
@@ -38,5 +55,13 @@ def step_model_link(op_token, state_ix, ts_ix, step):
     elif op_token[3] == 2:
         state_ix[op_token[1]] = state_ix[op_token[2]]
     elif op_token[3] == 3:
-        return True
         # state_ix[op_token[1]] = ts_ix[op_token[2]][step]
+        return True
+    elif op_token[3] == 4:
+        # add value in local state to the remote broadcast hub+register state 
+        state_ix[op_token[2]] = state_ix[op_token[2]] + state_ix[op_token[4]]
+        return True
+    elif op_token[3] == 5:
+        # push value in local state to the remote broadcast hub+register state 
+        state_ix[op_token[2]] = state_ix[op_token[4]]
+        return True

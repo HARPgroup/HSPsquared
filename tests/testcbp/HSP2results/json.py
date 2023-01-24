@@ -38,6 +38,13 @@ def model_class_loader(model_name, model_props, container = False):
           #remove_used_keys(model_props, 
       elif object_class == 'Constant':
           model_object = Constant(model_props.get('name'), container, model_props.get('value') )
+      elif object_class == 'DataMatrix':
+          # add a matrix with the data, then add a matrix accessor for each required variable 
+          model_object = ModelObject(model_props.get('name'), container)
+          # the matrix accessor should share the state_ix of the base object to set its value
+          # and a matrix doesn't actually set its value at each time step, letting the defaul 
+          # accessor do the work 
+          # but the ops for the matrix maybe should include it's accessor?
       else:
           model_object = ModelObject(model_props.get('name'), container)
     # one way to insure no class attributes get parsed as sub-comps is:
@@ -45,6 +52,19 @@ def model_class_loader(model_name, model_props, container = False):
     # better yet to just NOT send those attributes as typed object_class arrays, instead just name : value
     return model_object
 
+def model_class_translate(model_props, object_class):
+    # make adjustments to non-standard items 
+    # this might better be moved to methods on the class handlers
+    if object_class == 'hydroImpoundment':
+        # special handling of matrix/storage_stage_area column
+        # we need to test to see if the storage table has been renamed 
+        # make table from matrix or storage_stage_area
+        # then make accessors from 
+        storage_stage_area = model_props.get('storage_stage_area')
+        matrix = model_props.get('matrix')
+        if ( (storage_stage_area == None) and (matrix != None): 
+            model_props['storage_stage_area'] = matrix
+            del model_props['matrix']
 
 def model_loader_recursive(model_data, container, loaded_model_objects):
     k_list = model_data.keys()
@@ -61,6 +81,9 @@ def model_loader_recursive(model_data, container, loaded_model_objects):
                 # if the class atttribute exists, we should pass it to container to load 
                 print("Skipping un-typed", object_name)
                 continue
+            print("Translating", object_name)
+            # this is a kludge, but can be important 
+            model_class_translate(model_props, object_class)
             print("Trying to load", object_name)
             model_object = model_class_loader(object_name, model_props, container)
             if model_object == False:
@@ -73,6 +96,7 @@ def model_loader_recursive(model_data, container, loaded_model_objects):
 
 # the implementationsrc_json_node
 src_json_node = 'http://deq1.bse.vt.edu/d.dh/node/62'
+ssa_el_pid = 4723116 # storage_stage_area did not load, what gives?  Use this to find out
 el_pid = 4723109
 json_url = src_json_node + "/" + str(el_pid)
 
