@@ -29,7 +29,7 @@ class Equation(ModelObject):
     def add_eqn_inputs(self):
         return # this is still in the works, but it is important to make this happen to verify all inputs are OK
         for i in range(1,len(self.ps)):
-          for j in range(1,2)
+          for j in range(1,2):
             op_name = self.ps[i][j]
             # constant_or_path() looks at name and path, since we only have a var name, we must assume 
             # the path is either a sibling or child variable or explicitly added other input, so this should
