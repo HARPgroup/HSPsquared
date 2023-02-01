@@ -310,41 +310,14 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         if step == 2:
             print("state_ix at step 2:", state_ix)
             #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
-            #print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 1:", IVOL0[step])
+            #print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 2:", IVOL0[step])
             
         # copy writeable state variables back to local state
+        # OUTDGT is writeable
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
-        # note: we don't allow writing of IVOL since that is what happened upstream.  But we *could* write to anything we wanted here.
-        #IVOL[step] = state_ix[ivol_ix] * VFACT
+        # IVOL is writeable 
+        IVOL[step] = state_ix[ivol_ix] * VFACT
         
-        """
-        ##########################################################################
-        # specl block
-        ##########################################################################
-        print("step", step, "of", steps)
-        # set up state_ix dictionary 
-        state_ix = specactions
-        # if specactions was a nested dict 
-        # state_ix = specactions['state_ix']
-        state_ix[1] = OUTDGT[step, 0]
-        state_ix[2] = OUTDGT[step, 1]
-        state_ix[3] = OUTDGT[step, 2]
-
-        print("state_ix before specl()")
-        [print(key,':',value) for key, value in state_ix.items()]
-
-        # call specl
-        #pre_step_model(op_tokens, state_ix, dict_ix, ts_ix) # currently does nothing
-        #errors_specl = step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
-        #errors_specl = specl(ui, ts, state_ix, step)
-
-        print("state_ix after specl()")
-        [print(key,':',value) for key, value in state_ix.items()]
-
-        # print("OUTDGT[step, :]", OUTDGT[step, :])
-        OUTDGT[step, :] = [state_ix[1], state_ix[2], state_ix[3]]
-        print("OUTDGT[step, :]", OUTDGT[step, :])
-        """
         ##########################################################################
         
         convf  = CONVF[step]
