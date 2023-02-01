@@ -301,6 +301,10 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         # note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
         state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
         
+        if step == 2:
+            print("state_ix before step 2:", state_ix)
+            #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
+            print("IVOL (with hydr_ix =", ivol_ix, ") before step 2:", state_ix[ivol_ix])
         # we do pre-step (nothing right now, but could be significant at some point)
         pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
         # we do step: this is where all the major calculations happen
@@ -310,12 +314,13 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         if step == 2:
             print("state_ix at step 2:", state_ix)
             #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
-            #print("IVOL0 (with hydr_ix =", ivol_ix, ") at step 2:", IVOL0[step])
+            print("IVOL (with hydr_ix =", ivol_ix, ") after specl() step 2:", state_ix[ivol_ix])
             
         # copy writeable state variables back to local state
         # OUTDGT is writeable
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
-        # IVOL is writeable 
+        # IVOL is writeable
+        # we must convert any updates to IVOL to the units expected in the _hydr_ calcs
         IVOL[step] = state_ix[ivol_ix] * VFACT
         
         ##########################################################################
