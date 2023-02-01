@@ -292,6 +292,147 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     
     return
 
+
+def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
+    # set globals on ModelObject
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
+    # set up the timer as the first element 
+    timer = SimTimer('timer', False, siminfo)
+    timer.add_op_tokens()
+    #river = ModelObject('RCHRES_R001')
+    # upon object creation river gets added to state with path "/STATE/RCHRES_R001"
+    #river.add_input("Qivol", f'{river.state_path}/HYDR/IVOL', 2, True)
+    # a json NHD from R parser
+    # Opening JSON file
+    # load the json data from a pre-generated json file on github
+    # json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
+    # jraw =  requests.get(json_url, verify=False)
+    # model_json = jj.content.decode('utf-8')
+    
+    # local file option:
+    jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
+    model_data = json.load(jfile)
+    # returns JSON object as Dict
+    # get the drainage area as 'area_sqmi'
+    # Add the Runit equation = Qin / area_sqmi (only valid for a headwater until we get DSN 10 going )
+    # iterate through nhd tribs and add them together into a big old equation 
+    loaded_model_objects = {}
+    container = False 
+    op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
+    hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
+    # call it!
+    model_loader_recursive(model_data, container, loaded_model_objects)
+    model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
+    model_tokenizer_recursive(model_root_object, loaded_model_objects)
+
+    return
+
+
+def model_class_loader(model_name, model_props, container = False):
+    # todo: check first to see if the model_name is an attribute on the container
+    # Use: if hasattr(container, model_name):
+    # if so, we set the value on the container, if not, we create a new subcomp on the container 
+    if model_props == None:
+        return False
+    if type(model_props) is str:
+        if is_float_digit(model_props):
+            model_object = ModelConstant(model_name, container, float(model_props) )
+            return model_object
+        else:
+            return False
+    elif type(model_props) is dict:
+      object_class = model_props.get('object_class')
+      if object_class == None:
+          # return as this is likely an attribute that is used for the containing class as attribute 
+          # and is handled by the container 
+          # todo: we may want to handle this here?  Or should this be a method on the class?
+          # Use: if hasattr(container, model_name):
+          return False
+      model_object = False
+      # Note: this routine uses the ".get()" method of the dict class type 
+      #       for attributes to pass in. 
+      #       ".get()" will return NoValue if it does not exist or the value. 
+      if object_class == 'Equation':
+          eqn = model_props.get('equation')
+          if type(eqn) is str:
+              eqn_str = eqn
+          else:
+              eqn_str = eqn.get('value')
+          model_object = Equation(model_props.get('name'), container, eqn_str )
+          #remove_used_keys(model_props, 
+      elif object_class == 'Constant':
+          model_object = ModelConstant(model_props.get('name'), container, model_props.get('value') )
+      elif object_class == 'DataMatrix':
+          # add a matrix with the data, then add a matrix accessor for each required variable 
+          model_object = ModelObject(model_props.get('name'), container)
+          # the matrix accessor should share the state_ix of the base object to set its value
+          # and a matrix doesn't actually set its value at each time step, letting the defaul 
+          # accessor do the work 
+          # but the ops for the matrix maybe should include it's accessor?
+      elif object_class == 'ModelLinkage':
+          model_object = ModelObject(model_props.get('name'), container)
+      else:
+          model_object = ModelObject(model_props.get('name'), container)
+    # one way to insure no class attributes get parsed as sub-comps is:
+    # model_object.remove_used_keys() 
+    # better yet to just NOT send those attributes as typed object_class arrays, instead just name : value
+    return model_object
+
+def model_class_translate(model_props, object_class):
+    # make adjustments to non-standard items 
+    # this might better be moved to methods on the class handlers
+    if object_class == 'hydroImpoundment':
+        # special handling of matrix/storage_stage_area column
+        # we need to test to see if the storage table has been renamed 
+        # make table from matrix or storage_stage_area
+        # then make accessors from 
+        storage_stage_area = model_props.get('storage_stage_area')
+        matrix = model_props.get('matrix')
+        if ( (storage_stage_area == None) and (matrix != None)): 
+            model_props['storage_stage_area'] = matrix
+            del model_props['matrix']
+
+def model_loader_recursive(model_data, container, loaded_model_objects):
+    k_list = model_data.keys()
+    object_names = dict.fromkeys(k_list , 1)
+    if type(object_names) is not dict:
+        return False 
+    for object_name in object_names:
+        print("Handling", object_name)
+        if object_name in {'name', 'object_class', 'id', 'value', 'default'}:
+            continue
+        model_props = model_data[object_name]
+        if type(model_props) is not dict:
+            # this is a constant, the loader  is built to handle this, but this causes errors with 
+            # properties on the class that are expected so we just skip and trust that all constants
+            # are formally declared as type Constant
+            continue
+        if type(model_props) is dict:
+            if not ('object_class' in model_props):
+                # this is either a class attribute or an un-handleable meta-data 
+                # if the class atttribute exists, we should pass it to container to load 
+                print("Skipping un-typed", object_name)
+                continue
+            print("Translating", object_name)
+            # this is a kludge, but can be important 
+            object_class = model_props['object_class']
+            model_class_translate(model_props, object_class)
+        # now we either have a constant (key and value), or a 
+        # fully defined object.  Either one should work OK.
+        print("Trying to load", object_name)
+        model_object = model_class_loader(object_name, model_props, container)
+        if model_object == False:
+            print("Could not load", object_name)
+            continue # not handled, but for now we will continue, tho later we should bail?
+        elif not (model_object.state_path in loaded_model_objects.keys()):
+            loaded_model_objects[model_object.state_path] = model_object 
+        # now for container type objects, go through its properties and handle
+        if type(model_props) is dict:
+            model_loader_recursive(model_props, model_object, loaded_model_objects)
+
+
+
 def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
     # Decide on using from utilities.py:
     # - save_timeseries(io_manager, ts, savedict, siminfo, saveall, operation, segment, activity, compress=True)
@@ -380,7 +521,7 @@ def test_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         print(op_tokens[i][0])
         if op_tokens[i][0] == 0:
             state_ix[i] = exec_model_object(op_tokens[i], state_ix, dict_ix)
-        if op_tokens[i][0] == 1:
+        elif op_tokens[i][0] == 1:
             state_ix[i] = exec_eqn(op_tokens[i], state_ix)
         elif op_tokens[i][0] == 2:
             state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)

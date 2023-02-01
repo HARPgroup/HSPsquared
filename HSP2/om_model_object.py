@@ -75,10 +75,12 @@ class ModelObject:
             return self.container.find_var_path(var_name)
         # check for root state vars STATE + var_name
         if ("/STATE/" + var_name) in self.state_paths.keys():
-            return self.state_paths[("/STATE/" + var_name)]
+            #return self.state_paths[("/STATE/" + var_name)]
+            return ("/STATE/" + var_name)
         # check for root state vars
         if var_name in self.state_paths.keys():
-            return self.state_paths[var_name]
+            #return self.state_paths[var_name]
+            return var_name
         #print(self.name, "could not find", var_name)
         return False
     
@@ -114,7 +116,8 @@ class ModelObject:
         # - input types: 1: parent-child link, 2: state property link, 3: timeseries object property link 
         # - trust = False means fail if the path does not already exist, True means assume it will be OK which is bad policy, except for the case where the path points to an existing location
         self.inputs[var_name] = var_path
-        var_ix = self.find_var_path(var_path)
+        found_path = self.find_var_path(var_path)
+        var_ix = get_state_ix(self.state_ix, self.state_paths, var_path)
         if var_ix == False:
             if (trust == False):
                 raise Exception("Cannot find variable path: " + var_path + " ... process terminated.")

@@ -9,17 +9,23 @@ from numba import njit
 class ModelLinkage(ModelObject):
     def __init__(self, name, container = False, right_path = '', link_type = 1, left_path = False):
         super(ModelLinkage, self).__init__(name, container)
-        # left_path is only valid for pushes (type 5), since it copies a values from left to right 
-        # other variations assume that the link name itself is what receives the data 
-        # and copies from right to left 
-        # the push is functionally equivalent to a pull whose path resolves to the same right_path 
+        # ModelLinkage copies a values from right to left
+        # right_path is the data source for the link 
+        # left_path is te destination of the link 
+        # left_path is implicit in types 1-3, i.e., the ModelLinkage object path itself is the left_path 
+        # left_path parameter is only needed for pushes (type 4 and 5)
+        # the push is functionally equivalent to a pull whose path resolves to the specified left_path  
         # but the push allows the potential for multiple objects to set a single state 
         # This can be dangerous or difficult to debug, but essential to replicate old HSPF behaviour
         # especially in the case of If/Then type structures.
+        # it is also useful for the broadcast objects, see om_model_broadcast for those 
         if container == False:
             # this is required
             print("Error: a link must have a container object to serve as the destination")
             return False
+        if left_path == False:
+            # self.state_path gets set when creating at the parent level
+            left_path = self.state_path 
         self.right_path = right_path
         self.left_path = left_path 
         self.link_type = link_type # 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
@@ -37,7 +43,7 @@ class ModelLinkage(ModelObject):
             else:
                 print("Error: link ", self.name, "does not have a valid source path")
             #print("tokenize() result", self.ops)
-        if self.link_type == 4:
+        if (self.link_type == 4) or (self.link_type == 5):
             # we push to the remote path in this one 
             left_ix = get_state_ix(self.state_ix, self.state_paths, self.left_path)
             right_ix = get_state_ix(self.state_ix, self.state_paths, self.right_path)

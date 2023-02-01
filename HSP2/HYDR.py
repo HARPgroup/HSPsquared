@@ -133,10 +133,11 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
     op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
-    load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
+    #load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
+    load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
     # debug 
-    dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/dma")
-    print("Op tokens for dma (", dma_ix,")", op_tokens[dma_ix])
+    dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/Qtrib")
+    print("Op tokens for Qtrib (", dma_ix,")", op_tokens[dma_ix])
     # add things from UCI as needed 
     # - we will have to auto-detect during parsing/tokenization to come up with a list
     # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 
@@ -144,7 +145,8 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     ###########################################################################
     print("Calling new _hydr_ with specl")
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
-    print("Final state value for dma (", dma_ix,")", state_ix[dma_ix])
+    print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
+    print("Final state at end of _hydr_()", state_ix)
     #print("Final state at end of _hydr_()", state_ix[1:20])
     #errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
     # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels) 

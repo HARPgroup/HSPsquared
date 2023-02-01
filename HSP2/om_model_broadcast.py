@@ -18,11 +18,13 @@ class ModelBroadcast(ModelObject):
             # create an object for each element in the array 
             if (broadcast_type == 'read'):
                 # create a link object of type 2, property reader to local state 
-                self.linkages[i] = ModelLinkage(broadcast_params[i][0], container, hub_path + broadcast_params[i][1], 2)
+                self.linkages[i] = ModelLinkage(broadcast_params[i][0], container, broadcast_params[i][1], 2)
                 bc_type_id = 0
             else:
+                # TBD
                 # push a value onto an accumulator 
-                
+                # need path to receiver object + broadcast_channel + remote name 
+                receiver = False # to be done                 
                 self.linkages[i] = ModelLinkage(broadcast_params[i][0], container, hub_path + broadcast_params[i][1], 2)
                 bc_type_id = 1 
         self.optype = 4 # 0 - shell object, 1 - equation, 2 - DataMatrix, 3 - input, 4 - broadcastChannel, 5 - ?

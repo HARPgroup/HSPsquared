@@ -17,12 +17,25 @@ class Equation(ModelObject):
         self.ps = False 
         self.var_ops = [] # keep these separate since the equation functions should not have to handle overhead
         self.optype = 1 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - ?
+        self.deconstruct_eqn()
+        self.add_eqn_inputs()
     
     def deconstruct_eqn(self):
         exprStack = []
         exprStack[:] = []
         self.ps = deconstruct_equation(self.equation)
         #print(exprStack)
+    
+    def add_eqn_inputs(self):
+        return # this is still in the works, but it is important to make this happen to verify all inputs are OK
+        for i in range(1,len(self.ps)):
+          for j in range(1,2)
+            op_name = self.ps[i][j]
+            # constant_or_path() looks at name and path, since we only have a var name, we must assume 
+            # the path is either a sibling or child variable or explicitly added other input, so this should
+            # resolve correctly, but we have not tried it
+            self.constant_or_path(op_name, op_name, trust = True)
+                
     
     def tokenize_ops(self):
         self.deconstruct_eqn()
