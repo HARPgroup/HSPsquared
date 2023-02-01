@@ -320,14 +320,8 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
     # returns JSON object as Dict
-    # get the drainage area as 'area_sqmi'
-    # Add the Runit equation = Qin / area_sqmi (only valid for a headwater until we get DSN 10 going )
-    # iterate through nhd tribs and add them together into a big old equation 
     loaded_model_objects = {}
     container = False 
-    op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
-    hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
-    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
     # call it!
     model_loader_recursive(model_data, container, loaded_model_objects)
     model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
