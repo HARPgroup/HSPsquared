@@ -324,6 +324,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     container = False 
     # call it!
     model_loader_recursive(model_data, container, loaded_model_objects)
+    print("Loaded the following objects/paths:", state_paths)
     model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
     model_tokenizer_recursive(model_root_object, loaded_model_objects)
 
