@@ -311,9 +311,11 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # Opening JSON file
     # load the json data from a pre-generated json file on github
     json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
+    # Opening JSON file
     jraw =  requests.get(json_url, verify=False)
-    model_json = jj.content.decode('utf-8')
-    model_data = json.load(model_json)
+    model_json = jraw.content.decode('utf-8')
+    # returns JSON object as Dict
+    model_data = json.loads(model_json)
     # local file option:
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
