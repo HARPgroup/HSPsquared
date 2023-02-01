@@ -292,6 +292,11 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     
     return
 
+import json
+import requests
+from requests.auth import HTTPBasicAuth
+import csv
+import pandas as pd
 
 def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # set globals on ModelObject
@@ -305,13 +310,13 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     # a json NHD from R parser
     # Opening JSON file
     # load the json data from a pre-generated json file on github
-    # json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
-    # jraw =  requests.get(json_url, verify=False)
-    # model_json = jj.content.decode('utf-8')
-    
+    json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
+    jraw =  requests.get(json_url, verify=False)
+    model_json = jj.content.decode('utf-8')
+    model_data = json.load(model_json)
     # local file option:
-    jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
-    model_data = json.load(jfile)
+    #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
+    #model_data = json.load(jfile)
     # returns JSON object as Dict
     # get the drainage area as 'area_sqmi'
     # Add the Runit equation = Qin / area_sqmi (only valid for a headwater until we get DSN 10 going )
