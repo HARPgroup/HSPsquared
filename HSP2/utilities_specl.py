@@ -316,6 +316,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     model_json = jraw.content.decode('utf-8')
     # returns JSON object as Dict
     model_data = json.loads(model_json)
+    print("Loaded json with keys:", model_data.keys())
     # local file option:
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
