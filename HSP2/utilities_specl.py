@@ -331,7 +331,9 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
 
     return
 
-
+# model class reader
+# get model class  to guess object type in this lib 
+# the parent object must be known
 def model_class_loader(model_name, model_props, container = False):
     # todo: check first to see if the model_name is an attribute on the container
     # Use: if hasattr(container, model_name):
@@ -374,7 +376,16 @@ def model_class_loader(model_name, model_props, container = False):
           # accessor do the work 
           # but the ops for the matrix maybe should include it's accessor?
       elif object_class == 'ModelLinkage':
-          model_object = ModelObject(model_props.get('name'), container)
+          right_path = ''
+          link_type = False
+          left_path = False
+          if 'right_path' in model_props.keys():
+            right_path = model_props['right_path']
+          if 'link_type' in model_props.keys():
+            link_type = model_props['link_type']
+          if 'left_path' in model_props.keys():
+            left_path = model_props['left_path']
+          model_object = ModelLinkage(model_props.get('name'), container, right_path, link_type, left_path)
       else:
           model_object = ModelObject(model_props.get('name'), container)
     # one way to insure no class attributes get parsed as sub-comps is:
@@ -434,6 +445,23 @@ def model_loader_recursive(model_data, container, loaded_model_objects):
         if type(model_props) is dict:
             model_loader_recursive(model_props, model_object, loaded_model_objects)
 
+
+def model_tokenizer_recursive(model_object, loaded_model_objects):
+    k_list = model_object.inputs.keys()
+    input_names = dict.fromkeys(k_list , 1)
+    if type(input_names) is not dict:
+        return False 
+    for input_name in input_names:
+        print("Checking input", input_name)
+        input_path = model_object.inputs[input_name]
+        if input_path in loaded_model_objects.keys():
+            input_object = loaded_model_objects[input_path]
+            model_tokenizer_recursive(input_object, loaded_model_objects)
+        else:
+            print("Problem loading input", input_name, "input_path", input_path, "not in loaded_model_objects.keys()")
+            return False
+    # now after tokenizing all inputs this should be OK to tokenize
+    model_object.add_op_tokens()
 
 
 def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
