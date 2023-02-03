@@ -15,10 +15,10 @@ class Equation(ModelObject):
         super(Equation, self).__init__(name, container)
         self.equation = eqn
         self.ps = False 
+        self.ps_names = [] # Intermediate with constants turned into variable references in state_paths
         self.var_ops = [] # keep these separate since the equation functions should not have to handle overhead
         self.optype = 1 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - ?
         self.deconstruct_eqn()
-        self.add_eqn_inputs()
     
     def deconstruct_eqn(self):
         exprStack = []
@@ -26,16 +26,35 @@ class Equation(ModelObject):
         self.ps = deconstruct_equation(self.equation)
         #print(exprStack)
     
-    def add_eqn_inputs(self):
-        return # this is still in the works, but it is important to make this happen to verify all inputs are OK
-        for i in range(1,len(self.ps)):
-          for j in range(1,2):
-            op_name = self.ps[i][j]
-            # constant_or_path() looks at name and path, since we only have a var name, we must assume 
-            # the path is either a sibling or child variable or explicitly added other input, so this should
-            # resolve correctly, but we have not tried it
-            self.constant_or_path(op_name, op_name, trust = True)
-                
+    def find_paths(self):
+        super().find_paths()
+        self.paths_found = False # override parent setting until we verify everything
+        #return 
+        # we now want to check to see that all variables can be found (i.e. path exists) 
+        # and we want to create variables for any constants that we have here 
+        # do not handle mathematical operators
+        self.ps_names = []
+        for i in range(len(self.ps)):
+            name_op = ["", "", ""]
+            name_op[0] = self.ps[i][0]
+            for j in range(1,3):
+                # range 1,3 counts thru 1 and 2 (not 3, cause python is so array centric it knows you know)
+                op_value = self.ps[i][j]
+                if is_float_digit(op_value):
+                    op_name = "_op_" + str(i) + "_" + str(j)
+                else:
+                    op_name = op_value 
+                print("Checking op set", i, "op", j, ":", op_name)
+                # constant_or_path() looks at name and path, since we only have a var name, we must assume 
+                # the path is either a sibling or child variable or explicitly added other input, so this should
+                # resolve correctly, but we have not tried it
+                var_ix = self.constant_or_path(op_name, op_value, False)
+                # we now return, trusting that the state_path for each operand 
+                # is stored in self.inputs, with the varix saved in self.inputs_ix
+                name_op[j] = op_name
+            self.ps_names.append(name_op)
+        self.paths_found = True
+        return
     
     def tokenize_ops(self):
         self.deconstruct_eqn()
@@ -63,10 +82,13 @@ class Equation(ModelObject):
                   self.var_ops[j] = s_ix
     
     def tokenize(self):
-        self.tokenize_ops() 
-        self.tokenize_vars()
         # call parent to render standard tokens
         super().tokenize()
+        # replaces operators with integer code,
+        # and turns the array of 3 value opcode arrays into a single sequential array 
+        self.tokenize_ops() 
+        # finds the ix value for each operand 
+        self.tokenize_vars()
         # renders tokens for high speed execution
         self.ops = self.ops + self.var_ops
  
@@ -114,15 +136,22 @@ def deconstruct_equation(eqn):
     pre_evaluate_stack(ep[:], ps)
     return ps
 
+def get_operator_token(op):
+    # find the numerical token for an operator
+    # returns integer value, or 0 if this is not a recorgnized mathematical operator
+    if op == '-': opn = 1
+    elif op == '+': opn = 2
+    elif op == '*': opn = 3
+    elif op == '/': opn = 4
+    elif op == '^': opn = 5
+    else: opn = False
+    return opn
+
 def tokenize_ops(ps):
     '''Translates a set of string operands into integer keyed tokens for faster execution.''' 
     tops = [len(ps)] # first token is number of ops
     for i in range(len(ps)):
-        if ps[i][0] == '-': op = 1
-        if ps[i][0] == '+': op = 2
-        if ps[i][0] == '*': op = 3
-        if ps[i][0] == '/': op = 4
-        if ps[i][0] == '^': op = 5
+        op = get_operator_token(ps[i][0])
         # a negative op code indicates null
         # this should cause no confusion since all op codes are references and none are actual values
         if ps[i][1] == None: o1 = -1 

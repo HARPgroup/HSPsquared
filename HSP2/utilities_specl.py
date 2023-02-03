@@ -27,7 +27,7 @@ def get_state_ix(state_ix, state_paths, var_path):
     return var_ix
 
 
-def set_state(state_ix, state_paths, var_path, default_value = 0.0):
+def set_state(state_ix, state_paths, var_path, default_value = 0.0, debug = False):
     """
     Given an hdf5 style path to a variable, set the value 
     If the variable does not yet exist, create it.
@@ -36,8 +36,9 @@ def set_state(state_ix, state_paths, var_path, default_value = 0.0):
     if not (var_path in state_paths.keys()):
         # we need to add this to the state 
         state_paths[var_path] = append_state(state_ix, default_value)
-    
-    var_ix = state_paths[var_path]
+    var_ix = get_state_ix(state_ix, state_paths, var_path)
+    if (debug == True):
+        print("Setting state_ix[", var_ix, "], to", default_value)
     state_ix[var_ix] = default_value
     return var_ix
 
@@ -51,7 +52,7 @@ def set_dict_state(state_ix, dict_ix, state_paths, var_path, default_value = {})
     if not (var_path in state_paths.keys()):
         # we need to add this to the state 
         state_paths[var_path] = append_state(state_ix, default_value)
-    var_ix = state_paths[var_path]
+    var_ix = get_state_ix(state_ix, state_paths, var_path)
     return var_ix
 
 
@@ -322,19 +323,22 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     #model_data = json.load(jfile)
     # returns JSON object as Dict
     loaded_model_objects = {}
+    model_exec_list = {}
     container = False 
     # call it!
     model_loader_recursive(model_data, container, loaded_model_objects)
     print("Loaded the following objects/paths:", state_paths)
+    print("Insuring all paths are valid, and connecting models as inputs")
+    model_path_loader(loaded_model_objects)
+    print("Tokenizing models")
     model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
-    model_tokenizer_recursive(model_root_object, loaded_model_objects)
-
+    model_tokenizer_recursive(model_root_object, loaded_model_objects, model_exec_list)
     return
 
 # model class reader
 # get model class  to guess object type in this lib 
 # the parent object must be known
-def model_class_loader(model_name, model_props, container = False):
+def model_class_loader(model_name, model_props, container = False, loaded_model_objects = {}):
     # todo: check first to see if the model_name is an attribute on the container
     # Use: if hasattr(container, model_name):
     # if so, we set the value on the container, if not, we create a new subcomp on the container 
@@ -370,11 +374,13 @@ def model_class_loader(model_name, model_props, container = False):
           model_object = ModelConstant(model_props.get('name'), container, model_props.get('value') )
       elif object_class == 'DataMatrix':
           # add a matrix with the data, then add a matrix accessor for each required variable 
-          model_object = ModelObject(model_props.get('name'), container)
-          # the matrix accessor should share the state_ix of the base object to set its value
-          # and a matrix doesn't actually set its value at each time step, letting the defaul 
-          # accessor do the work 
-          # but the ops for the matrix maybe should include it's accessor?
+          has_props = DataMatrix.check_properties(model_props)
+          if has_props == False:
+              print("Matrix object must have", DataMatrix)
+              return False
+          # create it
+          model_object = DataMatrix(model_props.get('name'), container, model_props)
+          
       elif object_class == 'ModelLinkage':
           right_path = ''
           link_type = False
@@ -391,6 +397,8 @@ def model_class_loader(model_name, model_props, container = False):
     # one way to insure no class attributes get parsed as sub-comps is:
     # model_object.remove_used_keys() 
     # better yet to just NOT send those attributes as typed object_class arrays, instead just name : value
+    if not (model_object.state_path in loaded_model_objects.keys()):
+        loaded_model_objects[model_object.state_path] = model_object 
     return model_object
 
 def model_class_translate(model_props, object_class):
@@ -415,6 +423,9 @@ def model_loader_recursive(model_data, container, loaded_model_objects):
     for object_name in object_names:
         print("Handling", object_name)
         if object_name in {'name', 'object_class', 'id', 'value', 'default'}:
+            # we should ask the class what properties are part of the class and also skips these
+            # therefore, we can assume that anything else must be a child object that needs to 
+            # be handled first -- but how to do this?
             continue
         model_props = model_data[object_name]
         if type(model_props) is not dict:
@@ -435,18 +446,28 @@ def model_loader_recursive(model_data, container, loaded_model_objects):
         # now we either have a constant (key and value), or a 
         # fully defined object.  Either one should work OK.
         print("Trying to load", object_name)
-        model_object = model_class_loader(object_name, model_props, container)
+        model_object = model_class_loader(object_name, model_props, container, loaded_model_objects)
         if model_object == False:
             print("Could not load", object_name)
             continue # not handled, but for now we will continue, tho later we should bail?
-        elif not (model_object.state_path in loaded_model_objects.keys()):
-            loaded_model_objects[model_object.state_path] = model_object 
         # now for container type objects, go through its properties and handle
         if type(model_props) is dict:
             model_loader_recursive(model_props, model_object, loaded_model_objects)
 
+def model_path_loader(loaded_model_objects):
+    k_list = loaded_model_objects.keys()
+    model_names = dict.fromkeys(k_list , 1)
+    for model_name in model_names:
+        print("Loading paths for", model_name)
+        model_object = loaded_model_objects[model_name]
+        model_object.find_paths()
 
-def model_tokenizer_recursive(model_object, loaded_model_objects):
+
+def model_tokenizer_recursive(model_object, loaded_model_objects, model_exec_list):
+    """
+    Given a root model_object, trace the inputs to load things in order
+    Store this order in model_exec_list
+    """
     k_list = model_object.inputs.keys()
     input_names = dict.fromkeys(k_list , 1)
     if type(input_names) is not dict:
@@ -462,6 +483,7 @@ def model_tokenizer_recursive(model_object, loaded_model_objects):
             return False
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
+    model_exec_list.append(model_object.ix)
 
 
 def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
@@ -522,16 +544,20 @@ def step_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         if op_tokens[i][0] == 1:
             state_ix[i] = exec_eqn(op_tokens[i], state_ix)
         elif op_tokens[i][0] == 2:
-            state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)
+            if (op_tokens[i][1] == op_tokens[i][2]):
+                # this insures a matrix with variables in it is up to date 
+                # only need to do this if the matrix data and matrix config are on same object
+                # otherwise, the matrix data is an input and has already been evaluated
+                state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)
+            if (op_tokens[3] > 0):
+                # this evaluates a single value from a matrix if the matrix is configured to do so.
+                state_ix[i] = exec_tbl_eval(op_tokens, op_tokens[i], state_ix, dict_ix)
         elif op_tokens[i][0] == 3:
             step_model_link(op_tokens[i], state_ix, ts_ix, step)
         elif op_tokens[i][0] == 4:
             val = 0
         elif op_tokens[i][0] == 5:
             step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
-        elif op_tokens[i][0] == 8:
-            # since this accesses other table objects, gotta pass the entire op_tokens Dict 
-            state_ix[i] = exec_tbl_eval(op_tokens, op_tokens[i], state_ix, dict_ix)
         elif op_tokens[i][0] == 9:
             # maybe this can be a Timeseries data input? 
             # not identical to local state value links since their ts can be relative past/future
