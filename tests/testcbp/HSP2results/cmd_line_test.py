@@ -14,6 +14,7 @@ from HSP2.om_equation import *
 from HSP2.om_data_matrix import *
 from HSP2.om_sim_timer import *
 from HSP2.om_model_linkage import ModelLinkage, step_model_link
+from HSP2.om_model_broadcast import *
 
 # show the needed props here
 DataMatrix.required_properties()
@@ -32,6 +33,19 @@ siminfo['delt'] =3600
 siminfo['tindex'] = date_range("2001-01-01", "2001-12-31", freq=Minute(siminfo['delt']))[1:]
 steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
+
+
+loaded_model_objects = {}
+model_exec_list = {}
+container = False 
+# call it!
+model_loader_recursive(model_data, container, loaded_model_objects)
+print("Loaded the following objects/paths:", state_paths)
+print("Insuring all paths are valid, and connecting models as inputs")
+model_path_loader(loaded_model_objects)
+print("Tokenizing models")
+model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
+model_tokenizer_recursive(model_root_object, loaded_model_objects, model_exec_list)
 
 # set up the river container
 river = ModelObject('RCHRES_R001')
@@ -53,6 +67,23 @@ Qintake.find_paths()
 Qintake.inputs = {}
 Qintake.find_var_path('Qup')
 Qintake.constant_or_path('Qup', 'Qup')
+
+# Prepare for Tribs
+Qin1 = Equation('Qin1', facility, "Qtrib + Qlocal + Qup")
+IVOLin = ModelLinkage("IVOLin", river, '/STATE/RCHRES_R001/HYDR/IVOL', 2)
+drainage_area_sqkm = Equation("drainage_area_sqkm",river,"257.0301") # will be set by json file 
+drainage_area_sqmi = Equation("drainage_area_sqmi", river, "drainage_area_sqkm * 0.386102") # will be set by json file 
+Runit = Equation("Runit", river, "IVOLin / drainage_area_sqmi") # will be set by json file 
+# Trib 1 
+Trib1 = ModelObject("Trib1", river)
+Trib1_da = Equation('drainage_area_sqmi', Trib1, "0.386102 * 5.0")
+Qin_trib1 = Equation('Qin', Trib1, "drainage_area_sqmi * Runit")
+# test a broadcast element
+broadcast_params = []
+broadcast_params.append({"Qout":"Qtrib"})
+broadcast_params.append({"drainage_area_sqmi":"trib_area_sqmi"})
+SendToParent = ModelBroadcast("Send_to_Parent", Trib1, 'send', 'hydroOject', 'parent', broadcast_params)
+
 
 loaded_model_objects[Qintake.state_path] = Qintake 
 model_path_loader(loaded_model_objects)

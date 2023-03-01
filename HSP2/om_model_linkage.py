@@ -11,7 +11,7 @@ class ModelLinkage(ModelObject):
         super(ModelLinkage, self).__init__(name, container)
         # ModelLinkage copies a values from right to left
         # right_path is the data source for the link 
-        # left_path is te destination of the link 
+        # left_path is the destination of the link 
         # left_path is implicit in types 1-3, i.e., the ModelLinkage object path itself is the left_path 
         # left_path parameter is only needed for pushes (type 4 and 5)
         # the push is functionally equivalent to a pull whose path resolves to the specified left_path  
@@ -31,6 +31,17 @@ class ModelLinkage(ModelObject):
         self.link_type = link_type # 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
         self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - broadcastChannel, 5 - ?
     
+    def find_paths(self):
+        # this should be needed if this is a PUSH link_type = 4 or 5
+        super().find_paths()
+        self.paths_found = False # override parent setting until we verify everything
+        # do we need to do this, or just trust it exists?
+        #self.insure_path(self, self.right_path)
+        # the left path, if this is type 4 or 5, is a push, so we must require it 
+        if ( (self.link_type == 4) or (self.link_type == 5) ):
+            self.insure_path(self, self.left_path)
+        #return 
+        
     def tokenize(self):
         super().tokenize()
         # - if this is a data property link then we add op codes to do a copy of data from one state address to another 
@@ -61,6 +72,7 @@ def step_model_link(op_token, state_ix, ts_ix, step):
     elif op_token[3] == 2:
         state_ix[op_token[1]] = state_ix[op_token[2]]
     elif op_token[3] == 3:
+        # read from ts variable TBD
         # state_ix[op_token[1]] = ts_ix[op_token[2]][step]
         return True
     elif op_token[3] == 4:
