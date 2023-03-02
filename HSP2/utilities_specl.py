@@ -322,23 +322,23 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
     # returns JSON object as Dict
-    loaded_model_objects = {}
+    model_object_cache = {}
     model_exec_list = {}
     container = False 
     # call it!
-    model_loader_recursive(model_data, container, loaded_model_objects)
+    model_loader_recursive(model_data, container, model_object_cache)
     print("Loaded the following objects/paths:", state_paths)
     print("Insuring all paths are valid, and connecting models as inputs")
-    model_path_loader(loaded_model_objects)
+    model_path_loader(model_object_cache)
     print("Tokenizing models")
-    model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
-    model_tokenizer_recursive(model_root_object, loaded_model_objects, model_exec_list)
+    model_root_object = model_object_cache["/STATE/RCHRES_R001"]
+    model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
     return
 
 # model class reader
 # get model class  to guess object type in this lib 
 # the parent object must be known
-def model_class_loader(model_name, model_props, container = False, loaded_model_objects = {}):
+def model_class_loader(model_name, model_props, container = False, model_object_cache = {}):
     # todo: check first to see if the model_name is an attribute on the container
     # Use: if hasattr(container, model_name):
     # if so, we set the value on the container, if not, we create a new subcomp on the container 
@@ -397,8 +397,8 @@ def model_class_loader(model_name, model_props, container = False, loaded_model_
     # one way to insure no class attributes get parsed as sub-comps is:
     # model_object.remove_used_keys() 
     # better yet to just NOT send those attributes as typed object_class arrays, instead just name : value
-    if not (model_object.state_path in loaded_model_objects.keys()):
-        loaded_model_objects[model_object.state_path] = model_object 
+    if not (model_object.state_path in model_object_cache.keys()):
+        model_object_cache[model_object.state_path] = model_object 
     return model_object
 
 def model_class_translate(model_props, object_class):
@@ -415,7 +415,7 @@ def model_class_translate(model_props, object_class):
             model_props['storage_stage_area'] = matrix
             del model_props['matrix']
 
-def model_loader_recursive(model_data, container, loaded_model_objects):
+def model_loader_recursive(model_data, container, model_object_cache):
     k_list = model_data.keys()
     object_names = dict.fromkeys(k_list , 1)
     if type(object_names) is not dict:
@@ -446,24 +446,24 @@ def model_loader_recursive(model_data, container, loaded_model_objects):
         # now we either have a constant (key and value), or a 
         # fully defined object.  Either one should work OK.
         print("Trying to load", object_name)
-        model_object = model_class_loader(object_name, model_props, container, loaded_model_objects)
+        model_object = model_class_loader(object_name, model_props, container, model_object_cache)
         if model_object == False:
             print("Could not load", object_name)
             continue # not handled, but for now we will continue, tho later we should bail?
         # now for container type objects, go through its properties and handle
         if type(model_props) is dict:
-            model_loader_recursive(model_props, model_object, loaded_model_objects)
+            model_loader_recursive(model_props, model_object, model_object_cache)
 
-def model_path_loader(loaded_model_objects):
-    k_list = loaded_model_objects.keys()
+def model_path_loader(model_object_cache):
+    k_list = model_object_cache.keys()
     model_names = dict.fromkeys(k_list , 1)
     for model_name in model_names:
         print("Loading paths for", model_name)
-        model_object = loaded_model_objects[model_name]
+        model_object = model_object_cache[model_name]
         model_object.find_paths()
 
 
-def model_tokenizer_recursive(model_object, loaded_model_objects, model_exec_list):
+def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list):
     """
     Given a root model_object, trace the inputs to load things in order
     Store this order in model_exec_list
@@ -475,11 +475,11 @@ def model_tokenizer_recursive(model_object, loaded_model_objects, model_exec_lis
     for input_name in input_names:
         print("Checking input", input_name)
         input_path = model_object.inputs[input_name]
-        if input_path in loaded_model_objects.keys():
-            input_object = loaded_model_objects[input_path]
-            model_tokenizer_recursive(input_object, loaded_model_objects)
+        if input_path in model_object_cache.keys():
+            input_object = model_object_cache[input_path]
+            model_tokenizer_recursive(input_object, model_object_cache)
         else:
-            print("Problem loading input", input_name, "input_path", input_path, "not in loaded_model_objects.keys()")
+            print("Problem loading input", input_name, "input_path", input_path, "not in model_object_cache.keys()")
             return False
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()

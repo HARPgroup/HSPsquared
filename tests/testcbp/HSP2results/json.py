@@ -42,6 +42,7 @@ model_data = json.load(jfile)
 # model_data['object_class']
 # 'hydroImpoundment'
 
+def MiroWatershedModel 
 
 # testing 
 op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
@@ -64,22 +65,22 @@ model_json = jraw.content.decode('utf-8')
 model_data = json.loads(model_json)
 print("Loaded json with keys:", model_data.keys())
 
-loaded_model_objects = {}
+model_object_cache = {}
 model_exec_list = {}
 container = False 
 # call it!
-model_loader_recursive(model_data, container, loaded_model_objects)
+model_loader_recursive(model_data, container, model_object_cache)
 print("Loaded the following objects/paths:", state_paths)
 print("Insuring all paths are valid, and connecting models as inputs")
-model_path_loader(loaded_model_objects)
+model_path_loader(model_object_cache)
 print("Tokenizing models")
-model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
-model_tokenizer_recursive(model_root_object, loaded_model_objects, model_exec_list)
+model_root_object = model_object_cache["/STATE/RCHRES_R001"]
+model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
 return
 
 # debug trib_area_sqmi
 # is part of equation ops bad or missing?
-obj = loaded_model_objects['/STATE/RCHRES_R001/trib_area_sqmi']
+obj = model_object_cache['/STATE/RCHRES_R001/trib_area_sqmi']
 ops = op_tokens[obj.ix]
 # op 0 is type (1 = equation), op 1 = ix, op 2 = # of operands triplets
 # experiment with adding 2, 3, 4, 5 of the 15 ops and when we reach a failure, eval = 0.0, we have found the bad op  
@@ -92,7 +93,7 @@ exec_eqn(ops_test, state_ix)
 
 # debug Qtrib
 # is part of equation ops bad or missing?
-obj = loaded_model_objects['/STATE/RCHRES_R001/Qtrib']
+obj = model_object_cache['/STATE/RCHRES_R001/Qtrib']
 ops = op_tokens[obj.ix]
 # op 0 is type (1 = equation), op 1 = ix, op 2 = # of operands triplets
 # experiment with adding 2, 3, 4, 5 of the 15 ops and when we reach a failure, eval = 0.0, we have found the bad op  
@@ -105,7 +106,7 @@ exec_eqn(ops_test, state_ix)
 state_ix[state_paths['/STATE/RCHRES_R001/HYDR/IVOL']] = 60.0
 test_model(op_tokens, state_ix, dict_ix, ts_ix, 1)
 
-# explore Spring Hollow impoundment object 
+# explore Spring Hollow watershed object 
 # authentication using rest un and pw
 jfile = open("/var/www/python/auth.private")
 jj = json.load(jfile)
@@ -113,11 +114,13 @@ rest_uname = jj[0]['rest_uname']
 rest_pass = jj[0]['rest_pw']
 basic = HTTPBasicAuth(rest_uname, rest_pass )
 src_json_node = 'http://deq1.bse.vt.edu/d.dh/node/62'
-json_url = src_json_node + "/" + str(5428310) # spring hollow impoundment
+json_url = src_json_node + "/" + str(4641253) + '/json/1'# spring hollow watershed 
 jraw =  requests.get(json_url, auth=basic)
 model_json = jraw.content.decode('utf-8')
 # returns JSON object as Dict
 model_data = json.loads(model_json)
-mm = model_data['impoundment']['matrix']
+mm = model_data['Spring Hollow Reservoir']['flowby']
+pond = DataMatrix('pond', False, mm)
 
-model_loader_recursive(mm, container, loaded_model_objects)
+
+#model_loader_recursive(mm, container, model_object_cache)

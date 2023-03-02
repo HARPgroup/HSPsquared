@@ -24,7 +24,7 @@ DataMatrixLookup.check_properties(['name', 'matrix_vals', 'mx_type', 'key1', 'lu
 
 # initialize runtime Dicts
 op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
-loaded_model_objects = {}
+model_object_cache = {}
 # set on object root class for global sharing
 ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
 # set up info and timer
@@ -35,17 +35,17 @@ steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
 
 
-loaded_model_objects = {}
+model_object_cache = {}
 model_exec_list = {}
 container = False 
 # call it!
-model_loader_recursive(model_data, container, loaded_model_objects)
+model_loader_recursive(model_data, container, model_object_cache)
 print("Loaded the following objects/paths:", state_paths)
 print("Insuring all paths are valid, and connecting models as inputs")
-model_path_loader(loaded_model_objects)
+model_path_loader(model_object_cache)
 print("Tokenizing models")
-model_root_object = loaded_model_objects["/STATE/RCHRES_R001"]
-model_tokenizer_recursive(model_root_object, loaded_model_objects, model_exec_list)
+model_root_object = model_object_cache["/STATE/RCHRES_R001"]
+model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
 
 # set up the river container
 river = ModelObject('RCHRES_R001')
@@ -80,10 +80,10 @@ Trib1_da = Equation('drainage_area_sqmi', Trib1, "0.386102 * 5.0")
 Qin_trib1 = Equation('Qin', Trib1, "drainage_area_sqmi * Runit")
 # test a broadcast element
 broadcast_params = []
-broadcast_params.append({"Qout":"Qtrib"})
-broadcast_params.append({"drainage_area_sqmi":"trib_area_sqmi"})
-SendToParent = ModelBroadcast("Send_to_Parent", Trib1, 'send', 'hydroOject', 'parent', broadcast_params)
+broadcast_params.append(["Qout","Qtrib"])
+broadcast_params.append(["drainage_area_sqmi","trib_area_sqmi"])
+SendToParent = ModelBroadcast("Send_to_Parent", Trib1, 'send', 'hydroObject', 'parent', broadcast_params)
 
 
-loaded_model_objects[Qintake.state_path] = Qintake 
-model_path_loader(loaded_model_objects)
+model_object_cache[Qintake.state_path] = Qintake 
+model_path_loader(model_object_cache)

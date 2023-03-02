@@ -53,8 +53,19 @@ class ModelBroadcast(ModelObject):
         super().tokenize()
         # because we added each type as a ModelLinkage, this may be superfluous?
         # this ModelLinkage will be handled on it's own.
-        # are there exec hierarchy challenges because of this?
-        
+        # are there exec hierarchy challenges because of skipping this?
+        # exec hierarchy function on object.inputs[] alone.  Since broadcasts
+        # are not treated as inputs, or are they? Do ModelLinkages create inputs?
+        #  - should read inputs create linkages, but send/push linkages not?
+        #    - ex: a facility controls a reservoir release with a push linkage 
+        #          the reservoir *should* execute after the facility in this case
+        #          but perhaps that just means we *shouldn't* use a push, instead 
+        #          we should have the reservoir pull the info?
+        #  - however, since "parent" pushes will automatically have hierarchy 
+        #    preserved, since the child object already is an input to the parent 
+        #    and therefore will execute before the parent
+        #  - but, we must insure that ModelLinkages get executed when their container 
+        #    is executed (which should come de facto as they are inputs to their container)
         #if (self.broadcast_type == 'send'):
         #    for i in self.linkages.keys():
         #        self.ops = self.ops + [self.left_ix, cop_codes[self.cop], self.right_ix]

@@ -207,7 +207,7 @@ class ModelObject:
     def tokenize(self):
         # renders tokens for high speed execution
         if (self.paths_found == False):
-            raise Exception("Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(loaded_model_objects)`)")
+            raise Exception("Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(model_object_cache)`)")
         self.ops = [self.optype, self.ix]
     
     def add_op_tokens(self):
