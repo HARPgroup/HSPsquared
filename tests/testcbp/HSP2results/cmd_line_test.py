@@ -80,13 +80,14 @@ Qin = Equation('Qin', river, "Qup + Qlocal + Qtrib")
 Trib1 = ModelObject("Trib1", river)
 Trib1_da = Equation('drainage_area_sqmi', Trib1, "0.386102 * 5.0")
 Qin_trib1 = Equation('Qin', Trib1, "drainage_area_sqmi * Runit")
+Qout_trib1 = Equation('Qout', Trib1, "Qin * 1.0")
 # test a broadcast element
 broadcast_params = []
 broadcast_params.append(["Qout","Qtrib"])
 broadcast_params.append(["drainage_area_sqmi","trib_area_sqmi"])
 SendToParent = ModelBroadcast("Send_to_Parent", Trib1, 'send', 'hydroObject', 'parent', broadcast_params)
 
-
+# Qtrib = "area1 * Runit + area2 * Runit + area3 * Runit"
 print("Loaded the following objects/paths:", state_paths)
 print("Insuring all paths are valid, and connecting models as inputs")
 # now load 
@@ -115,8 +116,11 @@ Qlocal.get_state('trib_area_sqmi')
 Qlocal.get_state('Runit')
 # 0.4463933228106152
 Qlocal.get_state('local_area_sqmi')
-# and any object can be used to get thae value of any path
+# and any object can be used to get the value of any path
 Qlocal.get_state('/STATE/RCHRES_R001/local_area_sqmi')
+river.get_state('Qtrib')
+river.get_state('/STATE/RCHRES_R001/hydroObject/Qtrib')
+Trib1.get_state('Qout')
 
 # look at the ops:
 Listen_to_Children.linkages
