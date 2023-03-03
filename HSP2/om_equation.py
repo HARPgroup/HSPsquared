@@ -40,6 +40,9 @@ class Equation(ModelObject):
             for j in range(1,3):
                 # range 1,3 counts thru 1 and 2 (not 3, cause python is so array centric it knows you know)
                 op_value = self.ps[i][j]
+                if op_value == None:
+                    # don't need to check these as they are just referring to the stack.
+                    continue
                 if is_float_digit(op_value):
                     op_name = "_op_" + str(i) + "_" + str(j)
                 else:

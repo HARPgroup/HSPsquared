@@ -13,13 +13,17 @@ class ModelObject:
     dict_ix = {} # Shared Dict with the hdf5 path of each object 
     ts_ix = {} # Shared Dict with the hdf5 path of each object 
     op_tokens = {} # Shared Dict with the tokenized representation of each object 
+    model_object_cache = {} # Shared with actual objects, keyed by their path 
     
     def __init__(self, name, container = False):
         self.name = name
         self.container = container # will be a link to another object
         self.log_path = "" # Ex: "/RESULTS/RCHRES_001/SPECL" 
         self.attribute_path = "" # 
-        self.state_path = "" # Ex: "/STATE/RCHRES_001" # the pointer to this object state
+        if (hasattr(self,'state_path') == False):
+            # if the state_path has already been set, we accept it. 
+            # this allows sub-classes to override the standard path guessing approach.
+            self.state_path = "" # Ex: "/STATE/RCHRES_001" # the pointer to this object state
         self.inputs = {} # associative array with key=local_variable_name, value=hdf5_path Ex: [ 'Qin' : '/STATE/RCHRES_001/IVOL' ]
         self.inputs_ix = {} # associative array with key=local_variable_name, value=state_ix integer key
         self.ix = False
@@ -27,9 +31,9 @@ class ModelObject:
         self.default_value = 0.0
         self.ops = []
         self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork
-        # this is replaceable. to replace state_path/re-regiser the index :
+        # this is replaceable. to replace state_path/re-register the index :
         # - remove the old PATH from state_paths: del state_paths[self.state_path]
-        # you should never creeate an object without knowing its container, but if you do
+        # you should never create an object without knowing its container, but if you do
         # you can TRY to do the following:
         # - set this objects new path based on containment and call:
         #         [my_object].make_paths()
@@ -69,6 +73,10 @@ class ModelObject:
         if strict and (prop_val == None):
             raise Exception("Cannot find property", prop_name, " in properties passed to ", self.name, "and strict = True.  Object creation halted. ")
         return prop_val
+        
+    def set_state(self, set_value):
+        var_ix = set_state(self.state_ix, self.state_paths, self.state_path, set_value)
+        return var_ix
     
     def load_state_dicts(self, op_tokens, state_paths, state_ix, dict_ix):
         self.op_tokens = op_tokens
@@ -145,6 +153,9 @@ class ModelObject:
             self.make_paths()
         print("Setting ", self.name, "state to", self.default_value)
         self.ix = set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
+        # store object in model_object_cache
+        if not (self.state_path in self.model_object_cache.keys()):
+            self.model_object_cache[self.state_path] = self 
         # this should check to see if this object has a parent, and if so, register the name on the parent 
         # default is as a child object. 
         if not (self.container == False):
@@ -162,6 +173,7 @@ class ModelObject:
         # - input types: 1: parent-child link, 2: state property link, 3: timeseries object property link 
         # - trust = False means fail if the path does not already exist, True means assume it will be OK which is bad policy, except for the case where the path points to an existing location
         # do we have a path here already or can we find on the parent?
+        # how do we check if this is a path already, in which case we trust it?
         found_path = self.find_var_path(var_name)
         print("Searched", var_name, "with path", var_path,"found", found_path)
         var_ix = get_state_ix(self.state_ix, self.state_paths, found_path)
@@ -170,9 +182,13 @@ class ModelObject:
                 raise Exception("Cannot find variable path: " + var_path + " ... process terminated.")
             var_ix = self.insure_path(var_path)
         else:
+            # if we are to trust the path, this might be a child property just added,
+            # and therefore, we don't look further than this 
+            # otherwise, we use found_path, whichever it is, as 
             # we know that this path is better, as we may have been given a simple variable name
             # and so found_path will look more like /STATE/RCHRES_001/...
-            var_path = found_path
+            if trust == False:
+                var_path = found_path
         self.inputs[var_name] = var_path
         self.inputs_ix[var_name] = var_ix
         return self.inputs_ix[var_name]
@@ -194,20 +210,21 @@ class ModelObject:
         # find_paths() is called to insure that all of these can be found, and then, are added to inputs/inputs_ix
         # - We wait to find the index values for those variables after all things have been loaded
         # - base ModelObject does not have any "implicit" inputs, since all of its inputs are 
-        #   explicitly added children objects
+        #   explicitly added children objects, thus we default to True
+        self.paths_found = True
         # - But children such as Equation and DataMatrix, etc
+        #   so they mark paths_found = False and then 
         #   should go through their own locally defined data 
         #   and call add_input() for any data variables encountered
         # - add_input() will handle searching for the paths and ix values 
         #   and should also handle deciding if this is a constant, like a numeric value 
-        #   or a variable data and should handle them accordingly        
-        self.paths_found = None
+        #   or a variable data and should handle them accordingly  
         return True
         
     def tokenize(self):
         # renders tokens for high speed execution
         if (self.paths_found == False):
-            raise Exception("Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(model_object_cache)`)")
+            raise Exception("path_found False for object" + self.name + "(" + self.state_path + "). " + "Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(model_object_cache)`)")
         self.ops = [self.optype, self.ix]
     
     def add_op_tokens(self):
@@ -243,12 +260,16 @@ The class ModelConstant is for storing constants.  It must be loaded here becaus
 Is this useful or just clutter?  Useful I think since there are numerical constants...
 """
 class ModelConstant(ModelObject):
-    def __init__(self, name, container = False, value = 0.0):
+    def __init__(self, name, container = False, value = 0.0, state_path = False):
+        if (state_path != False):
+            # this allows us to mandate the location. useful for placeholders, broadcasts, etc.
+            self.state_path = state_path
         super(ModelConstant, self).__init__(name, container)
-        self.default_value = value 
+        self.default_value = float(value) 
         self.optype = 7 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric)
         print("ModelConstant named",self.name, "with path", self.state_path,"and ix", self.ix, "value", value)
-        set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
+        var_ix = self.set_state(float(value))
+        self.paths_found = True
         # self.state_ix[self.ix] = self.default_value
     
     def required_properties():

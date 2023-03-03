@@ -177,7 +177,8 @@ def init_sim_dicts():
     state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
     dict_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:,:])
     ts_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:])
-    return op_tokens, state_paths, state_ix, dict_ix, ts_ix
+    model_object_cache = {} # this does not need to be a special Dict as it is not used in numba 
+    return op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache
 
 def hydr_get_ix(state_ix, state_paths, domain):
     # get a list of keys for all hydr state variables
@@ -215,14 +216,14 @@ from HSP2.om_model_linkage import *
 from HSP2.om_data_matrix import *
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
-def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
+def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # by setting the state_parhs, opt_tokens, state_ix etc on the abstract class ModelObject
     # all objects that we create share this as a global referenced variable.  
     # this may be a good thing or it may be bad?  For now, we leverage this to reduce settings props
     # but at some point we move all prop setting into a function and this maybe doesn't seem so desirable
     # since there could be some unintended consequences if we actually *wanted* them to have separate copies
     # tho since the idea is that they are global registries, maybe that is not a valid concern.
-    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # set up the timer as the first element 
     timer = SimTimer('timer', False, siminfo)
     timer.add_op_tokens()
@@ -299,9 +300,9 @@ from requests.auth import HTTPBasicAuth
 import csv
 import pandas as pd
 
-def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
+def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # set globals on ModelObject
-    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix = (op_tokens, state_paths, state_ix, dict_ix)
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # set up the timer as the first element 
     timer = SimTimer('timer', False, siminfo)
     timer.add_op_tokens()
@@ -322,11 +323,10 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
     # returns JSON object as Dict
-    model_object_cache = {}
     model_exec_list = {}
     container = False 
     # call it!
-    model_loader_recursive(model_data, container, model_object_cache)
+    model_loader_recursive(model_data, container)
     print("Loaded the following objects/paths:", state_paths)
     print("Insuring all paths are valid, and connecting models as inputs")
     model_path_loader(model_object_cache)
@@ -338,7 +338,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix):
 # model class reader
 # get model class  to guess object type in this lib 
 # the parent object must be known
-def model_class_loader(model_name, model_props, container = False, model_object_cache = {}):
+def model_class_loader(model_name, model_props, container = False):
     # todo: check first to see if the model_name is an attribute on the container
     # Use: if hasattr(container, model_name):
     # if so, we set the value on the container, if not, we create a new subcomp on the container 
@@ -397,8 +397,6 @@ def model_class_loader(model_name, model_props, container = False, model_object_
     # one way to insure no class attributes get parsed as sub-comps is:
     # model_object.remove_used_keys() 
     # better yet to just NOT send those attributes as typed object_class arrays, instead just name : value
-    if not (model_object.state_path in model_object_cache.keys()):
-        model_object_cache[model_object.state_path] = model_object 
     return model_object
 
 def model_class_translate(model_props, object_class):
@@ -415,7 +413,7 @@ def model_class_translate(model_props, object_class):
             model_props['storage_stage_area'] = matrix
             del model_props['matrix']
 
-def model_loader_recursive(model_data, container, model_object_cache):
+def model_loader_recursive(model_data, container):
     k_list = model_data.keys()
     object_names = dict.fromkeys(k_list , 1)
     if type(object_names) is not dict:
@@ -446,13 +444,13 @@ def model_loader_recursive(model_data, container, model_object_cache):
         # now we either have a constant (key and value), or a 
         # fully defined object.  Either one should work OK.
         print("Trying to load", object_name)
-        model_object = model_class_loader(object_name, model_props, container, model_object_cache)
+        model_object = model_class_loader(object_name, model_props, container)
         if model_object == False:
             print("Could not load", object_name)
             continue # not handled, but for now we will continue, tho later we should bail?
         # now for container type objects, go through its properties and handle
         if type(model_props) is dict:
-            model_loader_recursive(model_props, model_object, model_object_cache)
+            model_loader_recursive(model_props, model_object)
 
 def model_path_loader(model_object_cache):
     k_list = model_object_cache.keys()
@@ -477,7 +475,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list)
         input_path = model_object.inputs[input_name]
         if input_path in model_object_cache.keys():
             input_object = model_object_cache[input_path]
-            model_tokenizer_recursive(input_object, model_object_cache)
+            model_tokenizer_recursive(input_object, model_object_cache, model_exec_list)
         else:
             print("Problem loading input", input_name, "input_path", input_path, "not in model_object_cache.keys()")
             return False

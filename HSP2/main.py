@@ -57,9 +57,10 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     #######################################################################################
     # initilize specactions dicts
     # need to determine the best way to do send these dicts to HYDR, a nested dictionary 
-    # named specactions containing the 4 dicts is an option, but difficult to do a nested 
-    # dict in numba. For this test example, just setting specactions equal to a single dict.
-    # op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
+    # or perhaps an object named specactions w/5 dicts as props is an option
+    # These dicts would need to be able to split out into numba usable structures. 
+    # For this test example, just setting specactions equal to a single dict.
+    # op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = init_sim_dicts()
     # print("state_ix:", state_ix)
     # specactions = state_ix
     #######################################################################################

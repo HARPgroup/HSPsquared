@@ -19,7 +19,7 @@ class ModelBroadcast(ModelObject):
         self.setup_broadcast(broadcast_type, broadcast_params, broadcast_channel, broadcast_hub)
     
     def setup_broadcast(self, broadcast_type, broadcast_params, broadcast_channel, broadcast_hub):
-        if broadcast_hub == 'self':
+        if ( (broadcast_hub == 'self') or (broadcast_hub == 'child') ):
             hub_path = self.container.state_path # the parent of this object is the "self" in question
         elif broadcast_hub == 'parent':
             if (self.container.container == False):
@@ -38,14 +38,26 @@ class ModelBroadcast(ModelObject):
             if (broadcast_type == 'read'):
                 src_path = hub_path + "/" + b_pair[1]
                 # create a link object of type 2, property reader to local state 
-                print("Adding read input from ", src_path, " as local var named ",b_pair[0])
+                print("Adding broadcast read as input from ", src_path, " as local var named ",b_pair[0])
                 self.bc_type_id = 2
-                self.linkages[i] = ModelLinkage(b_pair[0], self, src_path, self.bc_type_id)
+                # create a hub if it does not exist already 
+                # this will insure that there is a place for the data, and a place to 
+                # add inputs for the actual broadcast items. 
+                print("Creating broadcast hub ", broadcast_channel, " on ",self.container.name)
+                self.linkages[i] = ModelConstant(broadcast_channel, self.container, 0.0, hub_path)
+                i+=1
+                # create a constant as a placeholder for the data at the hub path 
+                # in case there are no senders
+                print("Creating a place-holder for data for hub ", self.linkages[i-1], " var name ",b_pair[0])
+                self.linkages[i] = ModelConstant(b_pair[0], self.linkages[i-1], 0.0, src_path)
+                # create an input to the parent container for this variable looking at the hub path 
+                self.container.add_input(b_pair[0], src_path, 1, True)
             else:
                 dest_path = hub_path + "/" + b_pair[1]
                 print("Adding send from local var ", b_pair[0], " to ",dest_path)
                 self.bc_type_id = 4
-                self.linkages[i] = ModelLinkage(b_pair[0], self, dest_path, self.bc_type_id)
+                src_path = self.find_var_path(b_pair[0])
+                self.linkages[i] = ModelLinkage(b_pair[0], self, src_path, self.bc_type_id, dest_path)
             i+=1
     
     def tokenize(self):

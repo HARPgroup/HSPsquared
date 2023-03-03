@@ -39,8 +39,9 @@ class ModelLinkage(ModelObject):
         #self.insure_path(self, self.right_path)
         # the left path, if this is type 4 or 5, is a push, so we must require it 
         if ( (self.link_type == 4) or (self.link_type == 5) ):
-            self.insure_path(self, self.left_path)
-        #return 
+            self.insure_path(self.left_path)
+        self.paths_found = True
+        return 
         
     def tokenize(self):
         super().tokenize()
@@ -78,6 +79,28 @@ def step_model_link(op_token, state_ix, ts_ix, step):
     elif op_token[3] == 4:
         # add value in local state to the remote broadcast hub+register state 
         state_ix[op_token[2]] = state_ix[op_token[2]] + state_ix[op_token[4]]
+        return True
+    elif op_token[3] == 5:
+        # push value in local state to the remote broadcast hub+register state 
+        state_ix[op_token[2]] = state_ix[op_token[4]]
+        return True
+
+@njit
+def test_model_link(op_token, state_ix, ts_ix, step):
+    if op_token[3] == 1:
+        return True
+    elif op_token[3] == 2:
+        state_ix[op_token[1]] = state_ix[op_token[2]]
+    elif op_token[3] == 3:
+        # read from ts variable TBD
+        # state_ix[op_token[1]] = ts_ix[op_token[2]][step]
+        return True
+    elif op_token[3] == 4:
+        print("Remote Broadcast accumulator type link.")
+        print("Setting op ID", str(op_token[2]), "to value from ID", str(op_token[4]), "with value of ")
+        # add value in local state to the remote broadcast hub+register state 
+        state_ix[op_token[2]] = state_ix[op_token[2]] + state_ix[op_token[4]]
+        print(str(state_ix[op_token[2]]) + " = ", str(state_ix[op_token[2]]) + "+" + str(state_ix[op_token[4]]))
         return True
     elif op_token[3] == 5:
         # push value in local state to the remote broadcast hub+register state 

@@ -131,7 +131,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     # specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
     # this is hard-wired but should be passed in via the UCI or perhaps specactions Dict when calling the hydr() function
     domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
-    op_tokens, state_paths, state_ix, dict_ix, ts_ix = init_sim_dicts()
+    op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = init_sim_dicts()
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
     #load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
     load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
