@@ -24,6 +24,7 @@ from HSP2.om_model_object import *
 from HSP2.om_equation import *
 from HSP2.om_data_matrix import *
 from HSP2.om_sim_timer import *
+from HSP2.om_model_broadcast import *
 from HSP2.om_model_linkage import ModelLinkage, step_model_link
 import numpy as np
 from numba import int8, float32, njit, types

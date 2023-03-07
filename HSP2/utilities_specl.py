@@ -214,6 +214,7 @@ from HSP2.om_sim_timer import *
 from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
 from HSP2.om_data_matrix import *
+from HSP2.om_model_broadcast import *
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
 def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
@@ -367,7 +368,14 @@ def model_class_loader(model_name, model_props, container = False):
           if type(eqn) is str:
               eqn_str = eqn
           else:
-              eqn_str = eqn.get('value')
+              if eqn == None:
+                  # try for equation stored as normal propcode
+                  eqn_str = model_props.get('value')
+              else:
+                  eqn_str = eqn.get('value')
+          if eqn_str == None:
+              raise Exception("This object", container.name, "does not have a parent container. Broadcast creation halted. ")
+              return False
           model_object = Equation(model_props.get('name'), container, eqn_str )
           #remove_used_keys(model_props, 
       elif object_class == 'Constant':
@@ -376,7 +384,28 @@ def model_class_loader(model_name, model_props, container = False):
           # add a matrix with the data, then add a matrix accessor for each required variable 
           has_props = DataMatrix.check_properties(model_props)
           if has_props == False:
-              print("Matrix object must have", DataMatrix)
+              print("Matrix object must have", DataMatrix.required_properties())
+              return False
+          # create it
+          model_object = DataMatrix(model_props.get('name'), container, model_props)
+      elif object_class == 'ModelBroadcast':
+          # add a matrix with the data, then add a matrix accessor for each required variable 
+          print("Loading ModelBroadcast class ")
+          has_props = ModelBroadcast.check_properties(model_props)
+          if has_props == False:
+              print("ModelBroadcast object must have", ModelBroadcast.required_properties())
+              return False
+          # create it
+          broadcast_type = model_props.get('broadcast_type')
+          broadcast_channel = model_props.get('broadcast_channel')
+          broadcast_hub = model_props.get('broadcast_hub')
+          broadcast_params = model_props.get('broadcast_params')
+          model_object = ModelBroadcast(model_props.get('name'), container, broadcast_type, broadcast_channel, broadcast_hub, broadcast_params)
+      elif object_class == 'MicroWatershedModel':
+          # add a matrix with the data, then add a matrix accessor for each required variable 
+          has_props = MicroWatershedModel.check_properties(model_props)
+          if has_props == False:
+              print("MicroWatershedModel object must have", MicroWatershedModel.required_properties())
               return False
           # create it
           model_object = DataMatrix(model_props.get('name'), container, model_props)
@@ -516,29 +545,31 @@ def pre_step_timeseries(state_ix, ts_ix, step):
 def iterate_models(op_tokens, state_ix, dict_ix, ts_ix, steps):
     checksum = 0.0
     for step in range(steps):
-        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
+        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
         step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
     return checksum
 
 @njit
-def pre_step_model(op_tokens, state_ix, dict_ix, ts_ix):
-    for i in op_tokens.keys():
+def pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
+    for i in model_exec_list:
         if op_tokens[i][0] == 1:
-            return False
+            pass
         elif op_tokens[i][0] == 2:
-            return False
+            pass
         elif op_tokens[i][0] == 3:
-            return False
+            pass
         elif op_tokens[i][0] == 4:
-            return False
+            pass
         elif op_tokens[i][0] == 5:
-            return False
+            pass
+        elif op_tokens[i][0] == 11:
+            pre_step_register(op_tokens[i], state_ix, dict_ix)
     return
 
 @njit 
-def step_model(op_tokens, state_ix, dict_ix, ts_ix, step):
+def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     val = 0
-    for i in op_tokens.keys():
+    for i in model_exec_list:
         if op_tokens[i][0] == 1:
             state_ix[i] = exec_eqn(op_tokens[i], state_ix)
         elif op_tokens[i][0] == 2:

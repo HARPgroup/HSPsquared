@@ -46,11 +46,15 @@ class ModelBroadcast(ModelObject):
                 print("Creating broadcast hub ", broadcast_channel, " on ",self.container.name)
                 self.linkages[i] = ModelConstant(broadcast_channel, self.container, 0.0, hub_path)
                 i+=1
-                # create a constant as a placeholder for the data at the hub path 
-                # in case there are no senders
-                print("Creating a place-holder for data for hub ", self.linkages[i-1], " var name ",b_pair[0])
-                self.linkages[i] = ModelConstant(b_pair[0], self.linkages[i-1], 0.0, src_path)
+                if self.find_var_path(src_path) == False:
+                    # create a register as a placeholder for the data at the hub path 
+                    # in case there are no senders
+                    print("Creating a register for data for hub ", self.linkages[i-1], " var name ",b_pair[0])
+                    var_register = ModelRegister(b_pair[0], self.linkages[i-1], 0.0, src_path)
+                else:
+                    var_register = self.model_object_cache[src_path]
                 # create an input to the parent container for this variable looking at the hub path 
+                self.linkages[i] = var_register
                 self.container.add_input(b_pair[0], src_path, 1, True)
             else:
                 dest_path = hub_path + "/" + b_pair[1]
@@ -58,6 +62,16 @@ class ModelBroadcast(ModelObject):
                 self.bc_type_id = 4
                 src_path = self.find_var_path(b_pair[0])
                 self.linkages[i] = ModelLinkage(b_pair[0], self, src_path, self.bc_type_id, dest_path)
+                i+=1
+                # create a register as a placeholder for the data at the hub path 
+                # in case there are no readers
+                if self.find_var_path(dest_path) == False:
+                    print("Creating a register for data for hub ", self.linkages[i-1], " var name ",b_pair[0])
+                    self.linkages[i] = ModelRegister(b_pair[0], self.linkages[i-1], 0.0, dest_path)
+                else:
+                    var_register = self.model_object_cache[dest_path]
+                # create an input to the parent container for this variable looking at the hub path 
+                self.linkages[i] = var_register
             i+=1
     
     def tokenize(self):
@@ -92,7 +106,29 @@ class ModelBroadcast(ModelObject):
         super().add_op_tokens()
 
 
+"""
+The class ModelRegister is for storing push values.
+Behavior is to zero each timestep.  This could be amended later.
+Maybe combined with stack behavior?  Or accumulator?
+"""
+class ModelRegister(ModelConstant):
+    def __init__(self, name, container = False, value = 0.0, state_path = False):
+        super(ModelRegister, self).__init__(name, container, value, state_path)
+        self.optype = 11 # 
+        # self.state_ix[self.ix] = self.default_value
+    
+    def required_properties():
+        req_props = super(ModelConstant, ModelConstant).required_properties()
+        req_props.extend(['value'])
+        return req_props
+
 # njit functions for runtime
+@njit
+def pre_step_register(op, state_ix, dict_ix):
+    ix = op[1]
+    print("Resetting register", ix,"to zero")
+    state_ix[ix] = 0.0
+
 @njit
 def pre_step_broadcast(op, state_ix, dict_ix):
     ix = op[1]
