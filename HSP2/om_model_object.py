@@ -14,6 +14,7 @@ class ModelObject:
     ts_ix = {} # Shared Dict with the hdf5 path of each object 
     op_tokens = {} # Shared Dict with the tokenized representation of each object 
     model_object_cache = {} # Shared with actual objects, keyed by their path 
+    model_exec_list = {} # Shared with actual objects, keyed by their path 
     
     def __init__(self, name, container = False):
         self.name = name
@@ -30,7 +31,7 @@ class ModelObject:
         self.paths_found = False # this should be False at start
         self.default_value = 0.0
         self.ops = []
-        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11
+        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input/ModelLinkage, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11
         # this is replaceable. to replace state_path/re-register the index :
         # - remove the old PATH from state_paths: del state_paths[self.state_path]
         # you should never create an object without knowing its container, but if you do
@@ -112,13 +113,31 @@ class ModelObject:
             var_path = self.find_var_path(var_name)
             var_ix = get_state_ix(self.state_ix, self.state_paths, var_path)
         return self.state_ix[var_ix]
+    
+    def get_exec_order(self, var_name = False):
+        if var_name == False:
+            var_ix = self.ix
+        else:
+            var_path = self.find_var_path(var_name)
+            var_ix = get_state_ix(self.state_ix, self.state_paths, var_path)
+        exec_order = get_exec_order(self.model_exec_list,var_ix)
+        return exec_order
+    
+    def get_object(self, var_name = False):
+        if var_name == False:
+            return self.model_object_cache[self.state_path]
+        else:
+            var_path = self.find_var_path(var_name)
+            return self.model_object_cache[var_path]
         
         
-    def find_var_path(self, var_name):
+    def find_var_path(self, var_name, local_only = False):
         # check local inputs for name
         if var_name in self.inputs.keys():
             #print("Found", var_name, "on ", self.name, "path=", self.inputs[var_name])
             return self.inputs[var_name]
+        if local_only:
+            return False # we are limiting the scope, so just return
         # check parent for name
         if not (self.container == False):
             #print(self.name,"looking to parent", self.container.name, "for", var_name)
@@ -193,6 +212,13 @@ class ModelObject:
         self.inputs_ix[var_name] = var_ix
         return self.inputs_ix[var_name]
     
+    def add_object_input(self, var_name, var_object, link_type = 1):
+        # See above for details.
+        # this adds an object as a link to another object 
+        self.inputs[var_name] = var_object.state_path
+        self.inputs_ix[var_name] = var_object.ix
+        return self.inputs_ix[var_name]
+    
     def insure_path(self, var_path):
         # if this path can be found in the hdf5 make sure that it is registered in state
         # and that it has needed object class to render it at runtime (some are automatic)
@@ -239,7 +265,8 @@ class ModelObject:
         # this tests the model for a single timestep.
         # this is not the method that is used for high-speed runs, but can theoretically be used for 
         # easier to understand demonstrations
-        step_model({self.op_tokens[self.ix]}, self.state_ix, self.dict_ix, self.ts_ix, step)
+        step_one(self.op_tokens, self.op_tokens[self.ix], self.state_ix, self.dict_ix, self.ts_ix, step)
+        #step_model({self.op_tokens[self.ix]}, self.state_ix, self.dict_ix, self.ts_ix, step)
     
     def dddstep_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         for i in op_tokens.keys():

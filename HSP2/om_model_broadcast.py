@@ -21,58 +21,90 @@ class ModelBroadcast(ModelObject):
     def setup_broadcast(self, broadcast_type, broadcast_params, broadcast_channel, broadcast_hub):
         if ( (broadcast_hub == 'self') or (broadcast_hub == 'child') ):
             hub_path = self.container.state_path # the parent of this object is the "self" in question
+            hub_container = self.container 
         elif broadcast_hub == 'parent':
             if (self.container.container == False):
                 raise Exception("This object", container.name, "does not have a parent container. Broadcast creation halted. ")
                 return False
             hub_path = self.container.container.state_path
+            hub_container = self.container.container
         else:
             # we assume this is a valid path.  but we verify and fail if it doesn't work during tokenization
+            # this is not really yet operational since it would be a global broadcast of sorts
             hub_path = broadcast_hub
-        # add thechannel to the hub path
-        hub_path = hub_path + "/" + broadcast_channel
+            hub_exists = find_var_path(hub_path)
+            if hub_exists == False:
+                hub_container = False
+            else:
+                hub_container = self.model_object_cache[hub_path]
+        # add the channel to the hub path
+        channel_path = hub_path + "/" + broadcast_channel
+        channel = self.insure_channel(broadcast_channel, hub_container)
         # now iterate through pairs of source/destination broadcast lines
         i = 0
         for b_pair in broadcast_params:
             # create an object for each element in the array 
             if (broadcast_type == 'read'):
+                # a broadcast channel (object has been created above) 
+                # + a register to hold the data (if not yet created) 
+                # + an input on the parent to read the data 
                 src_path = hub_path + "/" + b_pair[1]
+                self.bc_type_id = 2 # pull type 
+                register_varname = b_pair[0]
                 # create a link object of type 2, property reader to local state 
-                print("Adding broadcast read as input from ", src_path, " as local var named ",b_pair[0])
-                self.bc_type_id = 2
-                # create a hub if it does not exist already 
-                # this will insure that there is a place for the data, and a place to 
-                # add inputs for the actual broadcast items. 
-                print("Creating broadcast hub ", broadcast_channel, " on ",self.container.name)
-                self.linkages[i] = ModelConstant(broadcast_channel, self.container, 0.0, hub_path)
-                i+=1
-                if self.find_var_path(src_path) == False:
-                    # create a register as a placeholder for the data at the hub path 
-                    # in case there are no senders
-                    print("Creating a register for data for hub ", self.linkages[i-1], " var name ",b_pair[0])
-                    var_register = ModelRegister(b_pair[0], self.linkages[i-1], 0.0, src_path)
-                else:
-                    var_register = self.model_object_cache[src_path]
-                # create an input to the parent container for this variable looking at the hub path 
-                self.linkages[i] = var_register
-                self.container.add_input(b_pair[0], src_path, 1, True)
+                print("Adding broadcast read as input from ", channel_path, " as local var named ",register_varname)
+                # create a register if it does not exist already 
+                var_register = self.insure_register(register_varname, 0.0, channel)
+                # add input to parent container for this variable from the hub path 
+                self.container.add_input(register_varname, var_register.state_path, 1, True)
             else:
+                # a broadcast hub (if not yet created) 
+                # + a register to hold the data (if not yet created) 
+                # + an input on the broadcast hub to read the data (or a push on this object?) 
                 dest_path = hub_path + "/" + b_pair[1]
-                print("Adding send from local var ", b_pair[0], " to ",dest_path)
-                self.bc_type_id = 4
-                src_path = self.find_var_path(b_pair[0])
-                self.linkages[i] = ModelLinkage(b_pair[0], self, src_path, self.bc_type_id, dest_path)
-                i+=1
+                self.bc_type_id = 4 # push accumulator type
+                local_varname = b_pair[0] # this is where we take the data from 
+                register_varname = b_pair[1] # this is the name that will be stored on the register
+                print("Adding send from local var ", local_varname, " to ",channel.name)
                 # create a register as a placeholder for the data at the hub path 
                 # in case there are no readers
-                if self.find_var_path(dest_path) == False:
-                    print("Creating a register for data for hub ", self.linkages[i-1], " var name ",b_pair[0])
-                    self.linkages[i] = ModelRegister(b_pair[0], self.linkages[i-1], 0.0, dest_path)
-                else:
-                    var_register = self.model_object_cache[dest_path]
-                # create an input to the parent container for this variable looking at the hub path 
-                self.linkages[i] = var_register
-            i+=1
+                var_register = self.insure_register(register_varname, 0.0, channel)
+                dest_path = var_register.state_path
+                src_path = self.find_var_path(local_varname)
+                # this linkage pushes from local value to the remote path 
+                pusher = ModelLinkage(register_varname, self, src_path, self.bc_type_id, dest_path)
+                # try adding the linkage an input, just to see if it influences the ordering
+                print("Adding broadcast source ", local_varname, " as input to register ",var_register.name)
+                # we do an object connection here, as this is a foolproof way to 
+                # add already created objects as inputs
+                var_register.add_object_input(register_varname + str(pusher.ix), pusher, 1)
+                # this linkage creates a pull on the remote path, not yet ready since 
+                # there is no bc_type_id that corresponds to an accumulator pull                 
+                #puller = ModelLinkage(register_varname, var_register, src_path, self.bc_type_id)
+    
+    def insure_channel(self, broadcast_channel, hub_container):
+        print("Looking for channel ", broadcast_channel, " on ", hub_container.name)
+        # must create absolute path, otherwise, it will seek upstream and get the parent 
+        # we send with local_only = True so it won't go upstream 
+        channel_path = hub_container.find_var_path(broadcast_channel, True)
+        if channel_path == False:
+            print("Creating broadcast hub ", broadcast_channel, " on ",hub_container.name)
+            hub_object = ModelConstant(broadcast_channel, hub_container, 0.0)
+        else:
+            hub_object = self.model_object_cache[channel_path]
+        return hub_object
+    
+    def insure_register(self, var_name, default_value, register_container):
+        # we send with local_only = True so it won't go upstream 
+        register_path = register_container.find_var_path(var_name, True)
+        if register_path == False:
+            # create a register as a placeholder for the data at the hub path 
+            # in case there are no senders
+            print("Creating a register for data for hub ", register_container.name, "(", register_container.state_path, ")", " var name ",var_name)
+            var_register = ModelRegister(var_name, register_container, default_value)
+        else:
+            var_register = self.model_object_cache[register_path]
+        return var_register
     
     def tokenize(self):
         # call parent method to set basic ops common to all 
@@ -126,7 +158,7 @@ class ModelRegister(ModelConstant):
 @njit
 def pre_step_register(op, state_ix, dict_ix):
     ix = op[1]
-    print("Resetting register", ix,"to zero")
+    #print("Resetting register", ix,"to zero")
     state_ix[ix] = 0.0
 
 @njit

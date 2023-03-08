@@ -27,6 +27,28 @@ def get_state_ix(state_ix, state_paths, var_path):
     return var_ix
 
 
+def get_ix_path(state_paths, var_ix):
+    """
+    Find the integer key of a variable name in state_ix 
+    """
+    for spath, ix in state_paths.items():
+        if var_ix == ix:
+            # we need to add this to the state 
+            return spath 
+    return False
+
+
+def get_exec_order(model_exec_list, var_ix):
+    """
+    Find the integer key of a variable name in state_ix 
+    """
+    model_exec_list = dict(enumerate(model_exec_list.flatten(), 1))
+    for exec_order, ix in model_exec_list.items():
+        if var_ix == ix:
+            # we need to add this to the state 
+            return exec_order 
+    return False
+
 def set_state(state_ix, state_paths, var_path, default_value = 0.0, debug = False):
     """
     Given an hdf5 style path to a variable, set the value 
@@ -324,7 +346,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
     # returns JSON object as Dict
-    model_exec_list = {}
+    model_exec_list = np.asarray({})
     container = False 
     # call it!
     model_loader_recursive(model_data, container)
@@ -494,11 +516,30 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list)
     """
     Given a root model_object, trace the inputs to load things in order
     Store this order in model_exec_list
+    Note: All ordering is as-needed organic, except Broadcasts
+          - read from children is completed after all other inputs 
+          - read from parent is completed before all other inputs 
+          - could this be accomplished by more sophisticated handling of read 
+            broadcasts?  
+            - When loading a read broadcast, can we iterate through items 
+            that are sending to that broadcast? 
+            - Or is it better to let it as it is, 
     """
+    if model_object.ix in model_exec_list:
+        return
     k_list = model_object.inputs.keys()
     input_names = dict.fromkeys(k_list , 1)
     if type(input_names) is not dict:
         return False 
+    # isolate broadcasts, and sort out -- what happens if an equation references a broadcast var?
+    # is this a limitation of treating all children as inputs? 
+    # alternative, leave broadcasts organic, but load children first?
+    # children first, then local sub-comps is old method? old method:
+    #   - read parent broadcasts
+    #   - get inputs (essentially, linked vars)
+    #   - send child broadcasts (will send current step parent reads, last step local proc data)
+    #   - execute children
+    #   - execute local sub-comps
     for input_name in input_names:
         print("Checking input", input_name)
         input_path = model_object.inputs[input_name]
@@ -506,6 +547,11 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list)
             input_object = model_object_cache[input_path]
             model_tokenizer_recursive(input_object, model_object_cache, model_exec_list)
         else:
+            if input_path in model_object.state_paths.keys():
+                # this is a valid state reference without an object 
+                # thus, it is likely part of internals that are manually added 
+                # which should be fine.  tho perhaps we should have an object for these too.
+                continue
             print("Problem loading input", input_name, "input_path", input_path, "not in model_object_cache.keys()")
             return False
     # now after tokenizing all inputs this should be OK to tokenize
@@ -542,11 +588,11 @@ def pre_step_timeseries(state_ix, ts_ix, step):
 
 
 @njit
-def iterate_models(op_tokens, state_ix, dict_ix, ts_ix, steps):
+def iterate_models(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, steps):
     checksum = 0.0
     for step in range(steps):
-        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
-        step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
+        pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
+        step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
     return checksum
 
 @njit
@@ -570,32 +616,35 @@ def pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
 def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     val = 0
     for i in model_exec_list:
-        if op_tokens[i][0] == 1:
-            state_ix[i] = exec_eqn(op_tokens[i], state_ix)
-        elif op_tokens[i][0] == 2:
-            if (op_tokens[i][1] == op_tokens[i][2]):
-                # this insures a matrix with variables in it is up to date 
-                # only need to do this if the matrix data and matrix config are on same object
-                # otherwise, the matrix data is an input and has already been evaluated
-                state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)
-            if (op_tokens[3] > 0):
-                # this evaluates a single value from a matrix if the matrix is configured to do so.
-                state_ix[i] = exec_tbl_eval(op_tokens, op_tokens[i], state_ix, dict_ix)
-        elif op_tokens[i][0] == 3:
-            step_model_link(op_tokens[i], state_ix, ts_ix, step)
-        elif op_tokens[i][0] == 4:
-            val = 0
-        elif op_tokens[i][0] == 5:
-            step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
-        elif op_tokens[i][0] == 9:
-            # maybe this can be a Timeseries data input? 
-            # not identical to local state value links since their ts can be relative past/future
-            # op_tokens should contain a number of steps in the past or future if we wanted?
-            # would have to calculate that based on the timestep and input time frame to lag or forecast
-            # value = ts_ix[op_token[2]][step + ts_offset]
-            # to aggregate we would need to combine this ts lookup with a stack object
-            # state_ix[op_token[1]] = value 
-            val = 0 
+        step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
+    return 
+
+@njit
+def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
+    # op_tokens is passed in for ops like matrices that have lookups from other 
+    # locations.  All others rely only on ops 
+    val = 0
+    if debug == 1:
+        print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
+    if ops[0] == 1:
+        state_ix[ops[1]] = exec_eqn(ops, state_ix)
+    elif ops[0] == 2:
+        if (ops[1] == ops[2]):
+            # this insures a matrix with variables in it is up to date 
+            # only need to do this if the matrix data and matrix config are on same object
+            # otherwise, the matrix data is an input and has already been evaluated
+            state_ix[ops[1]] = exec_tbl_values(ops, state_ix, dict_ix)
+        if (op_tokens[3] > 0):
+            # this evaluates a single value from a matrix if the matrix is configured to do so.
+            state_ix[ops[1]] = exec_tbl_eval(op_tokens, ops, state_ix, dict_ix)
+    elif ops[0] == 3:
+        step_model_link(ops, state_ix, ts_ix, step)
+    elif ops[0] == 4:
+        val = 0
+    elif ops[0] == 5:
+        step_sim_timer(ops, state_ix, dict_ix, ts_ix, step)
+    elif ops[0] == 9:
+        val = 0 
     return 
 
 

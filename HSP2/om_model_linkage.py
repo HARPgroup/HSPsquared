@@ -30,6 +30,8 @@ class ModelLinkage(ModelObject):
         self.left_path = left_path 
         self.link_type = link_type # 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
         self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - broadcastChannel, 5 - ?
+        # this breaks for some reason, doesn't like the input name being different than the variable path ending?        
+        self.add_input(self.right_path, self.right_path)
     
     def find_paths(self):
         # this should be needed if this is a PUSH link_type = 4 or 5
@@ -85,7 +87,7 @@ def step_model_link(op_token, state_ix, ts_ix, step):
         state_ix[op_token[2]] = state_ix[op_token[4]]
         return True
 
-@njit
+
 def test_model_link(op_token, state_ix, ts_ix, step):
     if op_token[3] == 1:
         return True
