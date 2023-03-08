@@ -61,3 +61,8 @@ Qin = Equation('Qin', river, "Qup + Qlocal + Qtrib")
 # add a facility
 facility = ModelObject('facility', river)
 Qintake = Equation('Qintake', facility, "Qin * 1.0")
+hydr = ModelObject('HYDR', river)
+#O1 = ModelLinkage('O1', hydr, wd_mgd.state_path, 2)
+# because we may not be able to determine the difference with non-lagged tribs 
+#IVOLtest = ModelLinkage('IVOLtest', hydr, Qin.state_path, 2)
+#IVOL = ModelLinkage('IVOL', hydr, Qin.state_path, 2)

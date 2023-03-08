@@ -512,7 +512,7 @@ def model_path_loader(model_object_cache):
         model_object.find_paths()
 
 
-def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list):
+def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list, model_touch_list = []):
     """
     Given a root model_object, trace the inputs to load things in order
     Store this order in model_exec_list
@@ -527,6 +527,11 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list)
     """
     if model_object.ix in model_exec_list:
         return
+    if model_object.ix in model_touch_list:
+        print("Already touched", model_object.name, model_object.ix, model_object.state_path)
+        return
+    # record as having been called, and will ultimately return, to prevent recursions
+    model_touch_list.append(model_object.ix)
     k_list = model_object.inputs.keys()
     input_names = dict.fromkeys(k_list , 1)
     if type(input_names) is not dict:
@@ -545,7 +550,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list)
         input_path = model_object.inputs[input_name]
         if input_path in model_object_cache.keys():
             input_object = model_object_cache[input_path]
-            model_tokenizer_recursive(input_object, model_object_cache, model_exec_list)
+            model_tokenizer_recursive(input_object, model_object_cache, model_exec_list, model_touch_list)
         else:
             if input_path in model_object.state_paths.keys():
                 # this is a valid state reference without an object 
