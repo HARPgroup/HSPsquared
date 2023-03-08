@@ -34,6 +34,9 @@ ModelObject.model_exec_list = model_exec_list
 set_state(state_ix, state_paths, '/STATE/RCHRES_R001/HYDR/IVOL', 44.3)
 pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 1)
 step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 1)
+set_state(state_ix, state_paths, '/STATE/RCHRES_R001/HYDR/IVOL', 15.7)
+pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 2)
+step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 2)
 
 # can look at all kinds of state variables like this:
 # get this variables state 
@@ -41,12 +44,12 @@ step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 1)
 moc = model_object_cache
 trib2 = river.get_object('nhd_8566731')
 trib1 = trib2.get_object('nhd_8566705')
-# Another way to get objects 
-trib2.get_object('hydroObject').get_object('Qtrib').inputs
-trib2.get_object('hydroObject').get_object('Qtrib').get_object('Qtrib67').get_exec_order()
-
-trib2.get_state('local_area_sqmi')
 trib2.get_state('Runit')
+# Another way to get objects 
+#trib2.get_object('hydroObject').get_object('Qtrib').inputs
+#trib2.get_object('hydroObject').get_object('Qtrib').get_object('Qtrib67').get_exec_order()
+trib2.get_state('Runit')
+
 trib2.get_state('Qout')
 trib2.get_state('Qin')
 trib2.get_state('Qlocal')
