@@ -471,7 +471,7 @@ def model_loader_recursive(model_data, container):
     if type(object_names) is not dict:
         return False 
     for object_name in object_names:
-        print("Handling", object_name)
+        #print("Handling", object_name)
         if object_name in {'name', 'object_class', 'id', 'value', 'default'}:
             # we should ask the class what properties are part of the class and also skips these
             # therefore, we can assume that anything else must be a child object that needs to 
@@ -487,15 +487,15 @@ def model_loader_recursive(model_data, container):
             if not ('object_class' in model_props):
                 # this is either a class attribute or an un-handleable meta-data 
                 # if the class atttribute exists, we should pass it to container to load 
-                print("Skipping un-typed", object_name)
+                #print("Skipping un-typed", object_name)
                 continue
-            print("Translating", object_name)
+            #print("Translating", object_name)
             # this is a kludge, but can be important 
             object_class = model_props['object_class']
             model_class_translate(model_props, object_class)
         # now we either have a constant (key and value), or a 
         # fully defined object.  Either one should work OK.
-        print("Trying to load", object_name)
+        #print("Trying to load", object_name)
         model_object = model_class_loader(object_name, model_props, container)
         if model_object == False:
             print("Could not load", object_name)
@@ -529,7 +529,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
     if model_object.ix in model_exec_list:
         return
     if model_object.ix in model_touch_list:
-        print("Already touched", model_object.name, model_object.ix, model_object.state_path)
+        #print("Already touched", model_object.name, model_object.ix, model_object.state_path)
         return
     # record as having been called, and will ultimately return, to prevent recursions
     model_touch_list.append(model_object.ix)
@@ -547,7 +547,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
     #   - execute children
     #   - execute local sub-comps
     for input_name in input_names:
-        print("Checking input", input_name)
+        #print("Checking input", input_name)
         input_path = model_object.inputs[input_name]
         if input_path in model_object_cache.keys():
             input_object = model_object_cache[input_path]

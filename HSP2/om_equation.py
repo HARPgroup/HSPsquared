@@ -47,7 +47,7 @@ class Equation(ModelObject):
                     op_name = "_op_" + str(i) + "_" + str(j)
                 else:
                     op_name = op_value 
-                print("Checking op set", i, "op", j, ":", op_name)
+                #print("Checking op set", i, "op", j, ":", op_name)
                 # constant_or_path() looks at name and path, since we only have a var name, we must assume 
                 # the path is either a sibling or child variable or explicitly added other input, so this should
                 # resolve correctly, but we have not tried it
