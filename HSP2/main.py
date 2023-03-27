@@ -90,7 +90,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
 
             # now conditionally execute all activity modules for the op, segment
             ts = get_timeseries(io_manager,ddext_sources[(operation,segment)],siminfo)
-            print("ddext_sources to get_timeseries", ddext_sources[(operation,segment)])
+            # look at ts retreived print("ddext_sources to get_timeseries", ddext_sources[(operation,segment)])
             ts = get_gener_timeseries(ts, gener_instances, ddlinks[segment])
             flags = uci[(operation, 'GENERAL', segment)]['ACTIVITY']
             if operation == 'RCHRES':
