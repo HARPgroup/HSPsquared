@@ -168,6 +168,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
 #def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 # def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
     errors = zeros(int(ui['errlen'])).astype(int64)
+    print("ui:", ui)
 
     steps  = int(ui['steps'])            # number of simulation steps
     delts  = ui['delt'] * 60.0           # seconds in simulation interval
