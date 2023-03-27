@@ -346,8 +346,8 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
     # returns JSON object as Dict
-    #model_exec_list = np.asarray({})
-    model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
+    model_exec_list = np.asarray({})
+    #model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
     container = False 
     # call it!
     model_loader_recursive(model_data, container)
@@ -562,7 +562,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
-    model_exec_list.append(model_object.ix)
+    model_exec_list = append(model_exec_list, [model_object.ix])
 
 
 def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
