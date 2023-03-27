@@ -154,23 +154,23 @@ class ModelObject:
         return False
     
     def constant_or_path(self, keyname, keyval, trust = False):
-        print("Called constant_or_path with", keyname, " = ", keyval)
+        #print("Called constant_or_path with", keyname, " = ", keyval)
         if is_float_digit(keyval):
             # we are given a constant value, not a variable reference 
-            print("Creating constant ", keyname, " = ", keyval)
+            #print("Creating constant ", keyname, " = ", keyval)
             k = ModelConstant(keyname, self, float(keyval))
             kix = k.ix
         else:
-            print("Adding input ", keyname, " = ", keyval)
+            #print("Adding input ", keyname, " = ", keyval)
             kix = self.add_input(keyname, keyval, 2, trust)
         return kix
     
     def register_path(self):
         # initialize the path variable if not already set
-        print(self.name,"called register_path()")
+        #print(self.name,"called register_path()")
         if self.state_path == '':
             self.make_paths()
-        print("Setting ", self.name, "state to", self.default_value)
+        #print("Setting ", self.name, "state to", self.default_value)
         self.ix = set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
         # store object in model_object_cache
         if not (self.state_path in self.model_object_cache.keys()):
@@ -194,7 +194,7 @@ class ModelObject:
         # do we have a path here already or can we find on the parent?
         # how do we check if this is a path already, in which case we trust it?
         found_path = self.find_var_path(var_name)
-        print("Searched", var_name, "with path", var_path,"found", found_path)
+        #print("Searched", var_name, "with path", var_path,"found", found_path)
         var_ix = get_state_ix(self.state_ix, self.state_paths, found_path)
         if var_ix == False:
             if (trust == False):
@@ -294,7 +294,7 @@ class ModelConstant(ModelObject):
         super(ModelConstant, self).__init__(name, container)
         self.default_value = float(value) 
         self.optype = 7 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric)
-        print("ModelConstant named",self.name, "with path", self.state_path,"and ix", self.ix, "value", value)
+        #print("ModelConstant named",self.name, "with path", self.state_path,"and ix", self.ix, "value", value)
         var_ix = self.set_state(float(value))
         self.paths_found = True
         # self.state_ix[self.ix] = self.default_value

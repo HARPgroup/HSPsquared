@@ -117,6 +117,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
 
                 ui = uci[(operation, activity, segment)]   # ui is a dictionary
                 #print(ui)
+                ui['SEGMENT'] = segment
                 if operation == 'PERLND' and activity == 'SEDMNT':
                     # special exception here to make CSNOFG available
                     ui['PARAMETERS']['CSNOFG'] = uci[(operation, 'PWATER', segment)]['PARAMETERS']['CSNOFG']
