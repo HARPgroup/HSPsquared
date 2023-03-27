@@ -135,7 +135,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = init_sim_dicts()
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
     #load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
-    load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
+    load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
     # debug 
     dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/Qtrib")
     print("Op tokens for Qtrib (", dma_ix,")", op_tokens[dma_ix])
