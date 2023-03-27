@@ -144,6 +144,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 
     
     ###########################################################################
+    print("ui:", ui)
     print("Calling new _hydr_ with specl")
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
     print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
@@ -168,7 +169,6 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
 #def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
 # def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):    
     errors = zeros(int(ui['errlen'])).astype(int64)
-    print("ui:", ui)
 
     steps  = int(ui['steps'])            # number of simulation steps
     delts  = ui['delt'] * 60.0           # seconds in simulation interval
