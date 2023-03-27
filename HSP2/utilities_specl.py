@@ -535,7 +535,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
     k_list = model_object.inputs.keys()
     input_names = dict.fromkeys(k_list , 1)
     if type(input_names) is not dict:
-        return False 
+        return 
     # isolate broadcasts, and sort out -- what happens if an equation references a broadcast var?
     # is this a limitation of treating all children as inputs? 
     # alternative, leave broadcasts organic, but load children first?
@@ -558,7 +558,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
                 # which should be fine.  tho perhaps we should have an object for these too.
                 continue
             print("Problem loading input", input_name, "input_path", input_path, "not in model_object_cache.keys()")
-            return False
+            return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
     model_exec_list.append(model_object.ix)

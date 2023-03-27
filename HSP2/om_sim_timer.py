@@ -11,7 +11,7 @@ from numba import njit
 class SimTimer(ModelObject):
     def __init__(self, name, container, siminfo):
         super(SimTimer, self).__init__(name, container)
-        self.state_path = 'timestamp'
+        self.state_path = '/STATE/timestamp'
         self.time_array = self.dti_to_time_array(siminfo) # creates numpy formatted array of year, mo, day, ... for each timestep
         self.date_path_ix = [] # where are the are components stored in the state_ix Dict
         self.optype = 5 # 0 - ModelObject, 1 - Equation, 2 - datamatrix, 3 - ModelLinkage, 4 - BroadcastChannel, 5 - SimTimer 

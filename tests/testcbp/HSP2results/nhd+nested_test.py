@@ -1,5 +1,7 @@
 # Set up model by loading:
 # tests/testcbp/HSP2results/load_test_riverseg.py
+# - creates object "root", which contains all simulation data beneath it
+#   - insures that timer elements get executed
 # load NHD subsheds from file
 #jfile = open("C:/Workspace/tmp/8567221.json") # has 3 elements 
 #jfile = open("C:/Workspace/tmp/8566791.json") # has only 1 element 
@@ -21,10 +23,12 @@ print("Loaded the following objects/paths:", state_paths)
 print("Insuring all paths are valid, and connecting models as inputs")
 # now load 
 model_path_loader(model_object_cache)
-model_root_object = model_object_cache[river.state_path]
+model_root = model_object_cache[river.state_path]
 # create ordered list and tokenize
-model_exec_list = []
-model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
+model_exec_list = [] # the order list of execution
+model_touch_list = [] # a holder for objects that have been already traced but may not have been added yet (prevents endless recursion)
+model_tokenizer_recursive(timer, model_object_cache, model_exec_list, model_touch_list)
+model_tokenizer_recursive(model_root, model_object_cache, model_exec_list, model_touch_list)
 model_exec_list = np.asarray(model_exec_list, dtype="i8")
 ModelObject.model_exec_list = model_exec_list
 
