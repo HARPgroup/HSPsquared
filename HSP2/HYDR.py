@@ -306,7 +306,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
             #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             print("IVOL (with hydr_ix =", ivol_ix, ") before step 2:", state_ix[ivol_ix])
         # we do pre-step (nothing right now, but could be significant at some point)
-        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix)
+        pre_step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
         # we do step: this is where all the major calculations happen
         step_model(op_tokens, state_ix, dict_ix, ts_ix, step)
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
