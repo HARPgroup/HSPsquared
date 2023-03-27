@@ -50,7 +50,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
        ui is a dictionary with RID specific HSPF UCI like data
        ts is a dictionary with RID specific timeseries
        specactions is a dictionary with all special actions'''
-
+    print("uci", uci)
     steps   = siminfo['steps']                # number of simulation points
     uunits  = siminfo['units']
     nexits  = int(uci['PARAMETERS']['NEXITS'])
@@ -138,13 +138,11 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
     # debug 
     dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/Qtrib")
-    print("Op tokens for Qtrib (", dma_ix,")", op_tokens[dma_ix])
     # add things from UCI as needed 
     # - we will have to auto-detect during parsing/tokenization to come up with a list
     # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 
     
     ###########################################################################
-    print("ui:", ui)
     print("Calling new _hydr_ with specl")
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
     print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
