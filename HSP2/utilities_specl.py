@@ -562,7 +562,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
-    model_exec_list = append(model_exec_list, [model_object.ix])
+    model_exec_list = np.append(model_exec_list, model_object.ix)
 
 
 def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
