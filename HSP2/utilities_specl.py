@@ -249,7 +249,7 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, mo
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # set up the timer as the first element 
     timer = SimTimer('timer', False, siminfo)
-    timer.add_op_tokens()
+    #timer.add_op_tokens()
     river = ModelObject('RCHRES_R001')
     # upon object creation river gets added to state with path "/STATE/RCHRES_R001"
     river.add_input("Qin", f'{river.state_path}/HYDR/IVOL', 2)
@@ -357,6 +357,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     print("Tokenizing models")
     model_root_object = model_object_cache["/STATE/RCHRES_R001"]
     model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
+    op_tokens[0] = model_exec_list
     return
 
 # model class reader
@@ -413,7 +414,7 @@ def model_class_loader(model_name, model_props, container = False):
           model_object = DataMatrix(model_props.get('name'), container, model_props)
       elif object_class == 'ModelBroadcast':
           # add a matrix with the data, then add a matrix accessor for each required variable 
-          print("Loading ModelBroadcast class ")
+          #print("Loading ModelBroadcast class ")
           has_props = ModelBroadcast.check_properties(model_props)
           if has_props == False:
               print("ModelBroadcast object must have", ModelBroadcast.required_properties())
@@ -508,7 +509,7 @@ def model_path_loader(model_object_cache):
     k_list = model_object_cache.keys()
     model_names = dict.fromkeys(k_list , 1)
     for model_name in model_names:
-        print("Loading paths for", model_name)
+        #print("Loading paths for", model_name)
         model_object = model_object_cache[model_name]
         model_object.find_paths()
 

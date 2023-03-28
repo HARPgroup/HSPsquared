@@ -178,7 +178,7 @@ class ModelObject:
         # this should check to see if this object has a parent, and if so, register the name on the parent 
         # default is as a child object. 
         if not (self.container == False):
-            print("Adding", self.name,"as input to", self.container.name)
+            #print("Adding", self.name,"as input to", self.container.name)
             # since this is a request to actually create a new path, we instruct trust = True as last argument
             return self.container.add_input(self.name, self.state_path, 1, True)
         return self.ix
