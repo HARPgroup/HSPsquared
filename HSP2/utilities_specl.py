@@ -346,7 +346,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
     # returns JSON object as Dict
-    model_exec_list = np.asarray({}, dtype="i8")
+    model_exec_list = np.asarray({})
     #model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
     container = False 
     # call it!
@@ -357,7 +357,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     print("Tokenizing models")
     model_root_object = model_object_cache["/STATE/RCHRES_R001"]
     model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
-    op_tokens[0] = model_exec_list
+    op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
     return
 
 # model class reader
