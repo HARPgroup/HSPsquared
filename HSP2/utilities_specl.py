@@ -346,7 +346,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     #model_data = json.load(jfile)
     # returns JSON object as Dict
-    model_exec_list = np.asarray({})
+    model_exec_list = np.asarray([])
     #model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
     container = False 
     # call it!
