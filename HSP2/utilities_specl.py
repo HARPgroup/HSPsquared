@@ -351,7 +351,7 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     container = False 
     # call it!
     model_loader_recursive(model_data, container)
-    print("Loaded the following objects/paths:", state_paths)
+    print("Loaded the following objects & paths")
     print("Insuring all paths are valid, and connecting models as inputs")
     model_path_loader(model_object_cache)
     print("Tokenizing models")
