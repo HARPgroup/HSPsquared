@@ -341,7 +341,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     hdf5_path = io_manager._input.file_path
     (fbase, fext) = os.path.splitext(hdf5_path)
     fjson = fbase + ".json"
-    if (!os.path.isfile(fjson)) {
+    if (not os.path.isfile(fjson)) {
         print("Did not find json file"fjson,"returning")
     }
     json.load(fjson)
