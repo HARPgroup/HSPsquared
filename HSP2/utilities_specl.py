@@ -355,8 +355,9 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     #model_json = jraw.content.decode('utf-8')
     # returns JSON object as Dict
     # returns JSON object as Dict
-    model_exec_list = np.asarray([])
-    #model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
+    #model_exec_list = np.asarray([])
+    model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
+    model_exec_list = np.asarray(model_exec_list, dtype="i8")
     container = False 
     # call it!
     model_loader_recursive(model_data, container)
