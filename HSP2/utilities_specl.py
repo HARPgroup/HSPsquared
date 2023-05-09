@@ -323,12 +323,13 @@ from requests.auth import HTTPBasicAuth
 import csv
 import pandas as pd
 
-def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
+def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # set globals on ModelObject
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # set up the timer as the first element 
     timer = SimTimer('timer', False, siminfo)
     #timer.add_op_tokens()
+    print("siminfo:", siminfo)
     #river = ModelObject('RCHRES_R001')
     # upon object creation river gets added to state with path "/STATE/RCHRES_R001"
     #river.add_input("Qivol", f'{river.state_path}/HYDR/IVOL', 2, True)
@@ -336,6 +337,9 @@ def load_nhd_simple(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, m
     # Opening JSON file
     # load the json data from a pre-generated json file on github
     json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
+    # try this
+    hdf5_path = io_manager._input.file_path
+    print("hdf5_path=", hdf5_path)
     # Opening JSON file
     jraw =  requests.get(json_url, verify=False)
     model_json = jraw.content.decode('utf-8')
@@ -574,25 +578,6 @@ def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
     # see line 317 in utilities.py for use example of write_ts()
     x = 0 # dummy
     return
-
-def load_sim_ts(f, state_ix, ts_ix):
-  tsq = f['TIMESERIES/'] # f is the hdf5 file 
-  # this code replicates a piece of the function of get_timeseries, and loads the full timeseries into a Dict
-  # the dict will be keyed by a simple integer, and have values at the time step only.  The actual time 
-  # at that step will be contained in ts_ts 
-  ts_tables = list(tsq.keys())
-  for i in ts_tables:
-      if i == 'SUMMARY': continue # skip this non-numeric table
-      var_path = '/TIMESERIES/' + i
-      ix = set_state(state_ix, state_paths, var_path, 0.0)
-      ts_ix[ix] = np.asarray(tsq[i]['table']['values'], dtype="float32")
-
-@njit
-def pre_step_timeseries(state_ix, ts_ix, step):
-    for idx in ts_ix.keys():
-        state_ix[idx] = ts_ix[idx][step] # the timeseries inputs state get set here. must a special type of object to do this
-
-
 
 @njit
 def iterate_models(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, steps):
