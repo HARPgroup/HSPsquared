@@ -345,7 +345,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     if (not os.path.isfile(fjson)):
         print("Did not find json file", fjson, "returning")
         return
-    json.load(fjson)
+    jfile = json.load(fjson)
     print("hdf5_path=", hdf5_path)
     # Opening JSON file from remote url
     # json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
@@ -353,10 +353,10 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     #model_json = jraw.content.decode('utf-8')
     # returns JSON object as Dict
     # model_data = json.loads(model_json)
-    print("Loaded json with keys:", model_data.keys())
     # local file option:
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
     model_data = json.load(jfile)
+    print("Loaded json with keys:", model_data.keys())
     # returns JSON object as Dict
     model_exec_list = np.asarray([])
     #model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
