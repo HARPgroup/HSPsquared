@@ -75,6 +75,8 @@ def step_model_link(op_token, state_ix, ts_ix, step):
     if op_token[3] == 1:
         return True
     elif op_token[3] == 2:
+        if step == 2:
+            print("Setting state_ix[", op_token_[1], "] =", state_ix[op_token[2]])
         state_ix[op_token[1]] = state_ix[op_token[2]]
     elif op_token[3] == 3:
         # read from ts variable TBD

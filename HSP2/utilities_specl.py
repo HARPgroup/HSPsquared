@@ -374,8 +374,6 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
         print("IVOLin state_ix = ", state_ix[ivol_ix])
     else:
         print("Could not find /STATE/RCHRES_R001/IVOLin in ", state_paths)
-    print("Model exec list:", model_exec_list)
-    print("Model op_tokens[0]:", op_tokens[0])
     return
 
 # model class reader
@@ -545,9 +543,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             that are sending to that broadcast? 
             - Or is it better to let it as it is, 
     """
-    print("model_tokenizer_recursive called with model_exec_list", model_exec_list)
     if model_object.ix in model_exec_list:
-        print("Already found ", model_object.ix, "in model_exec_list")
         return
     if model_object.ix in model_touch_list:
         #print("Already touched", model_object.name, model_object.ix, model_object.state_path)
@@ -573,8 +569,6 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
         if input_path in model_object_cache.keys():
             input_object = model_object_cache[input_path]
             model_tokenizer_recursive(input_object, model_object_cache, model_exec_list, model_touch_list)
-            print("returned from model_tokenizer_recursive with model_exec_list", model_exec_list)
-            print("returned from model_tokenizer_recursive with model_touch_list", model_touch_list)
         else:
             if input_path in model_object.state_paths.keys():
                 # this is a valid state reference without an object 
@@ -586,7 +580,6 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
     model_exec_list.append(model_object.ix)
-    print("Added model ix", model_object.ix,"to model_exec_list", model_exec_list)
 
 
 def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
