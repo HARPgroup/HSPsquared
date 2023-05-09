@@ -364,17 +364,17 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     print("Insuring all paths are valid, and connecting models as inputs")
     model_path_loader(model_object_cache)
     print("Tokenizing models")
+    model_root_object = model_object_cache["/STATE/RCHRES_R001"]
+    model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
+    op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
     if ("/STATE/RCHRES_R001/IVOLin" in state_paths):
         ivol_ix = state_paths["/STATE/RCHRES_R001/IVOLin"]
-        print("IVOLin found. state_paths = ", ivol_ix)
-        #print("IVOLin op_tokens ", op_tokens[ivol_ix])
+        #print("IVOLin found. state_paths = ", ivol_ix)
+        print("IVOLin op_tokens ", op_tokens[ivol_ix])
         print("IVOLin op_tokens ", op_tokens)
         print("IVOLin state_ix = ", state_ix[ivol_ix])
     else:
         print("Could not find /STATE/RCHRES_R001/IVOLin in ", state_paths)
-    model_root_object = model_object_cache["/STATE/RCHRES_R001"]
-    model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
-    op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
     return
 
 # model class reader
