@@ -145,7 +145,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     print("Calling new _hydr_ with specl, and ts keys:", ts.keys())
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
     print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
-    print("Final state at end of _hydr_()", state_ix)
+    #print("Final state at end of _hydr_()", state_ix)
     #print("Final state at end of _hydr_()", state_ix[1:20])
     #errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
     # errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels) 
@@ -303,7 +303,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
         
         if step == 2:
-            print("state_ix before step 2:", state_ix)
+            #print("state_ix before step 2:", state_ix)
             #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             print("IVOL (with hydr_ix =", ivol_ix, ") before step 2:", state_ix[ivol_ix])
         # we do pre-step (nothing right now, but could be significant at some point)
@@ -319,7 +319,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         # we must convert any updates to IVOL to the units expected in the _hydr_ calcs
         IVOL[step] = state_ix[ivol_ix] * VFACT
         if step == 2:
-            print("state_ix at step 2:", state_ix)
+            #print("state_ix at step 2:", state_ix)
             #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             print("IVOL (with hydr_ix =", ivol_ix, ") after specl() step 2:", state_ix[ivol_ix])
             
