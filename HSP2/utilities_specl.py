@@ -330,7 +330,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # set up the timer as the first element 
     timer = SimTimer('timer', False, siminfo)
     #timer.add_op_tokens()
-    print("siminfo:", siminfo)
+    #print("siminfo:", siminfo)
     #river = ModelObject('RCHRES_R001')
     # upon object creation river gets added to state with path "/STATE/RCHRES_R001"
     #river.add_input("Qivol", f'{river.state_path}/HYDR/IVOL', 2, True)
@@ -581,6 +581,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
+    print("Adding model ix", model_object.ix,"to model_exec_list")
     model_exec_list = np.append(model_exec_list, model_object.ix)
 
 
