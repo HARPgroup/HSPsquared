@@ -546,6 +546,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             that are sending to that broadcast? 
             - Or is it better to let it as it is, 
     """
+    print("model_tokenizer_recursive called with model_exec_list", model_exec_list)
     if model_object.ix in model_exec_list:
         print("Already found ", model_object.ix, "in model_exec_list")
         return
