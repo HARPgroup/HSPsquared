@@ -50,7 +50,6 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
        ui is a dictionary with RID specific HSPF UCI like data
        ts is a dictionary with RID specific timeseries
        specactions is a dictionary with all special actions'''
-    print("uci", uci)
     steps   = siminfo['steps']                # number of simulation points
     uunits  = siminfo['units']
     nexits  = int(uci['PARAMETERS']['NEXITS'])
@@ -313,17 +312,17 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
         step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
         # this is only a few tenths of a second slower on a 40 year simulation but interesting
         #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
-        if step == 2:
-            print("state_ix at step 2:", state_ix)
-            #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
-            print("IVOL (with hydr_ix =", ivol_ix, ") after specl() step 2:", state_ix[ivol_ix])
-            
         # copy writeable state variables back to local state
         # OUTDGT is writeable
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
         # IVOL is writeable
         # we must convert any updates to IVOL to the units expected in the _hydr_ calcs
         IVOL[step] = state_ix[ivol_ix] * VFACT
+        if step == 2:
+            print("state_ix at step 2:", state_ix)
+            #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
+            print("IVOL (with hydr_ix =", ivol_ix, ") after specl() step 2:", state_ix[ivol_ix])
+            
         
         ##########################################################################
         
