@@ -356,8 +356,6 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # returns JSON object as Dict
     # returns JSON object as Dict
     #model_exec_list = np.asarray([])
-    model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
-    model_exec_list = np.asarray(model_exec_list, dtype="i8")
     container = False 
     # call it!
     model_loader_recursive(model_data, container)
@@ -366,6 +364,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     model_path_loader(model_object_cache)
     print("Tokenizing models")
     model_root_object = model_object_cache["/STATE/RCHRES_R001"]
+    model_exec_list = []
     model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
     op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
     if ("/STATE/RCHRES_R001/IVOLin" in state_paths):
@@ -586,7 +585,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
-    model_exec_list = np.append(model_exec_list, model_object.ix)
+    model_exec_list.append(model_object.ix)
     print("Added model ix", model_object.ix,"to model_exec_list", model_exec_list)
 
 
