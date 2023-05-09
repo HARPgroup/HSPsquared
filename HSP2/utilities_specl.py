@@ -322,6 +322,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import csv
 import pandas as pd
+import os.path
 
 def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # set globals on ModelObject
