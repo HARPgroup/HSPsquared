@@ -574,6 +574,8 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
         if input_path in model_object_cache.keys():
             input_object = model_object_cache[input_path]
             model_tokenizer_recursive(input_object, model_object_cache, model_exec_list, model_touch_list)
+            print("returned from model_tokenizer_recursive with model_exec_list", model_exec_list)
+            print("returned from model_tokenizer_recursive with model_touch_list", model_touch_list)
         else:
             if input_path in model_object.state_paths.keys():
                 # this is a valid state reference without an object 
