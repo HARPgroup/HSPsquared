@@ -375,6 +375,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     else:
         print("Could not find /STATE/RCHRES_R001/IVOLin in ", state_paths)
     print("Model exec list:", model_exec_list)
+    print("Model op_tokens[0]:", op_tokens[0])
     return
 
 # model class reader
