@@ -582,7 +582,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
-    print("Adding model ix", model_object.ix,"to model_exec_list")
+    print("Adding model ix", model_object.ix,"to model_exec_list", model_exec_list)
     model_exec_list = np.append(model_exec_list, model_object.ix)
 
 
