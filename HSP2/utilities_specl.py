@@ -336,19 +336,26 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # a json NHD from R parser
     # Opening JSON file
     # load the json data from a pre-generated json file on github
-    json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
+    
     # try this
     hdf5_path = io_manager._input.file_path
+    (fbase, fext) = os.path.splitext(hdf5_path)
+    fjson = fbase + ".json"
+    if (!os.path.isfile(fjson)) {
+        print("Did not find json file"fjson,"returning")
+    }
+    json.load(fjson)
     print("hdf5_path=", hdf5_path)
-    # Opening JSON file
-    jraw =  requests.get(json_url, verify=False)
-    model_json = jraw.content.decode('utf-8')
+    # Opening JSON file from remote url
+    # json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
+    #jraw =  requests.get(json_url, verify=False)
+    #model_json = jraw.content.decode('utf-8')
     # returns JSON object as Dict
-    model_data = json.loads(model_json)
+    # model_data = json.loads(model_json)
     print("Loaded json with keys:", model_data.keys())
     # local file option:
     #jfile = open("C:/usr/local/home/git/vahydro/R/modeling/nhd/nhd_simple_8566737.json")
-    #model_data = json.load(jfile)
+    model_data = json.load(jfile)
     # returns JSON object as Dict
     model_exec_list = np.asarray([])
     #model_exec_list = Dict.empty(key_type=types.int64, value_type=types.i8[:])
