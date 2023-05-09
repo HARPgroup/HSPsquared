@@ -70,6 +70,8 @@ class ModelLinkage(ModelObject):
 # Function for use during model simulations of tokenized objects
 @njit
 def step_model_link(op_token, state_ix, ts_ix, step):
+    if step == 2:
+        print("step_model_link() called at step 2 with op_token=", op_token)
     if op_token[3] == 1:
         return True
     elif op_token[3] == 2:
