@@ -24,7 +24,7 @@ class ModelBroadcast(ModelObject):
             hub_container = self.container 
         elif broadcast_hub == 'parent':
             if (self.container.container == False):
-                raise Exception("This object", container.name, "does not have a parent container. Broadcast creation halted. ")
+                raise Exception("The object", self.container.name, "does not have a parent container. Broadcast to hub 'parent' creation halted. ")
                 return False
             hub_path = self.container.container.state_path
             hub_container = self.container.container

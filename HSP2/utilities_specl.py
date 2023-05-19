@@ -414,7 +414,7 @@ def model_class_loader(model_name, model_props, container = False):
               else:
                   eqn_str = eqn.get('value')
           if eqn_str == None:
-              raise Exception("This object", container.name, "does not have a parent container. Broadcast creation halted. ")
+              raise Exception("Equation object", model_name, "does not have a valid equation string. Halting. ")
               return False
           model_object = Equation(model_props.get('name'), container, eqn_str )
           #remove_used_keys(model_props, 
@@ -462,6 +462,7 @@ def model_class_loader(model_name, model_props, container = False):
             left_path = model_props['left_path']
           model_object = ModelLinkage(model_props.get('name'), container, right_path, link_type, left_path)
       else:
+          print("Loading", model_props.get('name'), "with object_class", object_class,"as ModelObject")
           model_object = ModelObject(model_props.get('name'), container)
     # one way to insure no class attributes get parsed as sub-comps is:
     # model_object.remove_used_keys() 

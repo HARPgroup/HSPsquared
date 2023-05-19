@@ -289,9 +289,14 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
     # store initial outflow from reach:
     ui['ROS'] = ro
     
-    # set up specl pointers for slightly faster execution
+    # set up specl pointers for more readable code and slightly faster execution 
     o1_ix, o2_ix, o3_ix, ivol_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3'], hydr_ix['IVOL']
+    rovol_ix, volev_ix, vol_ix = hydr_ix['ROVOL'], hydr_ix['VOLEV'], hydr_ix['VOL']
     # add global constants
+    
+    # other initial vars 
+    rovol = 0.0 
+    volev = 0.0 
     
     # Prepare specl
     model_exec_list = op_tokens[0] # this is reserved for the order list - prolly a lousy idea but so many args...
@@ -299,28 +304,23 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
     # HYDR (except where noted)
     for step in range(steps):
         # set state_ix with value of local state variables and/or needed vars 
-        # note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
-        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix], state_ix[ivol_ix] = outdgt[0], outdgt[1], outdgt[2], IVOL0[step]
-        
+        # Note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
+        state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix]= outdgt[0], outdgt[1], outdgt[2]
+        state_ix[ro_ix], state_ix[rovol_ix] = ro, rovol 
+        state_ix[vol_ix], state_ix[ivol_ix] = vol, IVOL0[step]
+        state_ix[volev_ix] = volev
         if step == 2:
-            #print("state_ix before step 2:", state_ix)
-            #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             print("IVOL (with hydr_ix =", ivol_ix, ") before step 2:", state_ix[ivol_ix])
-        # we do pre-step (nothing right now, but could be significant at some point)
+        # pre-step (initialize registers, etc.)
         pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
-        # we do step: this is where all the major calculations happen
+        # step: this is where all the major calculations happen
         step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
-        # this is only a few tenths of a second slower on a 40 year simulation but interesting
-        #outdgt[:] = [ state_ix[hydr_ix['O1']], state_ix[hydr_ix['O2']], state_ix[hydr_ix['O3']] ]
-        # copy writeable state variables back to local state
+        # Now update all writeable variables in _hydr_ space 
         # OUTDGT is writeable
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
-        # IVOL is writeable
-        # we must convert any updates to IVOL to the units expected in the _hydr_ calcs
+        # IVOL is writeable. Note: we must convert IVOL to the units expected in _hydr_
         IVOL[step] = state_ix[ivol_ix] * VFACT
         if step == 2:
-            #print("state_ix at step 2:", state_ix)
-            #print("state_ix at step 1:", [print(key,':',value) for key, value in state_ix.items()])
             print("IVOL (with hydr_ix =", ivol_ix, ") after specl() step 2:", state_ix[ivol_ix])
             
         
