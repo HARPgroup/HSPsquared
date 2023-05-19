@@ -53,7 +53,7 @@ model_shell['RCHRES_R001']['name'] = 'RCHRES_R001'
 model_shell['RCHRES_R001']['object_class'] = 'ModelObject'
 model_data = model_shell # just needed to encapsulate the facility for broadcasts to be OK
 container = False 
-fac_data = model_data['RCHRES_R001']['Greensville County Raw Water Reservoir and Intake:Nottoway River']
+fac_data = model_data['RCHRES_R001'][list(model_data['RCHRES_R001'].keys())[0]]
 
 # call it!
 model_loader_recursive(model_data, container)
