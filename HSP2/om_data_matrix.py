@@ -66,10 +66,10 @@ class DataMatrix(ModelObject):
         if not self.mx_type > 0:
             # just a matrix of values, return.
             return 
-        self.key1_ix = self.constant_or_path('keycol1', self.handle_prop(model_props, 'keycol1', True) )
+        self.key1_ix = self.constant_or_path('keycol1', self.handle_prop(model_props, 'keycol1', True), True )
         self.lu_type1 = self.handle_prop(model_props, 'lutype1', True ) 
         if (self.mx_type > 1):
-            self.key2_ix = self.constant_or_path('keycol2', self.handle_prop(model_props, 'keycol2', True) )
+            self.key2_ix = self.constant_or_path('keycol2', self.handle_prop(model_props, 'keycol2', True), True )
             self.lu_type2 = self.handle_prop(model_props, 'lutype2', True ) 
         else:
             self.key2_ix = 0
