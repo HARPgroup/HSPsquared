@@ -136,7 +136,6 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     #load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix)
     load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
     # debug 
-    dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/Qtrib")
     # add things from UCI as needed 
     # - we will have to auto-detect during parsing/tokenization to come up with a list
     # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND 
@@ -144,7 +143,8 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     ###########################################################################
     #print("Calling new _hydr_ with specl, and ts keys:", ts.keys())
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
-    print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
+    # dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/Qtrib")
+    # print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
     print("Final state at end of _hydr_()", state_ix)
     #print("Final state at end of _hydr_()", state_ix[1:20])
     #errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
