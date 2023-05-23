@@ -65,10 +65,6 @@
                     "object_class": "array",
                     "value": [
                         [
-                            "mo_num",
-                            "mo_frac"
-                        ],
-                        [
                             "1",
                             "0.0746"
                         ],

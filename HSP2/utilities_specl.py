@@ -420,7 +420,7 @@ def model_class_loader(model_name, model_props, container = False):
           #remove_used_keys(model_props, 
       elif object_class == 'Constant':
           model_object = ModelConstant(model_props.get('name'), container, model_props.get('value') )
-      elif object_class == 'DataMatrix':
+      elif ( object_class.lower() == 'datamatrix'):
           # add a matrix with the data, then add a matrix accessor for each required variable 
           has_props = DataMatrix.check_properties(model_props)
           if has_props == False:

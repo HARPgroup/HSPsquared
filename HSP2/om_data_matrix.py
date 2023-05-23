@@ -38,8 +38,13 @@ class DataMatrix(ModelObject):
             self.matrix_ix = self.ix
         self.mx_type = self.handle_prop(model_props, 'mx_type') 
         if self.mx_type == None:
-            # check for valuetype instead
-            self.mx_type = self.handle_prop(model_props, 'valuetype') 
+            # check for valuetype instead - this will go away when we enforce mx_type
+            print("Guessing mx_type for", self.name, " from valuetype.  This is deprecated. ")
+            self.valuetype = self.handle_prop(model_props, 'valuetype') 
+            if self.valuetype != None:
+                self.mx_type = int(self.valuetype)
+                model_props['mx_type'] = self.mx_type
+            print("mx_type set to ", self.mx_type)
         if self.mx_type == None:
             #raise Exception("Matrix", self.name, " has neither mx_type nor valuetype.  Object creation halted. ")
             # note: the drupal hydroImpoundment classes ship storage_stage_area as 'matrix' and overwrite all other stuff.  Which is kinda busted, but is apparently needed by the small impoundments in the old OM model.
@@ -61,11 +66,11 @@ class DataMatrix(ModelObject):
         if not self.mx_type > 0:
             # just a matrix of values, return.
             return 
-        self.key1_ix = self.constant_or_path('key1', self.handle_prop(model_props, 'key1', True) )
-        self.lu_type1 = self.handle_prop(model_props, 'lu_type1', True ) 
+        self.key1_ix = self.constant_or_path('keycol1', self.handle_prop(model_props, 'keycol1', True) )
+        self.lu_type1 = self.handle_prop(model_props, 'lutype1', True ) 
         if (self.mx_type > 1):
-            self.key2_ix = self.constant_or_path('key2', self.handle_prop(model_props, 'key2', True) )
-            self.lu_type2 = self.handle_prop(model_props, 'lu_type2', True ) 
+            self.key2_ix = self.constant_or_path('keycol2', self.handle_prop(model_props, 'keycol2', True) )
+            self.lu_type2 = self.handle_prop(model_props, 'lutype2', True ) 
         else:
             self.key2_ix = 0
             self.lu_type2 = 0
@@ -117,7 +122,7 @@ class DataMatrixLookup(DataMatrix):
     @staticmethod
     def required_properties():
         req_props = super(DataMatrixLookup, DataMatrixLookup).required_properties()
-        req_props.extend(['mx_type', 'key1', 'lu_type1', 'key2', 'lu_type2'])
+        req_props.extend(['mx_type', 'keycol1', 'lutype1', 'keycol2', 'lutype2'])
         return req_props
 
 

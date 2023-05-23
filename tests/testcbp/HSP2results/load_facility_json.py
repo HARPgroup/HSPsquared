@@ -47,10 +47,13 @@ jraw =  requests.get(json_url, auth=basic)
 model_json = jraw.content.decode('utf-8')
 # returns JSON object as Dicts
 fac_data = json.loads(model_json)
+fac_name = list(fac_data.keys())[0]
+fac_model = fac_data[fac_name]
 model_shell = {}
-model_shell['RCHRES_R001'] = fac_data
+model_shell['RCHRES_R001'] = {}
 model_shell['RCHRES_R001']['name'] = 'RCHRES_R001'
 model_shell['RCHRES_R001']['object_class'] = 'ModelObject'
+model_shell['RCHRES_R001'][fac_name] = fac_model
 
 # save the json to a file
 with open("C:/usr/local/home/git/HSPsquared/tests/testcbp/HSP2results/PL3_5250_0001.json", "w") as river_file:
@@ -69,3 +72,16 @@ model_root_object = model_object_cache["/STATE/RCHRES_R001"]
 model_exec_list = []
 model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
 
+# step if you like
+# make the model_exec_list into a typed Dict (for numba)
+# note: this is done in the utilities_specl.py code
+model_exec_list = np.asarray(model_exec_list, dtype="i8")
+# set up info and timer
+siminfo = {}
+siminfo['delt'] =3600
+siminfo['tindex'] = date_range("2001-01-01", "2001-12-31", freq=Minute(siminfo['delt']))[1:]
+steps = siminfo['steps'] = len(siminfo['tindex'])
+timer = SimTimer('timer', False, siminfo)
+# then call the step 
+set_state(state_ix, state_paths, '/STATE/RCHRES_R001/HYDR/IVOL', 44.3)
+step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 1)
