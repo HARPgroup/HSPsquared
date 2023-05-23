@@ -332,7 +332,7 @@ def pre_evaluate_stack(s, ps):
 
 
 @njit
-def exec_eqn(op_token, state_ix):
+def step_equation(op_token, state_ix):
     op_class = op_token[0] # we actually use this in the calling function, which will decide what 
                       # next level function to use 
     result = 0

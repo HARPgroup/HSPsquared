@@ -626,9 +626,6 @@ def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
 
 @njit 
 def post_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
-    val = 0
-    for i in model_exec_list:
-        step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
     return 
 
 @njit
@@ -639,7 +636,7 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     if debug == 1:
         print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
     if ops[0] == 1:
-        state_ix[ops[1]] = exec_eqn(ops, state_ix)
+        state_ix[ops[1]] = step_equation(ops, state_ix)
     elif ops[0] == 2:
         if (ops[1] == ops[2]):
             # this insures a matrix with variables in it is up to date 
@@ -669,7 +666,7 @@ def test_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         if op_tokens[i][0] == 0:
             state_ix[i] = exec_model_object(op_tokens[i], state_ix, dict_ix)
         elif op_tokens[i][0] == 1:
-            state_ix[i] = exec_eqn(op_tokens[i], state_ix)
+            state_ix[i] = step_equation(op_tokens[i], state_ix)
         elif op_tokens[i][0] == 2:
             state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)
         elif op_tokens[i][0] == 3:

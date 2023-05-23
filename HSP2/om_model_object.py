@@ -271,7 +271,7 @@ class ModelObject:
     def dddstep_model(op_tokens, state_ix, dict_ix, ts_ix, step):
         for i in op_tokens.keys():
             if op_tokens[i][0] == 1:
-                state_ix[i] = exec_eqn(op_tokens[i], state_ix)
+                state_ix[i] = step_equation(op_tokens[i], state_ix)
             elif op_tokens[i][0] == 2:
                 state_ix[i] = exec_tbl_eval(op_tokens[i], state_ix, dict_ix)
             elif op_tokens[i][0] == 3:
