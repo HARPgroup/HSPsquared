@@ -1,21 +1,24 @@
-import json
-import requests
-from requests.auth import HTTPBasicAuth
-import csv
-import pandas as pd
-from pandas import HDFStore, Timestamp, read_hdf, DataFrame, date_range
-from pandas.tseries.offsets import Minute
-import os
-os.chdir("C:/usr/local/home/git/HSPsquared")
+
+from numpy import zeros, any, full, nan, array, int64
+from pandas import DataFrame
+from math import sqrt, log10
+from numba import njit
+from numba.typed import List
+from HSP2.utilities import initm, make_numba_dict
 from HSP2.utilities_specl import *
 from HSP2.SPECL import specl, _specl_
 from HSP2.om_model_object import *
 from HSP2.om_equation import *
 from HSP2.om_data_matrix import *
 from HSP2.om_sim_timer import *
-from HSP2.om_model_linkage import ModelLinkage, step_model_link
 from HSP2.om_model_broadcast import *
+from HSP2.om_model_linkage import ModelLinkage, step_model_link
+import numpy as np
+from numba import int8, float32, njit, types
+from numba.typed import Dict
 
+
+domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
 # initialize runtime Dicts
 op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = init_sim_dicts()
 model_object_cache = {}
@@ -23,7 +26,7 @@ model_object_cache = {}
 ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
 # set up info and timer
 siminfo = {}
-siminfo['delt'] =3600
+siminfo['delt'] =60
 siminfo['tindex'] = date_range("2001-01-01", "2001-12-31", freq=Minute(siminfo['delt']))[1:]
 steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)

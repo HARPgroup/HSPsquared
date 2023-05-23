@@ -624,6 +624,13 @@ def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
         step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
     return 
 
+@njit 
+def post_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
+    val = 0
+    for i in model_exec_list:
+        step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
+    return 
+
 @njit
 def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     # op_tokens is passed in for ops like matrices that have lookups from other 
