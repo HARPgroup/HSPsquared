@@ -34,7 +34,7 @@ steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
 
 src_json_node = 'http://deq1.bse.vt.edu/d.dh/node/62'
-el_pid = 4828385 # Greenville County New Reservoir: 5356344, CHesdin WTP: 4828385
+el_pid = 7113514 # Greenville County New Reservoir: 5356344, CHesdin WTP: 4828385, new Chesdin 6.4 7113514
 json_url = src_json_node + "/" + str(el_pid)
 # authentication using rest un and pw
 jfile = open("/var/www/python/auth.private")
@@ -45,15 +45,19 @@ basic = HTTPBasicAuth(rest_uname, rest_pass )
 # Opening JSON file
 jraw =  requests.get(json_url, auth=basic)
 model_json = jraw.content.decode('utf-8')
-# returns JSON object as Dict
-model_data = json.loads(model_json)
+# returns JSON object as Dicts
+fac_data = json.loads(model_json)
 model_shell = {}
-model_shell['RCHRES_R001'] = model_data
+model_shell['RCHRES_R001'] = fac_data
 model_shell['RCHRES_R001']['name'] = 'RCHRES_R001'
 model_shell['RCHRES_R001']['object_class'] = 'ModelObject'
+
+# save the json to a file
+with open("C:/usr/local/home/git/HSPsquared/tests/testcbp/HSP2results/PL3_5250_0001.json", "w") as river_file:
+    json.dump(model_shell, river_file, indent=4, sort_keys=True)
+
 model_data = model_shell # just needed to encapsulate the facility for broadcasts to be OK
 container = False 
-fac_data = model_data['RCHRES_R001'][list(model_data['RCHRES_R001'].keys())[0]]
 
 # call it!
 model_loader_recursive(model_data, container)
@@ -64,3 +68,4 @@ print("Tokenizing models")
 model_root_object = model_object_cache["/STATE/RCHRES_R001"]
 model_exec_list = []
 model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
+

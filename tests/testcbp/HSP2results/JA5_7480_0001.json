@@ -1,0 +1,228 @@
+{
+    "RCHRES_R001": {
+        "ARWA Chesdin Withdrawal": {
+            "cache_date": {
+                "id": "7113518",
+                "name": "cache_date",
+                "value": "-1"
+            },
+            "defaultval": {
+                "id": "7113517",
+                "name": "defaultval",
+                "value": ""
+            },
+            "flow_mode": {
+                "id": "7113520",
+                "name": "flow_mode",
+                "value": "3"
+            },
+            "historic_monthly_pct": {
+                "autosetvars": {
+                    "id": "7113541",
+                    "name": "autosetvars",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7113531",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "eval_type": {
+                    "id": "7113537",
+                    "name": "eval_type",
+                    "value": "auto"
+                },
+                "exec_hierarch": {
+                    "id": "7113530",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "id": "7113528",
+                "keycol1": {
+                    "id": "7113532",
+                    "name": "keycol1",
+                    "object_class": "textField",
+                    "value": "month"
+                },
+                "keycol2": {
+                    "id": "7113534",
+                    "name": "keycol2",
+                    "object_class": "textField",
+                    "value": ""
+                },
+                "lutype1": {
+                    "id": "7113539",
+                    "name": "lutype1",
+                    "value": "0"
+                },
+                "lutype2": {
+                    "id": "7113540",
+                    "name": "lutype2",
+                    "value": "0"
+                },
+                "matrix": {
+                    "name": "matrix",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "mo_num",
+                            "mo_frac"
+                        ],
+                        [
+                            "1",
+                            "0.0746"
+                        ],
+                        [
+                            "2",
+                            "0.0678"
+                        ],
+                        [
+                            "3",
+                            "0.0710"
+                        ],
+                        [
+                            "4",
+                            "0.0768"
+                        ],
+                        [
+                            "5",
+                            "0.0863"
+                        ],
+                        [
+                            "6",
+                            "0.0940"
+                        ],
+                        [
+                            "7",
+                            "0.1027"
+                        ],
+                        [
+                            "8",
+                            "0.0965"
+                        ],
+                        [
+                            "9",
+                            "0.0909"
+                        ],
+                        [
+                            "10",
+                            "0.0880"
+                        ],
+                        [
+                            "11",
+                            "0.0759"
+                        ],
+                        [
+                            "12",
+                            "0.0755"
+                        ]
+                    ]
+                },
+                "name": "historic_monthly_pct",
+                "object_class": "dataMatrix",
+                "value": null,
+                "value_dbcolumntype": {
+                    "id": "7113538",
+                    "name": "value_dbcolumntype",
+                    "value": "auto"
+                },
+                "valuetype": {
+                    "id": "7113536",
+                    "name": "valuetype",
+                    "value": "1"
+                }
+            },
+            "host": "deq1.bse.vt.edu",
+            "id": "7113514",
+            "name": "ARWA Chesdin Withdrawal",
+            "object_class": "modelContainer",
+            "run_info": {
+                "id": "7113516",
+                "name": "run_info",
+                "value": "-1"
+            },
+            "run_mode": {
+                "id": "7113519",
+                "name": "run_mode",
+                "value": "2"
+            },
+            "scenario": {
+                "name": "scenario",
+                "object_class": "textField",
+                "value": "json-test"
+            },
+            "wd_base_mgd": {
+                "default": null,
+                "defaultval": {
+                    "id": "7113524",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "engine": {
+                    "id": "7113527",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "equation": {
+                    "name": "equation",
+                    "value": "wd_mgy * historic_monthly_pct / modays"
+                },
+                "exec_hierarch": {
+                    "id": "7113523",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "id": "7113521",
+                "minvalue": {
+                    "id": "7113526",
+                    "name": "minvalue",
+                    "value": null
+                },
+                "name": "wd_base_mgd",
+                "nonnegative": {
+                    "id": "7113525",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "object_class": "Equation",
+                "wd_mgy": {
+                    "default": null,
+                    "defaultval": {
+                        "id": "7113545",
+                        "name": "defaultval",
+                        "value": ""
+                    },
+                    "engine": {
+                        "id": "7113548",
+                        "name": "engine",
+                        "value": "mathProcessor2"
+                    },
+                    "equation": {
+                        "name": "equation",
+                        "value": "17934"
+                    },
+                    "exec_hierarch": {
+                        "id": "7113544",
+                        "name": "exec_hierarch",
+                        "value": "0"
+                    },
+                    "id": "7113542",
+                    "minvalue": {
+                        "id": "7113547",
+                        "name": "minvalue",
+                        "value": null
+                    },
+                    "name": "wd_mgy",
+                    "nonnegative": {
+                        "id": "7113546",
+                        "name": "nonnegative",
+                        "value": "0"
+                    },
+                    "object_class": "Equation"
+                }
+            }
+        },
+        "name": "RCHRES_R001",
+        "object_class": "ModelObject"
+    }
+}

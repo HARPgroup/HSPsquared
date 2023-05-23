@@ -632,12 +632,15 @@ def post_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
 def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     # op_tokens is passed in for ops like matrices that have lookups from other 
     # locations.  All others rely only on ops 
+    # todo: decide if all step_[class() functions should set value in state_ix instead of returning value?
     val = 0
     if debug == 1:
         print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
     if ops[0] == 1:
         state_ix[ops[1]] = step_equation(ops, state_ix)
     elif ops[0] == 2:
+        # todo: this should be moved into a single function, 
+        # with the conforming name step_matrix(op_tokens, ops, state_ix, dict_ix)
         if (ops[1] == ops[2]):
             # this insures a matrix with variables in it is up to date 
             # only need to do this if the matrix data and matrix config are on same object
