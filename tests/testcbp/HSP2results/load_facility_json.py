@@ -83,5 +83,14 @@ siminfo['tindex'] = date_range("2001-01-01", "2001-12-31", freq=Minute(siminfo['
 steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
 # then call the step 
+step = 1 
 set_state(state_ix, state_paths, '/STATE/RCHRES_R001/HYDR/IVOL', 44.3)
+# call to see if it throws an error
 step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 1)
+# call a flexible, non-jit debug step
+test_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
+# call just one op token set, but from the step_one() wrapper
+step_one(op_tokens, op_tokens[18], state_ix, dict_ix, ts_ix, step, 1)
+# call an individual routine with debugging info 
+debug_tbl_eval(op_tokens, op_tokens[18], state_ix, dict_ix)
+

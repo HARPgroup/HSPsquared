@@ -193,6 +193,11 @@ class ModelObject:
         # - trust = False means fail if the path does not already exist, True means assume it will be OK which is bad policy, except for the case where the path points to an existing location
         # do we have a path here already or can we find on the parent?
         # how do we check if this is a path already, in which case we trust it?
+        # todo: we should be able to alias a var_name to a var_path, for example 
+        #       calling add_input('movar', 'month', 1, True)
+        #       this *should* search for month and find the STATE/month variable 
+        #       BUT this only works if both var_name and var_path are month 
+        #       so add_input('month', 'month', 1, True) works.
         found_path = self.find_var_path(var_name)
         #print("Searched", var_name, "with path", var_path,"found", found_path)
         var_ix = get_state_ix(self.state_ix, self.state_paths, found_path)

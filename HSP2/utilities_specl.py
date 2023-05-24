@@ -642,12 +642,16 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
         # todo: this should be moved into a single function, 
         # with the conforming name step_matrix(op_tokens, ops, state_ix, dict_ix)
         if (ops[1] == ops[2]):
+            if debug == 1:
+                print("DEBUG: Calling exec_tbl_values", ops)
             # this insures a matrix with variables in it is up to date 
             # only need to do this if the matrix data and matrix config are on same object
             # otherwise, the matrix data is an input and has already been evaluated
             state_ix[ops[1]] = exec_tbl_values(ops, state_ix, dict_ix)
-        if (op_tokens[3] > 0):
+        if (ops[3] > 0):
             # this evaluates a single value from a matrix if the matrix is configured to do so.
+            if debug == 1:
+                print("DEBUG: Calling exec_tbl_eval", ops)
             state_ix[ops[1]] = exec_tbl_eval(op_tokens, ops, state_ix, dict_ix)
     elif ops[0] == 3:
         step_model_link(ops, state_ix, ts_ix, step)
@@ -661,24 +665,11 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
 
 
 @njit 
-def test_model(op_tokens, state_ix, dict_ix, ts_ix, step):
+def test_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     val = 0
-    for i in op_tokens.keys():
+    for i in model_exec_list:
         print(i)
         print(op_tokens[i][0])
-        if op_tokens[i][0] == 0:
-            state_ix[i] = exec_model_object(op_tokens[i], state_ix, dict_ix)
-        elif op_tokens[i][0] == 1:
-            state_ix[i] = step_equation(op_tokens[i], state_ix)
-        elif op_tokens[i][0] == 2:
-            state_ix[i] = exec_tbl_values(op_tokens[i], state_ix, dict_ix)
-        elif op_tokens[i][0] == 3:
-            step_model_link(op_tokens[i], state_ix, ts_ix, step)
-        elif op_tokens[i][0] == 4:
-            val = 0
-        elif op_tokens[i][0] == 5:
-            step_sim_timer(op_tokens[i], state_ix, dict_ix, ts_ix, step)
-        elif op_tokens[i][0] == 8:
-            # since this accesses other table objects, gotta pass the entire op_tokens Dict 
-            state_ix[i] = exec_tbl_eval(op_tokens, op_tokens[i], state_ix, dict_ix)
+        print(op_tokens[i])
+        step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
     return 

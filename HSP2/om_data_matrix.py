@@ -63,14 +63,15 @@ class DataMatrix(ModelObject):
         # self.matrix_tokens = np.zeros(self.nrows * self.ncols, dtype=int ) 
         # set of default values to populate dict_ix
         self.matrix_values = np.zeros(data_matrix.shape)
+        # get and stash the variable name (could be numeric?) inputs for row and col lookup var (keycols1 and 2)
+        self.keycol1 = self.handle_prop(model_props, 'keycol1', True)
+        self.keycol2 = self.handle_prop(model_props, 'keycol2', True)
         if not self.mx_type > 0:
             # just a matrix of values, return.
             return 
-        self.key1_ix = self.constant_or_path('keycol1', self.handle_prop(model_props, 'keycol1', True), True )
-        self.lu_type1 = self.handle_prop(model_props, 'lutype1', True ) 
+        self.lu_type1 = int(self.handle_prop(model_props, 'lutype1', True ))
         if (self.mx_type > 1):
-            self.key2_ix = self.constant_or_path('keycol2', self.handle_prop(model_props, 'keycol2', True), True )
-            self.lu_type2 = self.handle_prop(model_props, 'lutype2', True ) 
+            self.lu_type2 = int(self.handle_prop(model_props, 'lutype2', True ) )
         else:
             self.key2_ix = 0
             self.lu_type2 = 0
@@ -84,6 +85,12 @@ class DataMatrix(ModelObject):
     
     def find_paths(self):
         super().find_paths()
+        self.key1_ix = self.constant_or_path(self.keycol1, self.keycol1, False )
+        if (self.mx_type > 1):
+          self.key2_ix = self.constant_or_path(self.keycol1, self.keycol2, False )
+        else:
+            self.key2_ix = 0
+            self.lu_type2 = 0
         self.paths_found = False # override parent setting until we verify everything
         self.matrix_tokens = [] # reset this in case it is called multiple times
         for i in range(self.nrows):
@@ -186,6 +193,9 @@ def table_lookup(data_table, keyval, lu_type, valcol):
         luval = data_table[:, valcol][0:][idx]
     elif lu_type == 1: # interpolate
         luval = np.interp(keyval,data_table[:, 0][0:], data_table[:, valcol][0:])
+    elif lu_type == 0: # exact match
+        lurow = table_row_lookup(data_table, keyval, lu_type)
+        luval = lurow[valcol]
     
     # show value at this point
     return luval
@@ -209,6 +219,7 @@ def exec_tbl_values(op, state_ix, dict_ix):
 def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     # Note: these indices must be adjusted to reflect the number of common op tokens
     # check this first, if it is type = 0, then it is just a matrix, and only needs to be loaded, not evaluated
+    #print("Called exec_tbl_eval, with ops=", op)
     ix = op[1]
     dix = op[2]
     tbl_op = op_tokens[dix]
@@ -224,7 +235,40 @@ def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     lu_type2 = op[9]
     data_table = dict_ix[dix]
     keyval1 = state_ix[key1_ix]
-    keyval2 = state_ix[key2_ix]
+    if key2_ix != 0:
+        keyval2 = state_ix[key2_ix]
+    else:
+        keyval2 = 0
     #print("keyval1, lu_type1, keyval2, lu_type2, ncols", keyval1, lu_type1, keyval2, lu_type2, ncols)
+    result = om_table_lookup(data_table, mx_type, ncols, keyval1, lu_type1, keyval2, lu_type2)
+    return result
+
+def debug_tbl_eval(op_tokens, op, state_ix, dict_ix):
+    # Note: these indices must be adjusted to reflect the number of common op tokens
+    # check this first, if it is type = 0, then it is just a matrix, and only needs to be loaded, not evaluated
+    ix = op[1]
+    dix = op[2]
+    tbl_op = op_tokens[dix]
+    print("Target Table ops:", tbl_op)
+    nrows = tbl_op[3]
+    ncols = tbl_op[4]
+    # load lookup infor for this accessor 
+    mx_type = op[5] # not used yet, what type of table?  in past this was always 1-d or 2-d 
+    key1_ix = op[6]
+    print("ix, dict_ix, mx_type, key1_ix", ix, dix, mx_type, key1_ix)
+    lu_type1 = op[7]
+    key2_ix = op[8]
+    lu_type2 = op[9]
+    print("lu_type1, key2_ix, lu_type2", lu_type1, key2_ix, lu_type2)
+    data_table = dict_ix[dix]
+    print("data_table", data_table)
+    print("key1_ix, key2_ix", key1_ix, key2_ix)
+    keyval1 = state_ix[key1_ix]
+    if key2_ix != 0:
+        keyval2 = state_ix[key2_ix]
+    else:
+        keyval2 = 0
+    print("key1_ix, key2_ix, keyval1, keyval2", key1_ix, key2_ix, keyval1, keyval2)
+    print("keyval1, lu_type1, keyval2, lu_type2, ncols", keyval1, lu_type1, keyval2, lu_type2, ncols)
     result = om_table_lookup(data_table, mx_type, ncols, keyval1, lu_type1, keyval2, lu_type2)
     return result
