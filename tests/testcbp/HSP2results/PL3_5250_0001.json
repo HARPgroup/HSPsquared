@@ -195,7 +195,7 @@
                     },
                     "equation": {
                         "name": "equation",
-                        "value": "17934"
+                        "value": "17934 * 1.0"
                     },
                     "exec_hierarch": {
                         "id": "7113544",
