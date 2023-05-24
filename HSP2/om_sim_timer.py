@@ -31,8 +31,8 @@ class SimTimer(ModelObject):
         wd_ix = set_state(self.state_ix, self.state_paths, "/STATE/weekday", float(self.time_array[0][7]))
         dt_ix = set_state(self.state_ix, self.state_paths, "/STATE/dt", float(self.time_array[0][8]))
         jd_ix = set_state(self.state_ix, self.state_paths, "/STATE/jday", float(self.time_array[0][9]))
-        jd_ix = set_state(self.state_ix, self.state_paths, "/STATE/modays", float(self.time_array[0][9]))
-        self.date_path_ix = [year_ix, month_ix, day_ix, hr_ix, min_ix, sec_ix, wd_ix, dt_ix, jd_ix]
+        md_ix = set_state(self.state_ix, self.state_paths, "/STATE/modays", float(self.time_array[0][10]))
+        self.date_path_ix = [year_ix, month_ix, day_ix, hr_ix, min_ix, sec_ix, wd_ix, dt_ix, jd_ix, md_ix]
         self.dict_ix[self.ix] = self.time_array
         
         return self.ix
