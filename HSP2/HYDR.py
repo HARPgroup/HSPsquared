@@ -298,7 +298,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
     # other initial vars 
     rovol = 0.0 
     volev = 0.0 
-    
+    ctr = 0
     # Prepare specl
     model_exec_list = op_tokens[0] # this is reserved for the order list - prolly a lousy idea but so many args...
 
@@ -306,18 +306,30 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
     for step in range(steps):
         # set state_ix with value of local state variables and/or needed vars 
         # Note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
+        if ctr == 0:
+            print("Initial load of outdgt before step ", step)
         state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix]= outdgt[0], outdgt[1], outdgt[2]
+        if ctr == 1:
+            print("Initial load of ro and rovol before step ", step)
         state_ix[ro_ix], state_ix[rovol_ix] = ro, rovol 
+        if ctr == 1:
+            print("Initial load of outdgt before step ", step)
         state_ix[vol_ix], state_ix[ivol_ix] = vol, IVOL0[step]
         state_ix[volev_ix] = volev
+        
         if step == 2:
-            print("IVOL (with hydr_ix =", ivol_ix, ") before step 2:", state_ix[ivol_ix])
+            print("IVOL (with hydr_ix =", ivol_ix, ") before pre_step 2:", state_ix[ivol_ix])
         # pre-step (initialize registers, etc.)
+        if ctr == 1:
+            print("calling pre_step_model ", step)
         pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
         # step: this is where all the major calculations happen
+        if ctr == 1:
+            print("calling step_model ", step)
         step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
         # Now update all writeable variables in _hydr_ space 
         # OUTDGT is writeable
+        ctr = ctr + 1
         outdgt[:] = [ state_ix[o1_ix], state_ix[o2_ix], state_ix[o3_ix] ]
         # IVOL is writeable. Note: we must convert IVOL to the units expected in _hydr_
         IVOL[step] = state_ix[ivol_ix] * VFACT
