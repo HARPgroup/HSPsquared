@@ -55,7 +55,7 @@ class SimTimer(ModelObject):
         dt = siminfo['delt']
         # sim timer is special, one entry for each time component for each timestep
         # convert DateIndex to numbers [int(i) for i in dateindex.year]
-        tdi = { 0: dateindex.astype(np.int64), 1:[float(i) for i in dateindex.year], 2:[float(i) for i in dateindex.month], 3:[float(i) for i in dateindex.day], 4:[float(i) for i in dateindex.hour], 5:[float(i) for i in dateindex.minute], 6:[float(i) for i in dateindex.second], 7:[float(i) for i in dateindex.weekday], 8:[float(dt) for i in dateindex], 9:[float(i) for i in dateindex.day_of_year] }
+        tdi = { 0: dateindex.astype(np.int64), 1:[float(i) for i in dateindex.year], 2:[float(i) for i in dateindex.month], 3:[float(i) for i in dateindex.day], 4:[float(i) for i in dateindex.hour], 5:[float(i) for i in dateindex.minute], 6:[float(i) for i in dateindex.second], 7:[float(i) for i in dateindex.weekday], 8:[float(dt) for i in dateindex], 9:[float(i) for i in dateindex.day_of_year], 10:[float(i) for i in dateindex.daysinmonth] }
         #tdi = { 0:dateindex.year, 1:dateindex.month, 2:dateindex.day, 3:dateindex.hour, 4:dateindex.minute, 5:dateindex.second }
         tid = DataFrame(tdi)
         h = 1 # added to increase row count for debug testing.
@@ -76,5 +76,6 @@ def step_sim_timer(op_token, state_ix, dict_ix, ts_ix, step):
     state_ix[op_token[8]] = dict_ix[op_token[1]][step][7] # weekday 
     state_ix[op_token[9]] = dict_ix[op_token[1]][step][8] # dt  
     state_ix[op_token[10]] = dict_ix[op_token[1]][step][9] # julian day  
+    state_ix[op_token[11]] = dict_ix[op_token[1]][step][10] # modays 
     return
 
