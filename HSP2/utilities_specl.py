@@ -388,7 +388,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
         print("Found local json file", fjson)
         jfile = open(fjson)
         model_data = json.load(jfile)
-    print("Loaded json with keys:", model_data.keys())
+    #print("Loaded json with keys:", model_data.keys())
     print("hdf5_path=", hdf5_path)
     # Opening JSON file from remote url
     # json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
@@ -416,7 +416,8 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
         print("IVOLin op_tokens ", op_tokens[ivol_ix])
         print("IVOLin state_ix = ", state_ix[ivol_ix])
     else:
-        print("Could not find",ivol_state_path,"in", state_paths)
+        print("Could not find",ivol_state_path)
+        #print("Could not find",ivol_state_path,"in", state_paths)
     return
 
 # model class reader
