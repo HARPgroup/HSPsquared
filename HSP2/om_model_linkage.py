@@ -30,7 +30,7 @@ class ModelLinkage(ModelObject):
             left_path = self.state_path 
         self.right_path = right_path
         self.left_path = left_path 
-        self.link_type = link_type broadcastChannel, 5 - ?
+        self.link_type = link_type 
         # this breaks for some reason, doesn't like the input name being different than the variable path ending?        
         self.add_input(self.right_path, self.right_path)
     
