@@ -323,7 +323,7 @@ from requests.auth import HTTPBasicAuth
 import csv
 import pandas as pd
 import os
-import imp
+import importlib
 import sys
 # function to dynamically load module, based on "Using imp module" in https://www.tutorialspoint.com/How-I-can-dynamically-import-Python-module#
 #def dynamic_module_import(module_name, class_name):
