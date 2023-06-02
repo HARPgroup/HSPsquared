@@ -325,8 +325,9 @@ import pandas as pd
 import os
 import imp
 import sys
-# function to dynamically load module
-def dynamic_module_import(module_name, class_name):
+# function to dynamically load module, based on "Using imp module" in https://www.tutorialspoint.com/How-I-can-dynamically-import-Python-module#
+#def dynamic_module_import(module_name, class_name):
+def dynamic_module_import(module_name):
     # find_module() is used to find the module in current directory
     # it gets the pointer, path and description of the module
     try:
@@ -339,11 +340,12 @@ def dynamic_module_import(module_name, class_name):
         load_module = imp.load_module(module_name, file_pointer, file_path, description)
     except Exception as e:
         print(e)
-    try:
-        load_class = imp.load_module("{}.{}".format(module_name, class_name), file_pointer, file_path, description)
-    except Exception as e:
-        print(e)
-    return load_module, load_class
+    #try:
+    #    load_class = imp.load_module("{}.{}".format(module_name, class_name), file_pointer, file_path, description)
+    #except Exception as e:
+    #    print(e)
+    #return load_module, load_class
+    return load_module
 
 
 def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
@@ -365,12 +367,15 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # try this
     hdf5_path = io_manager._input.file_path
     (fbase, fext) = os.path.splitext(hdf5_path)
+    # see if there is a code module with custom python 
+    #hsp2_local_py = dynamic_module_import(fbase)
+    # see if there is custom json
     fjson = fbase + ".json"
-    if (not os.path.isfile(fjson)):
-        print("Did not find json file", fjson, "returning")
-        return
-    jfile = open(fjson)
-    model_data = json.load(jfile)
+    model_data = []
+    if (os.path.isfile(fjson)):
+        print("Found local json file", fjson)
+        jfile = open(fjson)
+        model_data = json.load(jfile)
     print("Loaded json with keys:", model_data.keys())
     print("hdf5_path=", hdf5_path)
     # Opening JSON file from remote url
