@@ -371,7 +371,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     #hsp2_local_py = dynamic_module_import(fbase)
     # see if there is custom json
     fjson = fbase + ".json"
-    model_data = []
+    model_data = {}
     if (os.path.isfile(fjson)):
         print("Found local json file", fjson)
         jfile = open(fjson)
