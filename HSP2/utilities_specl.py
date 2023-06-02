@@ -399,6 +399,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     print("Tokenizing models")
     model_exec_list = []
     model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
+    print("model_exec_list:", model_exec_list)
     op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
     ivol_state_path = '/STATE/RCHRES_R001' + "/IVOLin"
     if (ivol_state_path in state_paths):
