@@ -372,7 +372,8 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     hdf5_path = io_manager._input.file_path
     (fbase, fext) = os.path.splitext(hdf5_path)
     # see if there is a code module with custom python 
-    #hsp2_local_py = dynamic_module_import(fbase)
+    print("Looking for custom python code ", (fbase + ".py"))
+    hsp2_local_py = dynamic_module_import(fbase)
     # see if there is custom json
     fjson = fbase + ".json"
     model_data = {}
