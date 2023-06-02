@@ -333,6 +333,7 @@ def dynamic_module_import(local_name, local_path, module_name):
     load_module = False
     local_spec = False
     try:
+        print ("Looking for local_name, local_path", local_name, local_path)
         local_spec = importlib.util.find_spec(local_name, local_path)
     except ImportError:
         print ("Imported module {} not found".format(local_name))
