@@ -391,18 +391,22 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     print("Loaded the following objects & paths")
     print("Insuring all paths are valid, and connecting models as inputs")
     model_path_loader(model_object_cache)
-    print("Tokenizing models")
-    model_root_object = model_object_cache["/STATE/RCHRES_R001"]
-    model_exec_list = []
-    model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
-    op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
-    if ("/STATE/RCHRES_R001/IVOLin" in state_paths):
-        ivol_ix = state_paths["/STATE/RCHRES_R001/IVOLin"]
-        #print("IVOLin found. state_paths = ", ivol_ix)
-        print("IVOLin op_tokens ", op_tokens[ivol_ix])
-        print("IVOLin state_ix = ", state_ix[ivol_ix])
-    else:
-        print("Could not find /STATE/RCHRES_R001/IVOLin in ", state_paths)
+    if (len(model_data.keys()) > 1):
+        # len() will be 1 if we only have a simtimer, but > 1 if we have a river being added
+        print("Tokenizing models")
+        model_root_path = list(model_object_cache.keys())[1]
+        model_root_object = model_object_cache[model_root_path]
+        model_exec_list = []
+        model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
+        op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
+        ivol_state_path = model_root_name + "/IVOLin"
+        if ((model_root_name + "/IVOLin") in state_paths):
+            ivol_ix = state_paths[ivol_state_path]
+            #print("IVOLin found. state_paths = ", ivol_ix)
+            print("IVOLin op_tokens ", op_tokens[ivol_ix])
+            print("IVOLin state_ix = ", state_ix[ivol_ix])
+        else:
+            print("Could not find",ivol_state_path,"in", state_paths)
     return
 
 # model class reader
