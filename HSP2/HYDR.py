@@ -142,7 +142,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     
     ###########################################################################
     #print("Calling new _hydr_ with specl, and ts keys:", ts.keys())
-    print("state paths", state_paths)
+    #print("state paths", state_paths)
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
     # dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/Qtrib")
     # print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
