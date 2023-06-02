@@ -327,13 +327,13 @@ import importlib
 import sys
 # function to dynamically load module, based on "Using imp module" in https://www.tutorialspoint.com/How-I-can-dynamically-import-Python-module#
 #def dynamic_module_import(module_name, class_name):
-def dynamic_module_import(local_name, module_name):
+def dynamic_module_import(local_name, local_path, module_name):
     # find_module() is used to find the module in current directory
     # it gets the pointer, path and description of the module
     load_module = False
     local_spec = False
     try:
-        local_spec = importlib.util.find_spec(local_name)
+        local_spec = importlib.util.find_spec(local_name, local_path)
     except ImportError:
         print ("Imported module {} not found".format(local_name))
     try:
@@ -372,14 +372,14 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # Opening JSON file
     # load the json data from a pre-generated json file on github
     
-    print(os.getcwd())
-    
+    local_path = os.getcwd()
+    print("Path:", local_path)
     # try this
     hdf5_path = io_manager._input.file_path
     (fbase, fext) = os.path.splitext(hdf5_path)
     # see if there is a code module with custom python 
     print("Looking for custom python code ", (fbase + ".py"))
-    hsp2_local_py = dynamic_module_import(fbase, "hsp2_local_py")
+    hsp2_local_py = dynamic_module_import(fbase, local_path, "hsp2_local_py")
     # see if there is custom json
     fjson = fbase + ".json"
     model_data = {}
