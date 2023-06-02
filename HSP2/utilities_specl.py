@@ -330,6 +330,8 @@ import sys
 def dynamic_module_import(module_name):
     # find_module() is used to find the module in current directory
     # it gets the pointer, path and description of the module
+    load_module = False
+    file_pointer = False
     try:
         file_pointer, file_path, description = imp.find_module(module_name)
     except ImportError:
@@ -337,7 +339,8 @@ def dynamic_module_import(module_name):
     try:
         # load_module dynamically loads the module
         # the parameters are pointer, path and description of the module 
-        load_module = imp.load_module(module_name, file_pointer, file_path, description)
+        if (file_pointer != False):
+            load_module = imp.load_module(module_name, file_pointer, file_path, description)
     except Exception as e:
         print(e)
     #try:
