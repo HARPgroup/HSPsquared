@@ -142,6 +142,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     
     ###########################################################################
     #print("Calling new _hydr_ with specl, and ts keys:", ts.keys())
+    print("state paths", state_paths)
     errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, op_tokens, state_ix, dict_ix, ts_ix, hydr_ix)                  # run reaches simulation code
     # dma_ix = get_state_ix(state_ix, state_paths, "/STATE/RCHRES_R001/Qtrib")
     # print("Final state value for Qtrib (", dma_ix,")", state_ix[dma_ix])
@@ -301,7 +302,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, op_tokens
     ctr = 0
     # Prepare specl
     model_exec_list = op_tokens[0] # this is reserved for the order list - prolly a lousy idea but so many args...
-
+    print("state values", state_ix)
     # HYDR (except where noted)
     for step in range(steps):
         # set state_ix with value of local state variables and/or needed vars 
