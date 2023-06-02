@@ -389,9 +389,9 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # returns JSON object as Dict
     # returns JSON object as Dict
     #model_exec_list = np.asarray([])
-    container = False 
+    #container = False 
     # call it!
-    model_loader_recursive(model_data, container)
+    model_loader_recursive(model_data, model_root_object)
     print("Loaded the following objects & paths")
     print("Insuring all paths are valid, and connecting models as inputs")
     model_path_loader(model_object_cache)
