@@ -322,7 +322,29 @@ import requests
 from requests.auth import HTTPBasicAuth
 import csv
 import pandas as pd
-import os.path
+import os
+import imp
+import sys
+# function to dynamically load module
+def dynamic_module_import(module_name, class_name):
+    # find_module() is used to find the module in current directory
+    # it gets the pointer, path and description of the module
+    try:
+        file_pointer, file_path, description = imp.find_module(module_name)
+    except ImportError:
+        print ("Imported module {} not found".format(module_name))
+    try:
+        # load_module dynamically loads the module
+        # the parameters are pointer, path and description of the module 
+        load_module = imp.load_module(module_name, file_pointer, file_path, description)
+    except Exception as e:
+        print(e)
+    try:
+        load_class = imp.load_module("{}.{}".format(module_name, class_name), file_pointer, file_path, description)
+    except Exception as e:
+        print(e)
+    return load_module, load_class
+
 
 def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # set globals on ModelObject
@@ -337,6 +359,8 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # a json NHD from R parser
     # Opening JSON file
     # load the json data from a pre-generated json file on github
+    
+    print(os.getcwd())
     
     # try this
     hdf5_path = io_manager._input.file_path

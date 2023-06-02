@@ -34,7 +34,7 @@ steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
 
 src_json_node = 'http://deq1.bse.vt.edu/d.dh/node/62'
-el_pid = 7113514 # Greenville County New Reservoir: 5356344, CHesdin WTP: 4828385, new Chesdin 6.4 7113514
+el_pid = 7113514 # Greenville County New Reservoir: 5356344, Chesdin WTP: 4828385, new Chesdin 6.4 7113514, Crozet BC 
 json_url = src_json_node + "/" + str(el_pid)
 # authentication using rest un and pw
 jfile = open("/var/www/python/auth.private")

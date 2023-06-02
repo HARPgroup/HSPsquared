@@ -200,8 +200,19 @@ def table_lookup(data_table, keyval, lu_type, valcol):
     # show value at this point
     return luval
 
+
+"""
+exec_tbl_values() updates the values in the dict_ix state for a data matrix as it may contain named variables 
+- todo: determine if time savings can be achieved by storing state references for ONLY variable names in matrices
+        Since we currently tokenize every item in the dict_ix and copy it from state_ix every timestep
+        regardless of whether it is an actual named variable reference or a static numeric value.
+        See if speed increases by storing a series of row,col,ix ops for ONLY those entries that are 
+        actual variable references, instead of the current method of storing a ix pointer for every single 
+        matrix cell.
+"""
 @njit
 def exec_tbl_values(op, state_ix, dict_ix):
+    # this f
     ix = op[1]
     data_matrix = dict_ix[ix]
     nrows = op[3]

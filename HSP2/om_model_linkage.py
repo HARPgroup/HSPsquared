@@ -10,15 +10,17 @@ class ModelLinkage(ModelObject):
     def __init__(self, name, container = False, right_path = '', link_type = 1, left_path = False):
         super(ModelLinkage, self).__init__(name, container)
         # ModelLinkage copies a values from right to left
-        # right_path is the data source for the link 
-        # left_path is the destination of the link 
-        # left_path is implicit in types 1-3, i.e., the ModelLinkage object path itself is the left_path 
-        # left_path parameter is only needed for pushes (type 4 and 5)
-        # the push is functionally equivalent to a pull whose path resolves to the specified left_path  
-        # but the push allows the potential for multiple objects to set a single state 
-        # This can be dangerous or difficult to debug, but essential to replicate old HSPF behaviour
-        # especially in the case of If/Then type structures.
-        # it is also useful for the broadcast objects, see om_model_broadcast for those 
+        # right_path: is the data source for the link 
+        # left_path: is the destination of the link 
+        # left_path: is implicit in types 1-3, i.e., the ModelLinkage object path itself is the left_path 
+        #   - left_path parameter is only needed for pushes (type 4 and 5)
+        #   - the push is functionally equivalent to a pull whose path resolves to the specified left_path  
+        #   - but the push allows the potential for multiple objects to set a single state 
+        #     This can be dangerous or difficult to debug, but essential to replicate old HSPF behaviour
+        #     especially in the case of If/Then type structures.
+        #     it is also useful for the broadcast objects, see om_model_broadcast for those 
+        # link_type: 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
+        self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - 
         if container == False:
             # this is required
             print("Error: a link must have a container object to serve as the destination")
@@ -28,8 +30,7 @@ class ModelLinkage(ModelObject):
             left_path = self.state_path 
         self.right_path = right_path
         self.left_path = left_path 
-        self.link_type = link_type # 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
-        self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - broadcastChannel, 5 - ?
+        self.link_type = link_type broadcastChannel, 5 - ?
         # this breaks for some reason, doesn't like the input name being different than the variable path ending?        
         self.add_input(self.right_path, self.right_path)
     
