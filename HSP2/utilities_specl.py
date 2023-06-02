@@ -351,12 +351,12 @@ def dynamic_module_import(module_name):
 def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # set globals on ModelObject
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
-    # set up the timer as the first element 
-    timer = SimTimer('timer', False, siminfo)
     # Create the base that everything is added to.
     # this object does nothing except host the rest.
     # it has no name so that all paths can be relative to it.
     model_root_object = ModelObject("") 
+    # set up the timer as the first element 
+    timer = SimTimer('timer', model_root_object, siminfo)
     #timer.add_op_tokens()
     #print("siminfo:", siminfo)
     #river = ModelObject('RCHRES_R001')
