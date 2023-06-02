@@ -340,6 +340,7 @@ def dynamic_module_import(local_name, module_name):
         # load_module dynamically loads the module
         # the parameters are pointer, path and description of the module 
         if (local_spec != False):
+            print("local_spec = ", local_spec)
             module = importlib.util.module_from_spec(local_spec)
             sys.modules[module_name] = module
             local_spec.loader.exec_module(module)
