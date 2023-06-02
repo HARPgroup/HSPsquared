@@ -331,16 +331,15 @@ def dynamic_module_import(local_name, module_name):
     # find_module() is used to find the module in current directory
     # it gets the pointer, path and description of the module
     load_module = False
-    file_pointer = False
+    local_spec = False
     try:
-        file_pointer, file_path, description = imp.find_module(local_name)
+        local_spec = importlib.util.find_spec(local_name)
     except ImportError:
         print ("Imported module {} not found".format(local_name))
     try:
         # load_module dynamically loads the module
         # the parameters are pointer, path and description of the module 
-        if (file_pointer != False):
-            local_spec = importlib.util.find_spec(local_name)
+        if (local_spec != False):
             module = importlib.util.module_from_spec(local_spec)
             sys.modules[module_name] = module
             local_spec.loader.exec_module(module)
