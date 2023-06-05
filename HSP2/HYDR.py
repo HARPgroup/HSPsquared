@@ -158,7 +158,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     # save initial outflow(s) from reach:
     uci['PARAMETERS']['ROS'] = ui['ROS']
 
-    return errors, ERRMSGS`
+    return errors, ERRMSGS
 
 
 @njit(cache=True)
