@@ -73,6 +73,10 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     gener_instances = {}
     # Data model for dynamic simulation and linking support and special actions
     state = {} # shared state Dictionary, contains numba-ready Dicts 
+    # Add crucial simulation info for dynamic operation support
+    siminfo['delt'] = delt
+    siminfo['tindex'] = date_range(start, stop, freq=Minute(delt))[1:]
+    siminfo['steps'] = len(siminfo['tindex'])
     # Set up Things in state that will be used in all modular activitis like SPECL
     op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = init_sim_dicts()
     # Now, load any OM components if present, and store variables on objects 
@@ -81,10 +85,6 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['model_object_cache']  = op_tokens, state_paths, state_ix, dict_ix, model_object_cache
     # finally stash specactions in state, these are not domain (segment) dependent so do it in advance
     state['specactions'] = specactions # stash the specaction dict in state
-    # Add crucial simulation info for dynamic operation support
-    siminfo['delt'] = delt
-    siminfo['tindex'] = date_range(start, stop, freq=Minute(delt))[1:]
-    siminfo['steps'] = len(siminfo['tindex'])
 
     # main processing loop
     msg(1, f'Simulation Start: {start}, Stop: {stop}')
