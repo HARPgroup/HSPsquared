@@ -382,9 +382,7 @@ def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_
     # see if there is a code module with custom python 
     print("Looking for custom python code ", (fbase + ".py"))
     print("calling dynamic_module_import(",fbase, local_path, ", 'hsp2_local_py')")
-    hsp2_local_py = dynamic_module_import(fbase, local_path, "hsp2_local_py")
-    print("calling with Nonee dynamic_module_import(",fbase, None, ", 'hsp2_local_py')")
-    hsp2_local_py = dynamic_module_import(fbase, None, "hsp2_local_py")
+    hsp2_local_py = dynamic_module_import(fbase + ".py", local_path, "hsp2_local_py")
     # see if there is custom json
     fjson = fbase + ".json"
     model_data = {}
