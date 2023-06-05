@@ -334,7 +334,6 @@ def dynamic_module_import(local_name, local_path, module_name):
     local_spec = False
     try:
         print ("Looking for local_name, local_path", local_name, local_path)
-        #local_spec = importlib.util.find_spec(local_name, local_path)
         local_spec = importlib.util.spec_from_file_location(local_name, local_path)
     except ImportError:
         print ("Imported module {} not found".format(local_name))
@@ -356,7 +355,7 @@ def dynamic_module_import(local_name, local_path, module_name):
     return load_module
 
 
-def load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
+def load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # set globals on ModelObject
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # Create the base that everything is added to.

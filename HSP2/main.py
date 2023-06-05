@@ -69,6 +69,16 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
 
     copy_instances = {}
     gener_instances = {}
+    # Data model for dynamic simulation and linking support and special actions
+    state = {} # shared state Dictionary, contains numba-ready Dicts 
+    # Set up Things in state that will be used in all modular activitis like SPECL
+    op_tokens, state_paths, state_ix, dict_ix, model_object_cache = init_sim_dicts(state)
+    # Now, load any OM components if present, and store variables on objects 
+    load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
+    # now put all of these Dicts into the state Dict 
+    state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['model_object_cache']  = op_tokens, state_paths, state_ix, dict_ix, model_object_cache
+    # finally stash specactions in state, these are not domain (segment) dependent so do it in advance
+    state['specactions'] = specactions # stash the specaction dict in state
 
     # main processing loop
     msg(1, f'Simulation Start: {start}, Stop: {stop}')
@@ -78,7 +88,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
         siminfo['delt'] = delt
         siminfo['tindex'] = date_range(start, stop, freq=Minute(delt))[1:]
         siminfo['steps'] = len(siminfo['tindex'])
-
+        
         if operation == 'COPY':
             copy_instances[segment] = activities[operation](io_manager, siminfo, ddext_sources[(operation,segment)]) 
         elif operation == 'GENER':
@@ -114,6 +124,11 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                     continue
 
                 msg(3, f'{activity}')
+                # give shortcut to state path for the upcoming function 
+                state['operation'] = operation # Context for dynamic executables.
+                state['segment'] = segment # Context for dynamic executables.
+                state['function'] = function # Context for dynamic executables.
+                state['domain'] = "/STATE/" + operation + "_" + segment + "/" function 
 
                 ui = uci[(operation, activity, segment)]   # ui is a dictionary
                 #print(ui)
@@ -223,7 +238,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                 ############ calls activity function like snow() ##############
                 if operation not in ['COPY','GENER']:
                     if (activity == 'HYDR'):
-                        errors, errmessages = function(io_manager, siminfo, ui, ts, ftables, specactions)
+                        errors, errmessages = function(io_manager, siminfo, ui, ts, ftables, state)
                         # errors, errmessages = function(io_manager, siminfo, ui, ts, ftables)
                     elif (activity != 'RQUAL'):
                         errors, errmessages = function(io_manager, siminfo, ui, ts)
