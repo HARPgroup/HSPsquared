@@ -10,6 +10,8 @@ from numba.typed import Dict
 from pandas import DataFrame, date_range
 from pandas.tseries.offsets import Minute
 from datetime import datetime as dt
+from HSP2.utilities_specl import *
+from HSP2.SPECL import specl, _specl_
 import os
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 # from HSP2.utilities_specl import init_sim_dicts
