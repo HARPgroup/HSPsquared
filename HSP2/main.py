@@ -74,7 +74,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     # Data model for dynamic simulation and linking support and special actions
     state = {} # shared state Dictionary, contains numba-ready Dicts 
     # Set up Things in state that will be used in all modular activitis like SPECL
-    op_tokens, state_paths, state_ix, dict_ix, model_object_cache = init_sim_dicts(state)
+    op_tokens, state_paths, state_ix, dict_ix, model_object_cache = init_sim_dicts()
     # Now, load any OM components if present, and store variables on objects 
     load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
     # now put all of these Dicts into the state Dict 
