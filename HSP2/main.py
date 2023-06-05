@@ -81,15 +81,16 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['model_object_cache']  = op_tokens, state_paths, state_ix, dict_ix, model_object_cache
     # finally stash specactions in state, these are not domain (segment) dependent so do it in advance
     state['specactions'] = specactions # stash the specaction dict in state
+    # Add crucial simulation info for dynamic operation support
+    siminfo['delt'] = delt
+    siminfo['tindex'] = date_range(start, stop, freq=Minute(delt))[1:]
+    siminfo['steps'] = len(siminfo['tindex'])
 
     # main processing loop
     msg(1, f'Simulation Start: {start}, Stop: {stop}')
     tscat = {}
     for _, operation, segment, delt in opseq.itertuples():
         msg(2, f'{operation} {segment} DELT(minutes): {delt}')
-        siminfo['delt'] = delt
-        siminfo['tindex'] = date_range(start, stop, freq=Minute(delt))[1:]
-        siminfo['steps'] = len(siminfo['tindex'])
         
         if operation == 'COPY':
             copy_instances[segment] = activities[operation](io_manager, siminfo, ddext_sources[(operation,segment)]) 
