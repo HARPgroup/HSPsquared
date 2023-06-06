@@ -133,13 +133,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     domain = state['domain'] # any objects that are connected to this object should be loaded
     op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'], state['model_object_cache']
     hydr_ix = hydr_get_ix(state_ix, state_paths, domain)
-    #load_sim_dicts(siminfo, op_tokens, state_paths, stateerZAaz_ix, dict_ix, ts_ix)
-    load_nhd_simple(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
-    # debug
-    # add things from UCI as needed
-    # - we will have to auto-detect during parsing/tokenization to come up with a list
-    # - this will be critical for such things like SPECL that changes monthly distributions for things like PERLND
-
+    
     ###########################################################################
     #print("Calling new _hydr_ with specl, and ts keys:", ts.keys())
     #print("state paths", state_paths)
