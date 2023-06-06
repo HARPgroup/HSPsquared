@@ -82,7 +82,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     # Now, load any OM components if present, and store variables on objects 
     load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
     # now put all of these Dicts into the state Dict 
-    state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['model_object_cache']  = op_tokens, state_paths, state_ix, dict_ix, model_object_cache
+    state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'], state['model_object_cache']  = op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache
     # finally stash specactions in state, these are not domain (segment) dependent so do it in advance
     state['specactions'] = specactions # stash the specaction dict in state
 
