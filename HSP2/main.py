@@ -55,7 +55,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     specactions = uci_obj.specactions
     monthdata = uci_obj.monthdata
     specactions = {} # placeholder till added to uci parser
-    print('uci',uci_obj)
+    print('uci_obj.opseq.keys', uci_obj.opseq.keys())
     #######################################################################################
     # initilize specactions dicts
     # need to determine the best way to do send these dicts to HYDR, a nested dictionary 
