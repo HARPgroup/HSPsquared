@@ -60,6 +60,32 @@ def is_float_digit(n: str) -> bool:
         return False
 
 
+def init_om_dicts():
+    """
+    The base dictionaries used to store model object info 
+    """
+    op_tokens = Dict.empty(key_type=types.int64, value_type=types.i8[:])
+    model_object_cache = {} # this does not need to be a special Dict as it is not used in numba 
+    return op_tokens, model_object_cache
+
+# This is deprecated but kept to support legacy demo code 
+# Function is not splot between 2 functions:
+# - init_state_dicts() (from state.py) 
+# - init_om_dicsts() from om.py 
+def init_sim_dicts():
+    """
+    We should get really good at using docstrings...
+    Agree. they are dope.
+    """
+    op_tokens = Dict.empty(key_type=types.int64, value_type=types.i8[:])
+    state_paths = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
+    state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
+    dict_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:,:])
+    ts_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:])
+    model_object_cache = {} # this does not need to be a special Dict as it is not used in numba 
+    return op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache
+
+
 def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
     # by setting the state_parhs, opt_tokens, state_ix etc on the abstract class ModelObject
     # all objects that we create share this as a global referenced variable.  
