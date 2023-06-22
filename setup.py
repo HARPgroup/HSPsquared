@@ -69,11 +69,9 @@ def process_env_yaml(fname, dev=False):
 
 
 install_requires = process_env_yaml("environment.yml")
-print("Install req:", install_requires)
 extras_require = {
     "dev": process_env_yaml("environment_dev.yml", dev=True) + ["cleanpy", "twine"]
 }
-print("EX Req:", extras_require)
 
 setup(
     name="HSPsquared",
