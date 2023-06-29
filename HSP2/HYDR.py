@@ -58,6 +58,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
         AFACT = 10000.0
 
     u = uci['PARAMETERS']
+    print("UCI Parameters", u)
     funct  = array([u[name] for name in u.keys() if name.startswith('FUNCT')]).astype(int)[0:nexits]
     ODGTF  = array([u[name] for name in u.keys() if name.startswith('ODGTF')]).astype(int)[0:nexits]
     ODFVF  = array([u[name] for name in u.keys() if name.startswith('ODFVF')]).astype(int)[0:nexits]
