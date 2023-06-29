@@ -18,7 +18,7 @@ from math import sqrt, log10
 from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
-from HSP2.SPECL import specl, _specl_
+from HSP2.SPECL import specl
 
 ERRMSGS =('HYDR: SOLVE equations are indeterminate',             #ERRMSG0
           'HYDR: extrapolation of rchtab will take place',       #ERRMSG1
@@ -30,7 +30,7 @@ TOLERANCE = 0.001   # newton method max loops
 MAXLOOPS  = 100     # newton method exit tolerance
 
 
-def hydr(io_manager, siminfo, uci, ts, ftables):
+def hydr(io_manager, siminfo, uci, ts, ftables, specactions):
     ''' find the state of the reach/reservoir at the end of the time interval
     and the outflows during the interval
 
@@ -117,9 +117,11 @@ def hydr(io_manager, siminfo, uci, ts, ftables):
     for i in range(nexits):
         Olabels.append(f'O{i+1}')
         OVOLlabels.append(f'OVOL{i+1}')
+    # specactions - special actions code TBD
+    specactions = make_numba_dict(specactions) # Note: all values coverted to float automatically
 
     ###########################################################################
-    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels)                  # run reaches simulation code
+    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, specactions)                  # run reaches simulation code
     ###########################################################################
 
     if 'O'    in ts:  del ts['O']
@@ -132,7 +134,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables):
 
 
 @njit(cache=True)
-def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels):
+def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, specactions):
     errors = zeros(int(ui['errlen'])).astype(int64)
 
     steps  = int(ui['steps'])            # number of simulation steps
