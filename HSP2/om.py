@@ -262,7 +262,8 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     # set globals on ModelObject
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # Create the base that everything is added to.
-    # this object does nothing except host the rest.HSP
+    # this object does nothing except host the rest.
+    model_root_object = ModelObject("") 
     # set up the timer as the first element 
     timer = SimTimer('timer', model_root_object, siminfo)
     # Opening JSON file
