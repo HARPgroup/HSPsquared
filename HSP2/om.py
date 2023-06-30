@@ -25,16 +25,6 @@ from numpy import zeros
 from numba import int8, float32, njit, types, typed # import the types
 import random # this is only used for a demo so may be deprecated
 
-def is_float_digit(n: str) -> bool:
-    """
-    Helper Function to determine if a variable is numeric
-    """
-    try:
-        float(n)
-        return True
-    except ValueError:
-        return False
-
 def get_exec_order(model_exec_list, var_ix):
     """
     Find the integer key of a variable name in state_ix 
