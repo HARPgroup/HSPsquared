@@ -16,11 +16,11 @@ The class DataMatrix is used to translate provide table lookup and interpolation
   # todo: at parse time, we can create these variables as children on this object
   # self.op_matrix = [] # this is the final opcoded matrix for runtime
 """
+from numba import njit
+import numpy as np
 from HSP2.state import *
 from HSP2.om import *
 from HSP2.om_model_object import *
-from numba import njit
-import numpy as np
 
 class DataMatrix(ModelObject):
     def __init__(self, name, container = False, model_props = []):
