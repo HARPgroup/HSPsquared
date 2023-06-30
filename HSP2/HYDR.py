@@ -158,9 +158,14 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     specactions = make_numba_dict(state['specactions']) # Note: all values coverted to float automatically
     
     ###########################################################################
+    # OM - load the tokens to pass in.
+    ###########################################################################
+    op_tokens = state['op_tokens'] 
+    
+    ###########################################################################
     # Do the simulation with _hydr_()
     ###########################################################################
-    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, state_info, state_paths, state_ix, dict_ix, ts_ix, specactions, state_step_hydr) # run reaches simulation code
+    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, state_info, state_paths, state_ix, dict_ix, ts_ix, specactions, state_step_hydr, op_tokens) # run reaches simulation code
     ###########################################################################
 
     if 'O'    in ts:  del ts['O']

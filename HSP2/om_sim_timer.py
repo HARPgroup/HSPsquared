@@ -3,7 +3,7 @@ The class SimTimer is used to translate copy data from one state location to ano
 It is also used to make an implicit parent child link to insure that an object is loaded
 during a model simulation.
 """
-from HSP2.utilities_specl import *
+from HSP2.state import *
 from HSP2.om_model_object import ModelObject
 from pandas import DataFrame, DatetimeIndex
 from numba import njit
