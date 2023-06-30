@@ -293,9 +293,9 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     # the resulting set of objects is returned.
     state['model_object_cache'] = model_object_cache
     state['op_tokens'] = op_tokens
-    state['state_step_om'] = False
+    state['state_step_om'] = 'disabled'
     if len(op_tokens) > 0:
-        state['state_step_om'] = True 
+        state['state_step_om'] = 'enabled' 
     return
 
 # model class reader
