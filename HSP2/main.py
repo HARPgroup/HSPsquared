@@ -67,6 +67,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     # Add support for dynamic functins to operate on STATE
     # - Load any dynamic components if present, and store variables on objects 
     state_load_dynamics_hsp2(state, io_manager, siminfo)
+    state_load_dynamics_om(state, io_manager, siminfo)
     # - finally stash specactions in state, not domain (segment) dependent so do it once
     state['specactions'] = specactions # stash the specaction dict in state
     #######################################################################################
