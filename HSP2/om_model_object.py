@@ -155,6 +155,7 @@ class ModelObject:
         return False
     
     def constant_or_path(self, keyname, keyval, trust = False):
+        print("dir", dir("om"))
         print("Called constant_or_path with", keyname, " = ", keyval)
         if is_float_digit(keyval):
             # we are given a constant value, not a variable reference 
