@@ -344,6 +344,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
         # Execute dynamic code if enabled
         # - these if statements may be irrelevant if default functions simply return 
         #   when no objects are defined.
+        print(state_info)
         if (state_info['state_step_om'] == 'enabled'):
             pre_step_model(op_tokens[0], op_tokens, state_ix, dict_ix, ts_ix, step)
         if (state_info['state_step_hydr'] == 'enabled'):
