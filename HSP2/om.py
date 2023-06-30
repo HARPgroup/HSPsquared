@@ -9,21 +9,14 @@ import requests
 from requests.auth import HTTPBasicAuth
 import csv
 import pandas as pd
-from HSP2.state import *
-from HSP2.om_model_object import *
-from HSP2.om_sim_timer import *
-from HSP2.om_equation import *
-from HSP2.om_model_linkage import *
-from HSP2.om_data_matrix import *
-from HSP2.om_model_broadcast import *
-from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
-
 import numpy as np
 import time
 from numba.typed import Dict
 from numpy import zeros
 from numba import int8, float32, njit, types, typed # import the types
 import random # this is only used for a demo so may be deprecated
+from HSP2.state import *
+
 
 def get_exec_order(model_exec_list, var_ix):
     """
@@ -59,6 +52,13 @@ def is_float_digit(n: str) -> bool:
     except ValueError:
         return False
 
+from HSP2.om_model_object import *
+from HSP2.om_sim_timer import *
+from HSP2.om_equation import *
+from HSP2.om_model_linkage import *
+from HSP2.om_data_matrix import *
+from HSP2.om_model_broadcast import *
+from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
 def init_om_dicts():
     """

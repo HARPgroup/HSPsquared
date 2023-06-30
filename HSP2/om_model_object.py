@@ -3,8 +3,8 @@ The class ModelObject is the base class upon which all other dynamic model objec
 It handles all Dict management functions, but provides for no runtime execution of it's own.
 All runtime exec is done by child classes.
 """
-from HSP2.state import *
 from HSP2.om import *
+from HSP2.state import *
 from pandas import Series, DataFrame, concat, HDFStore, set_option, to_numeric
 from pandas import Timestamp, Timedelta, read_hdf, read_csv
 
@@ -155,8 +155,7 @@ class ModelObject:
         return False
     
     def constant_or_path(self, keyname, keyval, trust = False):
-        print("dir", dir("om"))
-        print("Called constant_or_path with", keyname, " = ", keyval)
+        #print("Called constant_or_path with", keyname, " = ", keyval)
         if is_float_digit(keyval):
             # we are given a constant value, not a variable reference 
             #print("Creating constant ", keyname, " = ", keyval)
