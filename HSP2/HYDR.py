@@ -327,9 +327,23 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
             state_ix[out_ix[oi]] = outdgt[oi] 
         state_ix[vol_ix], state_ix[ivol_ix] = vol, IVOL0[step]
         state_ix[volev_ix] = volev
+        # *****************************************
         # Execute dynamic code if enabled
+        # - these if statements may be irrelevant if default functions simply return 
+        #   when no objects are defined.
+        if (state_info['state_step_om'] == 'enabled'):
+            pre_step_model(op_tokens[0], op_tokens, state_ix, dict_ix, ts_ix, step)
         if (state_info['state_step_hydr'] == 'enabled'):
             state_step_hydr(state_info, state_paths, state_ix, dict_ix, ts_ix, hydr_ix, step)
+        # Execute dynamic code if enabled
+        if (state_info['state_step_om'] == 'enabled'):
+            # op_tokens[0] contains the model exec list.  Later we may amend this 
+            # perhaps even storing a domain specific exec list under domain/exec_list?
+            step_model(op_tokens[0], op_tokens, state_ix, dict_ix, ts_ix, step)
+        # Execute dynamic code if enabled
+        if ( (state_info['state_step_hydr'] == 'enabled') 
+            or (state_info['state_step_om'] == 'enabled') 
+        ):
             # Do write-backs for editable STATE variables
             # OUTDGT is writeable
             for oi in range(nexits):
@@ -338,6 +352,8 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
             # Note: we must convert IVOL to the units expected in _hydr_ 
             # maybe routines should do this, and this is not needed (but pass VFACT in state)
             IVOL[step] = state_ix[ivol_ix] * VFACT
+        # End dynamic code step()
+        # *****************************************
         # vols, sas variables and their initializations  not needed.
         if irexit >= 0:             # irrigation exit is set, zero based number
             if rirwdl > 0.0:  # equivalent to OVOL for the irrigation exit

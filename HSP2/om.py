@@ -71,7 +71,7 @@ def init_om_dicts():
 # This is deprecated but kept to support legacy demo code 
 # Function is not splot between 2 functions:
 # - init_state_dicts() (from state.py) 
-# - init_om_dicsts() from om.py 
+# - init_om_dicts() from om.py 
 def init_sim_dicts():
     """
     We should get really good at using docstrings...
@@ -166,6 +166,8 @@ def load_sim_dicts(siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, mo
 
 
 def load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
+    # set up OM base dcits
+    op_tokens, model_object_cache = init_om_dicts()
     # set globals on ModelObject
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # Create the base that everything is added to.
@@ -240,8 +242,13 @@ def load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, di
     return
 
 def state_load_dynamics_om(state, io_manager, siminfo):
+    # this function will check to see if any of the multiple paths to loading
+    # dynamic operational model objects has been supplied for the model.
+    # - function "om_init_model": This function can be defined in the [model h5 base].py file containing things to be done early in the model loading, like setting up model objects.  This file will already have been loaded by the state module, and will be present in the module variable hsp2_local_py (we should rename to state_local_py?)
+    # - model objects defined in file named '[model h5 base].json -- this will populate an array of object definitions that will be loadable by "model_loader_recursive()"
     # Grab globals from state for easy handling
-    op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix, ts_ix'], state['model_object_cache']
+    op_tokens, model_object_cache = init_om_dicts()
+    state_paths, state_ix, dict_ix, ts_ix = state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix, ts_ix']
     # set globals on ModelObject
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # Create the base that everything is added to.
@@ -264,8 +271,6 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     # Load a function from code if it exists 
     if 'om_init_model' in dir(hsp2_local_py):
         hsp2_local_py.om_init_model(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
-    if 'om_step_hydr' in dir(hsp2_local_py):
-        siminfo['om_step_hydr'] = True 
     
     # see if there is custom json
     fjson = fbase + ".json"
@@ -286,6 +291,11 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     print("model_exec_list:", model_exec_list)
     # not sure if this still is needed?  Maybe it is used to stash the model_exec_list?
     op_tokens[0] = np.asarray(model_exec_list, dtype="i8") 
+    # the resulting set of objects is returned.
+    state['model_object_cache'] = model_object_cache
+    state['op_tokens'] = op_tokens
+    if len(op_tokens) > 0:
+        siminfo['state_step_om'] = True 
     return
 
 # model class reader
