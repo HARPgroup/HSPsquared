@@ -248,7 +248,7 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     # - model objects defined in file named '[model h5 base].json -- this will populate an array of object definitions that will be loadable by "model_loader_recursive()"
     # Grab globals from state for easy handling
     op_tokens, model_object_cache = init_om_dicts()
-    state_paths, state_ix, dict_ix, ts_ix = state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix, ts_ix']
+    state_paths, state_ix, dict_ix, ts_ix = state['state_paths'], state['state_ix'], state['dict_ix, ts_ix']
     # set globals on ModelObject
     ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
     # Create the base that everything is added to.
