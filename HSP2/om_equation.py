@@ -6,7 +6,7 @@ the variable name in question.  Ultimately, everyting becomes either an operator
 in the state_ix Dict for runtime execution.
 """
 from HSP2.om_model_object import ModelObject
-from HSP2.utilities_specl import *
+from HSP2.state import *
 from numba import njit
 class Equation(ModelObject):
     # the following are supplied by the parent class: name, log_path, attribute_path, state_path, inputs

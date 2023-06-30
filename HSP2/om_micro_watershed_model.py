@@ -4,7 +4,7 @@ And should instead use R or VAHydro to pass these networks in as json?
 """
 from HSP2.om_model_object import ModelObject
 from HSP2.om_model_object import ModelLinkage
-from HSP2.utilities_specl import *
+from HSP2.state import *
 from numba import njit
 class MicroWatershedModel(ModelObject):
     def __init__(self, name, container = False):

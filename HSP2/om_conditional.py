@@ -3,7 +3,7 @@ The class Conditional is used to translate provide table lookup and interpolatio
 See also Branch: an actual flow control structure that looks similar to Conditional, but changes execution
 """
 from HSP2.om_model_object import ModelObject
-from HSP2.utilities_specl import *
+from HSP2.state import *
 from numba import njit
 class Conditional(ModelObject):
     def __init__(self, name, container = False, matrix_vals = []):
