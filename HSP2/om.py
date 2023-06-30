@@ -239,6 +239,55 @@ def load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, di
         #print("Could not find",ivol_state_path,"in", state_paths)
     return
 
+def state_load_dynamics_om(state, io_manager, siminfo):
+    # Grab globals from state for easy handling
+    op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache = state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix, ts_ix'], state['model_object_cache']
+    # set globals on ModelObject
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (op_tokens, state_paths, state_ix, dict_ix, model_object_cache)
+    # Create the base that everything is added to.
+    # this object does nothing except host the rest.
+    # it has no name so that all paths can be relative to it.
+    model_root_object = ModelObject("") 
+    # set up the timer as the first element 
+    timer = SimTimer('timer', model_root_object, siminfo)
+    # Opening JSON file
+    # load the json data from a pre-generated json file on github
+    
+    local_path = os.getcwd()
+    print("Path:", local_path)
+    # try this
+    hdf5_path = io_manager._input.file_path
+    (fbase, fext) = os.path.splitext(hdf5_path)
+    # see if there is a code module with custom python 
+    print("Looking for custom om loader in python code ", (fbase + ".py"))
+    hsp2_local_py = state['hsp2_local_py']
+    # Load a function from code if it exists 
+    if 'om_init_model' in dir(hsp2_local_py):
+        hsp2_local_py.om_init_model(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
+    if 'om_step_hydr' in dir(hsp2_local_py):
+        siminfo['om_step_hydr'] = True 
+    
+    # see if there is custom json
+    fjson = fbase + ".json"
+    print("Looking for custom om json ", fjson)
+    model_data = {}
+    if (os.path.isfile(fjson)):
+        print("Found local json file", fjson)
+        jfile = open(fjson)
+        model_data = json.load(jfile)
+    # now parse this json/dict into model objects
+    model_loader_recursive(model_data, model_root_object)
+    print("Loaded objects & paths: insures all paths are valid, connects models as inputs")
+    model_path_loader(model_object_cache)
+    # len() will be 1 if we only have a simtimer, but > 1 if we have a river being added
+    print("Tokenizing models")
+    model_exec_list = []
+    model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
+    print("model_exec_list:", model_exec_list)
+    # not sure if this still is needed?  Maybe it is used to stash the model_exec_list?
+    op_tokens[0] = np.asarray(model_exec_list, dtype="i8") 
+    return
+
 # model class reader
 # get model class  to guess object type in this lib 
 # the parent object must be known
