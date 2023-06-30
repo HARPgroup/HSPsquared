@@ -5,6 +5,7 @@ during a model simulation.
 """
 from HSP2.om_model_object import ModelObject
 from HSP2.state import *
+from HSP2.om import *
 from numba import njit
 class ModelLinkage(ModelObject):
     def __init__(self, name, container = False, right_path = '', link_type = 1, left_path = False):

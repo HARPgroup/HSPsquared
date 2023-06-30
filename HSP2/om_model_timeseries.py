@@ -8,6 +8,7 @@ from HSP2IO.hdf import HDF5
 from HSP2IO.io import IOManager
 from HSP2.om_model_object import ModelObject
 from HSP2.state import *
+from HSP2.om import *
 import numpy as np
 import time
 from numba.typed import Dict

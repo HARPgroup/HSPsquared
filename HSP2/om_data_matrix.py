@@ -18,6 +18,7 @@ The class DataMatrix is used to translate provide table lookup and interpolation
 """
 from HSP2.om_model_object import *
 from HSP2.state import *
+from HSP2.om import *
 from numba import njit
 import numpy as np
 

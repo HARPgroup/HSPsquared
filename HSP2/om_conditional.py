@@ -4,6 +4,7 @@ See also Branch: an actual flow control structure that looks similar to Conditio
 """
 from HSP2.om_model_object import ModelObject
 from HSP2.state import *
+from HSP2.om import *
 from numba import njit
 class Conditional(ModelObject):
     def __init__(self, name, container = False, matrix_vals = []):

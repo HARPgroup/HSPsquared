@@ -4,6 +4,7 @@ It handles all Dict management functions, but provides for no runtime execution 
 All runtime exec is done by child classes.
 """
 from HSP2.state import *
+from HSP2.om import *
 from pandas import Series, DataFrame, concat, HDFStore, set_option, to_numeric
 from pandas import Timestamp, Timedelta, read_hdf, read_csv
 
