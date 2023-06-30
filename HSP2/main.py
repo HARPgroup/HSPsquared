@@ -12,6 +12,7 @@ import os
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 from HSP2.configuration import activities, noop, expand_masslinks
 from HSP2.state import *
+from HSP2.om import *
 
 from HSP2IO.io import IOManager, SupportsReadTS, Category
 

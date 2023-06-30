@@ -19,6 +19,14 @@ from numba import njit
 from numba.typed import List
 from HSP2.utilities import initm, make_numba_dict
 from HSP2.state import *
+from HSP2.om import *
+from HSP2.om_model_object import *
+from HSP2.om_sim_timer import *
+from HSP2.om_equation import *
+from HSP2.om_model_linkage import *
+from HSP2.om_data_matrix import *
+from HSP2.om_model_broadcast import *
+from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 from HSP2.SPECL import specl
 
 
