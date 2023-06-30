@@ -2,10 +2,10 @@
 This is a alpha concept.  Maybe it is wrong to assemble networks here like this
 And should instead use R or VAHydro to pass these networks in as json?
 """
-from HSP2.om_model_object import ModelObject
-from HSP2.om_model_object import ModelLinkage
 from HSP2.state import *
 from HSP2.om import *
+from HSP2.om_model_object import ModelObject
+from HSP2.om_model_object import ModelLinkage
 from numba import njit
 class MicroWatershedModel(ModelObject):
     def __init__(self, name, container = False):

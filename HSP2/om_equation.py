@@ -5,9 +5,9 @@ and will then search the local object inputs and the containing object inputs (i
 the variable name in question.  Ultimately, everyting becomes either an operator or a reference to a variable
 in the state_ix Dict for runtime execution.
 """
-from HSP2.om_model_object import ModelObject
 from HSP2.state import *
 from HSP2.om import *
+from HSP2.om_model_object import ModelObject
 from numba import njit
 class Equation(ModelObject):
     # the following are supplied by the parent class: name, log_path, attribute_path, state_path, inputs

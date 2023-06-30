@@ -2,10 +2,10 @@
 The class Broadcast is used to send and receive data to shared accumulator "channel" and "register".
 See also Branch: an actual flow control structure that looks similar to Conditional, but changes execution
 """
-from HSP2.om_model_object import *
-from HSP2.om_model_linkage import ModelLinkage
 from HSP2.state import *
 from HSP2.om import *
+from HSP2.om_model_object import *
+from HSP2.om_model_linkage import ModelLinkage
 from numba import njit
 class ModelBroadcast(ModelObject):
     def __init__(self, name, container = False, broadcast_type = 'read', broadcast_channel = False, broadcast_hub = 'self', broadcast_params = []):
