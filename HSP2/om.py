@@ -288,7 +288,7 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     model_exec_list = []
     model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
     print("model_exec_list:", model_exec_list)
-    # not sure if this still is needed?  Maybe it is used to stash the model_exec_list?
+    # This is used to stash the model_exec_list -- is this used?
     op_tokens[0] = np.asarray(model_exec_list, dtype="i8") 
     # the resulting set of objects is returned.
     state['model_object_cache'] = model_object_cache
