@@ -3,17 +3,7 @@ The class DataMatrix is used to translate provide table lookup and interpolation
   # we need to check these matrix_vals because the OM system allowed 
   # column headers to be put into the first row as placeholders, and 
   # if those string variables did NOT resolve to something in state it would simply 
-  # ignore them, which is sloppy.  So, we should check for the first column and row 
-  # if it is text, we will assume that it uses this data convention and eliminate the row 
-  # this is a problem because this facility ALSO was used to supply dynamic names 
-  # For example, in the Rivanna simulation 
-  # tier4_balance_demand (see http://deq1.bse.vt.edu:81/d.dh/om-model-info/5828517 )
-  # Auto-Set Parent Vars  = 1 (true)
-  # the first row had column names: Comp-Mode Wnf Wrm Wsh Wsf
-  # the system ignored the 0th column, and created the variables at runtime:
-  #    tier4_balance_demand_Wnf tier4_balance_demand_Wrm tier4_balance_demand_Wsh tier4_balance_demand_Wsf
-  # this is a useful system, tho, a matrix accessor would be fine replacement for this and cleaner
-  # todo: at parse time, we can create these variables as children on this object
+  # ignore them, which is sloppy.  See: "Handle legacy header values" in https://github.com/HARPgroup/HSPsquared/issues/26
   # self.op_matrix = [] # this is the final opcoded matrix for runtime
 """
 from numba import njit
@@ -27,6 +17,8 @@ class DataMatrix(ModelObject):
         super(DataMatrix, self).__init__(name, container)
         if not DataMatrix.check_properties(model_props):
             raise Exception("DataMatrix requires: " + ','.join(DataMatrix.required_properties()) + " ... process terminated.")
+        # check this fitrst, because it may determine how we process the inputted matrix
+        self.auto_set_vars = self.handle_prop(model_props, 'autosetvars')
         if type(model_props['matrix']) is str:
             # this is a matrix that uses another matrix for its data source
             self.add_input('matrix', model_props['matrix'], 2, False)
@@ -35,6 +27,10 @@ class DataMatrix(ModelObject):
             data_matrix = self.get_dict_state(self.matrix_ix)
         else: 
             self.matrix = np.asarray(self.handle_prop(model_props, 'matrix')) # gets passed in at creation
+            if self.auto_set_vars == 1:
+                # we need to extract the first row 
+                self.auto_var_names = self.matrix[0] # stash it
+                self.matrix = np.delete(self.matrix, 0, 0) # now remove it 
             data_matrix = self.matrix 
             self.matrix_ix = self.ix
         self.mx_type = self.handle_prop(model_props, 'mx_type') 
@@ -56,14 +52,12 @@ class DataMatrix(ModelObject):
         if not DataMatrixLookup.check_properties(model_props):
             self.mx_type = 0
         self.optype = 2 # 0 - shell object, 1 - equation, 2 - DataMatrix, 3 - input, 4 - broadcastChannel, 5 - ?
-        self.nrows = data_matrix.shape[0]
-        self.ncols = data_matrix.shape[1]
         # tokenized version of the matrix with variable references and constant references
         self.matrix_tokens = []
         # old version on accessor had the below. necessary?
         # self.matrix_tokens = np.zeros(self.nrows * self.ncols, dtype=int ) 
         # set of default values to populate dict_ix
-        self.matrix_values = np.zeros(data_matrix.shape)
+        self.init_matrix_attributes(data_matrix)
         # get and stash the variable name (could be numeric?) inputs for row and col lookup var (keycols1 and 2)
         self.keycol1 = self.handle_prop(model_props, 'keycol1', True)
         self.keycol2 = self.handle_prop(model_props, 'keycol2', True)
@@ -76,7 +70,11 @@ class DataMatrix(ModelObject):
         else:
             self.key2_ix = 0
             self.lu_type2 = 0
-        
+    
+    def init_matrix_attributes(self, data_matrix):
+        self.nrows = data_matrix.shape[0]
+        self.ncols = data_matrix.shape[1]
+        self.matrix_values = np.zeros(data_matrix.shape)
     
     @staticmethod
     def required_properties():
@@ -94,6 +92,28 @@ class DataMatrix(ModelObject):
             self.lu_type2 = 0
         self.paths_found = False # override parent setting until we verify everything
         self.matrix_tokens = [] # reset this in case it is called multiple times
+        # Now, we filter for the weird cases that legacy OM allowed 
+        header_suspects = 0 # this will tally up how many oddities we get
+        for k in range(self.ncols):
+            # just check if we can find the columns, and count how many we can find.
+            # if this is a 2-d lookup we set 
+            m_var = self.matrix[0][k]
+            if is_float_digit(m_var) == False:
+                # this is a string variable, check if it is a header or actual reference
+                var_exists = find_var_path(self.matrix[0][k])
+                if (var_exists == False):
+                    if ( (self.mx_type == 2) and (k == 0) ):
+                        # this is fine, 2-d arrays don't even use the 0,0 value
+                        # so we set it to a constant value of zero
+                        self.matrix[0][k] = 0.0 
+                    else:
+                        header_suspects = header_suspects + 1 
+            if (header_suspects > 0):
+                if (header_suspects == self.cols):
+                    # we have what looks like a header, discard, but warn that this sucks
+                    self.matrix = np.delete(self.matrix, 0, 0) # now remove it 
+                    # reset rows, cols, and value state storage matrix 
+                    self.init_matrix_attributes(self, self.matrix)
         for i in range(self.nrows):
             for j in range(self.ncols):
                 el_name = 'rowcol_' + str(i) + "_" + str(j)

@@ -204,7 +204,7 @@ class ModelObject:
         var_ix = get_state_ix(self.state_ix, self.state_paths, found_path)
         if var_ix == False:
             if (trust == False):
-                raise Exception("Cannot find variable path: " + var_path + " ... process terminated.")
+                raise Exception("Cannot find variable path: " + var_path + " when adding input to object " + self.name + " as input named " + var_name + " ... process terminated.")
             var_ix = self.insure_path(var_path)
         else:
             # if we are to trust the path, this might be a child property just added,
