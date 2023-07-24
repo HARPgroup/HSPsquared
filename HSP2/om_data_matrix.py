@@ -100,7 +100,7 @@ class DataMatrix(ModelObject):
             m_var = self.matrix[0][k]
             if is_float_digit(m_var) == False:
                 # this is a string variable, check if it is a header or actual reference
-                var_exists = find_var_path(self.matrix[0][k])
+                var_exists = self.find_var_path(self.matrix[0][k])
                 if (var_exists == False):
                     if ( (self.mx_type == 2) and (k == 0) ):
                         # this is fine, 2-d arrays don't even use the 0,0 value
@@ -108,12 +108,14 @@ class DataMatrix(ModelObject):
                         self.matrix[0][k] = 0.0 
                     else:
                         header_suspects = header_suspects + 1 
-            if (header_suspects > 0):
-                if (header_suspects == self.cols):
-                    # we have what looks like a header, discard, but warn that this sucks
-                    self.matrix = np.delete(self.matrix, 0, 0) # now remove it 
-                    # reset rows, cols, and value state storage matrix 
-                    self.init_matrix_attributes(self, self.matrix)
+        print("Checked the first row for headers, header_suspects = ", header_suspects)
+        if (header_suspects > 0):
+            if (header_suspects == self.ncols):
+                print("Removing the header row")
+                # we have what looks like a header, discard, but warn that this sucks
+                self.matrix = np.delete(self.matrix, 0, 0) # now remove it 
+                # reset rows, cols, and value state storage matrix 
+                self.init_matrix_attributes(self.matrix)
         for i in range(self.nrows):
             for j in range(self.ncols):
                 el_name = 'rowcol_' + str(i) + "_" + str(j)

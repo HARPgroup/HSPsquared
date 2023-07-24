@@ -1,3 +1,11 @@
+# put changeable stuff here
+src_json_node = 'http://deq1.bse.vt.edu/d.dh/node/62'
+#el_pid = 7113514 # Greenville County New Reservoir: 5356344, Chesdin WTP: 4828385, new Chesdin 6.4 7113514, Crozet BC 
+if not ("el_pid" in locals()):
+    print("*************************************")
+    print("ERROR: You must define el_pid before running this code")
+    print("*************************************")
+
 import json
 import requests
 from requests.auth import HTTPBasicAuth
@@ -37,8 +45,6 @@ siminfo['tindex'] = date_range("2001-01-01", "2001-12-31", freq=Minute(siminfo['
 steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
 
-src_json_node = 'http://deq1.bse.vt.edu/d.dh/node/62'
-el_pid = 7113514 # Greenville County New Reservoir: 5356344, Chesdin WTP: 4828385, new Chesdin 6.4 7113514, Crozet BC 
 json_url = src_json_node + "/" + str(el_pid)
 # authentication using rest un and pw
 jfile = open("/var/www/python/auth.private")
