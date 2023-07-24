@@ -18,6 +18,7 @@ class DataMatrix(ModelObject):
         if not DataMatrix.check_properties(model_props):
             raise Exception("DataMatrix requires: " + ','.join(DataMatrix.required_properties()) + " ... process terminated.")
         # check this fitrst, because it may determine how we process the inputted matrix
+        self.model_props_parsed = model_props # stash these for debugging the loader process
         self.auto_set_vars = self.handle_prop(model_props, 'autosetvars')
         if type(model_props['matrix']) is str:
             # this is a matrix that uses another matrix for its data source

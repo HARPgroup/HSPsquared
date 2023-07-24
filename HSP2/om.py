@@ -404,6 +404,8 @@ def model_class_translate(model_props, object_class):
         if ( (storage_stage_area == None) and (matrix != None)): 
             model_props['storage_stage_area'] = matrix
             del model_props['matrix']
+    if object_class == 'broadCastObject':
+        model_props['object_class'] = 'ModelBroadcast'
 
 def model_loader_recursive(model_data, container):
     k_list = model_data.keys()

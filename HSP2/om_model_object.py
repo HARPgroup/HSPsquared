@@ -22,6 +22,7 @@ class ModelObject:
         self.container = container # will be a link to another object
         self.log_path = "" # Ex: "/RESULTS/RCHRES_001/SPECL" 
         self.attribute_path = "" # 
+        self.model_props_parsed = {} # a place to stash parse record for debugging
         if (hasattr(self,'state_path') == False):
             # if the state_path has already been set, we accept it. 
             # this allows sub-classes to override the standard path guessing approach.
@@ -73,7 +74,7 @@ class ModelObject:
         elif type(prop_val) == dict:
             prop_val = prop_val.get('value')
         if strict and (prop_val == None):
-            raise Exception("Cannot find property", prop_name, " in properties passed to ", self.name, "and strict = True.  Object creation halted. ")
+            raise Exception("Cannot find property", prop_name, " in properties passed to ", self.name, "and strict = True.  Object creation halted. Path to object with error is " . self.state_path)
         return prop_val
         
     def set_state(self, set_value):
@@ -204,7 +205,7 @@ class ModelObject:
         var_ix = get_state_ix(self.state_ix, self.state_paths, found_path)
         if var_ix == False:
             if (trust == False):
-                raise Exception("Cannot find variable path: " + var_path + " when adding input to object " + self.name + " as input named " + var_name + " ... process terminated.")
+                raise Exception("Cannot find variable path: " + var_path + " when adding input to object " + self.name + " as input named " + var_name + " ... process terminated. Path to object with error is " + self.state_path)
             var_ix = self.insure_path(var_path)
         else:
             # if we are to trust the path, this might be a child property just added,

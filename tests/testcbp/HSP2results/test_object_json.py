@@ -1,6 +1,7 @@
 # put changeable stuff here
 src_json_node = 'http://deq1.bse.vt.edu/d.dh/node/62'
 #el_pid = 7113514 # Greenville County New Reservoir: 5356344, Chesdin WTP: 4828385, new Chesdin 6.4 7113514, Crozet BC 
+#river_pid = 4431664 # also, load the river
 if not ("el_pid" in locals()):
     print("*************************************")
     print("ERROR: You must define el_pid before running this code")
@@ -44,32 +45,47 @@ siminfo['delt'] =60
 siminfo['tindex'] = date_range("2001-01-01", "2001-12-31", freq=Minute(siminfo['delt']))[1:]
 steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
+# base array for the model json inputs before parsing
+model_data = {}
 
-json_url = src_json_node + "/" + str(el_pid)
 # authentication using rest un and pw
 jfile = open("/var/www/python/auth.private")
 jj = json.load(jfile)
 rest_uname = jj[0]['rest_uname']
 rest_pass = jj[0]['rest_pw']
 basic = HTTPBasicAuth(rest_uname, rest_pass )
+
+# Should we load a river segment or just create a shell?
+if not ("river_pid" in locals()):
+    model_data['RCHRES_R001'] = {}
+    model_data['RCHRES_R001']['name'] = 'RCHRES_R001'
+    model_data['RCHRES_R001']['object_class'] = 'ModelObject'
+else: 
+    # load the model container from json too 
+    json_url = src_json_node + "/" + str(river_pid)
+    jraw =  requests.get(json_url, auth=basic)
+    river_json = jraw.content.decode('utf-8')
+    # returns JSON object as Dicts
+    river_model = json.loads(river_json)
+    model_name = list(river_model.keys())[0]
+    model_data['RCHRES_R001'] = river_model[model_name]
+    model_data['RCHRES_R001']['name'] = 'RCHRES_R001'
+
+
 # Opening JSON file
+json_url = src_json_node + "/" + str(el_pid)
 jraw =  requests.get(json_url, auth=basic)
-model_json = jraw.content.decode('utf-8')
+fac_json = jraw.content.decode('utf-8')
 # returns JSON object as Dicts
-fac_data = json.loads(model_json)
+fac_data = json.loads(fac_json)
 fac_name = list(fac_data.keys())[0]
 fac_model = fac_data[fac_name]
-model_shell = {}
-model_shell['RCHRES_R001'] = {}
-model_shell['RCHRES_R001']['name'] = 'RCHRES_R001'
-model_shell['RCHRES_R001']['object_class'] = 'ModelObject'
-model_shell['RCHRES_R001'][fac_name] = fac_model
+model_data['RCHRES_R001'][fac_name] = fac_model
 
 # save the json to a file
 with open("C:/usr/local/home/git/HSPsquared/tests/testcbp/HSP2results/PL3_5250_0001.json", "w") as river_file:
-    json.dump(model_shell, river_file, indent=4, sort_keys=True)
+    json.dump(model_data, river_file, indent=4, sort_keys=True)
 
-model_data = model_shell # just needed to encapsulate the facility for broadcasts to be OK
 container = False 
 
 # call it!

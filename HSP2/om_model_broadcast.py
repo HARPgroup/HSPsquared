@@ -7,17 +7,24 @@ from HSP2.om import *
 from HSP2.om_model_object import *
 from HSP2.om_model_linkage import ModelLinkage
 from numba import njit
+import warnings
+
 class ModelBroadcast(ModelObject):
     def __init__(self, name, container = False, broadcast_type = 'read', broadcast_channel = False, broadcast_hub = 'self', broadcast_params = []):
         super(ModelBroadcast, self).__init__(name, container)
+        self.model_props_parsed['broadcast_params'] = broadcast_params
         # broadcast_params = [ [local_name1, remote_name1], [local_name2, remote_name2], ...]
         # broadcast_channel = state_path/[broadcast_channel]
         # broadcast_hub = self, parent, /state/path/to/element/ 
+        # we call handle+=_prop() because this will be OK with any format of caller data
         self.linkages = {} # store of objects created by this  
-        self.broadcast_type = broadcast_type
+        self.broadcast_type = self.handle_prop({'broadcast_type':broadcast_type}, 'broadcast_hub')
+        self.broadcast_hub = self.handle_prop({'broadcast_hub':broadcast_hub}, 'broadcast_hub')
+        self.broadcast_channel = self.handle_prop({'broadcast_channel':broadcast_channel}, 'broadcast_hub')
+        self.broadcast_params = self.handle_prop({'broadcast_params':broadcast_params}, 'broadcast_params')
         self.optype = 4 # 0 - shell object, 1 - equation, 2 - DataMatrix, 3 - input, 4 - broadcastChannel, 5 - ?
         self.bc_type_id = 2 # assume read -- is this redundant?  is it really the input type ix?
-        self.setup_broadcast(broadcast_type, broadcast_params, broadcast_channel, broadcast_hub)
+        self.setup_broadcast(self.broadcast_type, self.broadcast_params, self.broadcast_channel, self.broadcast_hub)
     
     def setup_broadcast(self, broadcast_type, broadcast_params, broadcast_channel, broadcast_hub):
         if ( (broadcast_hub == 'self') or (broadcast_hub == 'child') ):
@@ -25,15 +32,16 @@ class ModelBroadcast(ModelObject):
             hub_container = self.container 
         elif broadcast_hub == 'parent':
             if (self.container.container == False):
-                raise Exception("The object", self.container.name, "does not have a parent container. Broadcast to hub 'parent' creation halted. ")
+                warnings.warn("The object", self.container.name, "does not have a parent container. Broadcast to hub 'parent' creation halted. ")
                 return False
             hub_path = self.container.container.state_path
             hub_container = self.container.container
         else:
             # we assume this is a valid path.  but we verify and fail if it doesn't work during tokenization
             # this is not really yet operational since it would be a global broadcast of sorts
+            print("Broadcast ", self.name, " hub Path not parent, self or child.  Trying to find another hub_path = ", broadcast_hub)
             hub_path = broadcast_hub
-            hub_exists = find_var_path(hub_path)
+            hub_exists = self.find_var_path(hub_path)
             if hub_exists == False:
                 hub_container = False
             else:
