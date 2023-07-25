@@ -120,7 +120,7 @@ class ModelBroadcast(ModelObject):
             hub_name = hub_container.name
         if channel_path == False:
             print("Creating broadcast hub ", broadcast_channel, " on ", hub_name)
-            hub_object = ModelConstant(broadcast_channel, hub_container, 0.0)
+            hub_object = ModelConstant(broadcast_channel, hub_container, 0.0, hub_name)
         else:
             hub_object = self.model_object_cache[channel_path]
         return hub_object
@@ -177,7 +177,7 @@ Maybe combined with stack behavior?  Or accumulator?
 class ModelRegister(ModelConstant):
     def __init__(self, name, container = False, value = 0.0, state_path = False):
         super(ModelRegister, self).__init__(name, container, value, state_path)
-        self.optype = 11 # 
+        self.optype = 12 # 
         # self.state_ix[self.ix] = self.default_value
     
     def required_properties():

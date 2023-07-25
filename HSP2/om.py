@@ -403,7 +403,9 @@ def model_class_translate(model_props, object_class):
     if object_class == 'broadCastObject':
         model_props['object_class'] = 'ModelBroadcast'
         model_props['broadcast_channel'] = model_props['broadcast_class']
-        print("BC Channel parser after model_class_translate(): ", model_props)
+    if object_class == 'USGSChannelGeomObject_sub':
+        model_props['object_class'] = 'SimpleChannel'
+        print("Handling USGSChannelGeomObject_sub as SimpleChannel")
 
 def model_loader_recursive(model_data, container):
     k_list = model_data.keys()
