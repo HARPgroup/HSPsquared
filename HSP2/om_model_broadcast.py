@@ -10,9 +10,9 @@ from numba import njit
 import warnings
 
 class ModelBroadcast(ModelObject):
-    def __init__(self, name, container = False, broadcast_type = 'read', broadcast_channel = False, broadcast_hub = 'self', broadcast_params = []):
+    def __init__(self, name, container = False, model_props = []):
         super(ModelBroadcast, self).__init__(name, container)
-        self.model_props_parsed['broadcast_params'] = broadcast_params
+        self.model_props_parsed = model_props
         # broadcast_params = [ [local_name1, remote_name1], [local_name2, remote_name2], ...]
         # broadcast_channel = state_path/[broadcast_channel]
         # broadcast_hub = self, parent, /state/path/to/element/ 
@@ -20,6 +20,7 @@ class ModelBroadcast(ModelObject):
         self.linkages = {} # store of objects created by this  
         self.optype = 4 # 0 - shell object, 1 - equation, 2 - DataMatrix, 3 - input, 4 - broadcastChannel, 5 - ?
         self.bc_type_id = 2 # assume read -- is this redundant?  is it really the input type ix?
+        self.parse_model_props(model_props)
         self.setup_broadcast(self.broadcast_type, self.broadcast_params, self.broadcast_channel, self.broadcast_hub)
     
     
@@ -107,12 +108,18 @@ class ModelBroadcast(ModelObject):
                 #puller = ModelLinkage(register_varname, var_register, src_path, self.bc_type_id)
     
     def insure_channel(self, broadcast_channel, hub_container):
-        print("Looking for channel ", broadcast_channel, " on ", hub_container.name)
-        # must create absolute path, otherwise, it will seek upstream and get the parent 
-        # we send with local_only = True so it won't go upstream 
-        channel_path = hub_container.find_var_path(broadcast_channel, True)
+        if hub_container == False:
+            # this is a global, so no container
+            hub_name = '/STATE/global'
+            channel_path = False
+        else:
+            print("Looking for channel ", broadcast_channel, " on ", hub_container.name)
+            # must create absolute path, otherwise, it will seek upstream and get the parent 
+            # we send with local_only = True so it won't go upstream 
+            channel_path = hub_container.find_var_path(broadcast_channel, True)
+            hub_name = hub_container.name
         if channel_path == False:
-            print("Creating broadcast hub ", broadcast_channel, " on ",hub_container.name)
+            print("Creating broadcast hub ", broadcast_channel, " on ", hub_name)
             hub_object = ModelConstant(broadcast_channel, hub_container, 0.0)
         else:
             hub_object = self.model_object_cache[channel_path]

@@ -81,6 +81,7 @@ class ModelObject:
         # sub-classes will allow an create argument "model_props" and handle them here.
         # see also: handle_prop(), which will be called y parse_model_props 
         #           for all attributes supported by the class
+        return True
     
     def set_state(self, set_value):
         var_ix = set_state(self.state_ix, self.state_paths, self.state_path, set_value)
