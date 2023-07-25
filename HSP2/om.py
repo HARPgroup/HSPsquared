@@ -358,11 +358,7 @@ def model_class_loader(model_name, model_props, container = False):
               print("ModelBroadcast object must have", ModelBroadcast.required_properties())
               return False
           # create it
-          broadcast_type = model_props.get('broadcast_type')
-          broadcast_channel = model_props.get('broadcast_channel')
-          broadcast_hub = model_props.get('broadcast_hub')
-          broadcast_params = model_props.get('broadcast_params')
-          model_object = ModelBroadcast(model_props.get('name'), container, broadcast_type, broadcast_channel, broadcast_hub, broadcast_params)
+          model_object = ModelBroadcast(model_props.get('name'), container, model_props)
       elif object_class == 'MicroWatershedModel':
           # add a matrix with the data, then add a matrix accessor for each required variable 
           has_props = MicroWatershedModel.check_properties(model_props)
@@ -406,6 +402,8 @@ def model_class_translate(model_props, object_class):
             del model_props['matrix']
     if object_class == 'broadCastObject':
         model_props['object_class'] = 'ModelBroadcast'
+        model_props['broadcast_channel'] = model_props['broadcast_class']
+        print("BC Channel parser after model_class_translate(): ", model_props)
 
 def model_loader_recursive(model_data, container):
     k_list = model_data.keys()

@@ -18,22 +18,37 @@ class ModelBroadcast(ModelObject):
         # broadcast_hub = self, parent, /state/path/to/element/ 
         # we call handle+=_prop() because this will be OK with any format of caller data
         self.linkages = {} # store of objects created by this  
-        self.broadcast_type = self.handle_prop({'broadcast_type':broadcast_type}, 'broadcast_hub')
-        self.broadcast_hub = self.handle_prop({'broadcast_hub':broadcast_hub}, 'broadcast_hub')
-        self.broadcast_channel = self.handle_prop({'broadcast_channel':broadcast_channel}, 'broadcast_hub')
-        self.broadcast_params = self.handle_prop({'broadcast_params':broadcast_params}, 'broadcast_params')
         self.optype = 4 # 0 - shell object, 1 - equation, 2 - DataMatrix, 3 - input, 4 - broadcastChannel, 5 - ?
         self.bc_type_id = 2 # assume read -- is this redundant?  is it really the input type ix?
         self.setup_broadcast(self.broadcast_type, self.broadcast_params, self.broadcast_channel, self.broadcast_hub)
     
+    
+    def parse_model_props(self, model_props, strict = False ):
+        # handle props array 
+        self.broadcast_type = self.handle_prop(model_props, 'broadcast_type')
+        self.broadcast_hub = self.handle_prop(model_props, 'broadcast_hub')
+        self.broadcast_channel = self.handle_prop(model_props, 'broadcast_channel')
+        self.broadcast_params = self.handle_prop(model_props, 'broadcast_params')
+        if self.broadcast_type == None:
+            self.broadcast_type = 'read'
+        if self.broadcast_channel == None:
+            self.broadcast_channel = False
+        if self.broadcast_hub == None:
+            self.broadcast_hub = 'self'
+        if self.broadcast_params == None:
+            self.broadcast_params = []
+            
+        
+    
     def setup_broadcast(self, broadcast_type, broadcast_params, broadcast_channel, broadcast_hub):
+        if (broadcast_hub == 'parent') and (self.container.container == False):
+            warnings.warn("Broadcast named " + self.name + " is parent object " + self.container.name + " with path " + self.container.state_path + " does not have a grand-parent container. Broadcast to hub 'parent' guessing as a path-type global. ")
+            broadcast_hub = '/STATE/global'
+            warnings.warn("Proceeding with broadcast_type, broadcast_params, broadcast_channel, broadcast_hub = " + str(broadcast_type) + "," + str(broadcast_params) + "," + str(broadcast_channel) + "," + str(broadcast_hub))
         if ( (broadcast_hub == 'self') or (broadcast_hub == 'child') ):
             hub_path = self.container.state_path # the parent of this object is the "self" in question
             hub_container = self.container 
         elif broadcast_hub == 'parent':
-            if (self.container.container == False):
-                warnings.warn("The object", self.container.name, "does not have a parent container. Broadcast to hub 'parent' creation halted. ")
-                return False
             hub_path = self.container.container.state_path
             hub_container = self.container.container
         else:

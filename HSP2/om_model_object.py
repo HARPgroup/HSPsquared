@@ -65,7 +65,7 @@ class ModelObject:
             return False 
         return True
     
-    def handle_prop(self, model_props, prop_name, strict = False ):
+    def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
         # this checks to see if the prop is in dict with value form, or just a value 
         # strict = True causes an exception if property is missing from model_props dict 
         prop_val = model_props.get(prop_name)
@@ -76,7 +76,12 @@ class ModelObject:
         if strict and (prop_val == None):
             raise Exception("Cannot find property", prop_name, " in properties passed to ", self.name, "and strict = True.  Object creation halted. Path to object with error is " . self.state_path)
         return prop_val
-        
+    
+    def parse_model_props(self, model_props, strict = False ):
+        # sub-classes will allow an create argument "model_props" and handle them here.
+        # see also: handle_prop(), which will be called y parse_model_props 
+        #           for all attributes supported by the class
+    
     def set_state(self, set_value):
         var_ix = set_state(self.state_ix, self.state_paths, self.state_path, set_value)
         return var_ix
