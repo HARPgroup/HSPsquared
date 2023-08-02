@@ -686,6 +686,7 @@
                 "name": "slope",
                 "value": "0.0216"
             },
+            "solver": 0,
             "tol": {
                 "id": "7194363",
                 "name": "tol",
@@ -1267,6 +1268,13 @@
                 "id": "7047698",
                 "name": "mne9_10",
                 "value": "0.842416"
+            },
+            "model_status": {
+                "code": "Model run complete.",
+                "host": "deq1.bse.vt.edu",
+                "id": "7194853",
+                "name": "model_status",
+                "value": "0"
             },
             "modified": "1679137629",
             "name": "subsheds",

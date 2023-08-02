@@ -78,11 +78,11 @@ class SimpleChannel(ModelObject):
         # call parent method to set basic ops common to all 
         super().tokenize()
         op_num = 0
-        order_ops = ['solver', 'Qin', 'Rin', 'Qout', 'demand', 'storage']
+        order_ops = ['solver', 'Qin', 'Rin', 'Qout', 'demand', 'Storage']
         print("DEBUG: adding op tokens from inputs", self.inputs)
         for i in order_ops:
             print("DEBUG: adding op token for ", i)
-            self.var_ops[op_num] = self.inputs_ix[i]
+            self.var_ops.append(self.inputs_ix[i])
     
     def add_op_tokens(self):
         # this puts the tokens into the global simulation queue 
