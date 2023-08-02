@@ -122,10 +122,10 @@ def step_simple_channel(op, state_ix, dict_ix):
     #ps_mgd = state_ix[discharge_ix]
     ps_mgd = 0 # temp for now
     Qout = Qin
-    S1 = state_ix[storage_ix] # initial storage from end of last time step 
-    # Simple Routing
     print("dt ix:", dt_ix)
     return
+    S1 = state_ix[storage_ix] # initial storage from end of last time step 
+    # Simple Routing
     print("dt in minutes:", state_ix[dt_ix])
     dts = (state_ix[dt_ix] * 60)
     if (solver == 0):
