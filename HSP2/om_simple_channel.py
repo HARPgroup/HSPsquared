@@ -97,7 +97,7 @@ def pre_step_simple_channel(op, state_ix, dict_ix):
     # Not yet completed. Maybe we do not need any pre-step actions?
 
 @njit
-def step_simple_channel(op, state_ix, dict_ix):
+def step_simple_channel(op, state_ix, dict_ix, step):
     ix = op[1] # note op[0] is op type which is known if we are here.
     # Not yet completed.
     # 3 options for solver:
@@ -117,9 +117,10 @@ def step_simple_channel(op, state_ix, dict_ix):
     # discharge_ix: op[7], et_ix: op[8], precip_ix: op[9]
     # if this object uses anything other than Qout = Qin
     # get ix for: Qin,
-    print("Rin_ix ix:", Rin_ix)
-    print("state_ix:", state_ix)
-    print("op:", state_ix)
+    if (step == 10):
+        print("Rin_ix ix:", Rin_ix)
+        print("state_ix:", state_ix)
+        print("op:", state_ix)
     return
     Qin = state_ix[Qin_ix] + state_ix[Rin_ix]
     wd_mgd = state_ix[demand_ix]
