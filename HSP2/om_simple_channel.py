@@ -120,7 +120,7 @@ def step_simple_channel(op, state_ix, dict_ix, step):
     if (step == 10):
         print("Rin_ix ix:", Rin_ix)
         print("state_ix:", state_ix)
-        print("op:", state_ix)
+        print("op:", op)
     return
     Qin = state_ix[Qin_ix] + state_ix[Rin_ix]
     wd_mgd = state_ix[demand_ix]
