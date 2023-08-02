@@ -120,6 +120,7 @@ def step_simple_channel(op, state_ix, dict_ix):
     Qin = state_ix[Qin_ix] + state_ix[Rin_ix]
     wd_mgd = state_ix[demand_ix]
     #ps_mgd = state_ix[discharge_ix]
+    ps_mgd = 0 # temp for now
     Qout = Qin
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
     # Simple Routing
