@@ -71,7 +71,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
             if activity == 'HYDR':
                 state_context_hsp2(state, operation, segment, activity)
                 print("Init HYDR state context for domain", state['domain'])
-                hydr_init_ix(state_ix, state_paths, state['domain'])
+                hydr_init_ix(state['state_ix'], state['state_paths'], state['domain'])
     # Parse dynamic components to operate on STATE
     # - Load any dynamic components if present, and store variables on objects 
     state_load_dynamics_hsp2(state, io_manager, siminfo)
