@@ -600,6 +600,8 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
         step_sim_timer(ops, state_ix, dict_ix, ts_ix, step)
     elif ops[0] == 9:
         val = 0 
+    elif ops[0] == 13:
+        step_simple_channel(ops, state_ix, dict_ix)
     return 
 
 
