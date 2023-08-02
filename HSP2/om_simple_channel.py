@@ -107,7 +107,7 @@ def step_simple_channel(op, state_ix, dict_ix):
     #   - 3: Newton's Method
     # type = op[0], ix = op[1]
     solver = op[2]
-    dt = op[3]
+    dt_ix = op[3]
     Qin_ix = op[4] # the data state index for the Qin variable (upstream inflow)
     Rin_ix = op[5] # the data state index for the Rin variable (local inflow)
     Qout_ix = op[6] # the data state index for the Qout variable 
@@ -124,7 +124,9 @@ def step_simple_channel(op, state_ix, dict_ix):
     Qout = Qin
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
     # Simple Routing
-    dts = (dt * 60)
+    print("Calcing dt with ix:", dt_ix)
+    dts = (state_ix[dt_ix] * 60)
+    return
     if (solver == 0):
         Qout = Qin - wd_mgd * 1.547 / dts + ps_mgd * 1.547 / dts
     elif (solver > 0):
@@ -135,9 +137,7 @@ def step_simple_channel(op, state_ix, dict_ix):
     if (S2 < 0):
         S2 = 0
         Qout = S1 / dts # exact rate needed to empty channel in 1 step.
-    print("Loading Qout with ix:", Qout_ix)
     state_ix[Qout_ix] = Qout
-    return
     state_ix[storage_ix] = S2
     # TBD (or not depending on what is useful)
     #state_ix[V_ix] = Vout;
