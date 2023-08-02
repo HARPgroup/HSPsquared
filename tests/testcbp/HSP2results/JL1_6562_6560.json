@@ -427,6 +427,12 @@
                 "value": "vahydro-2.0"
             }
         },
+        "IVOL": {
+            "link_type": 2,
+            "name": "IVOL",
+            "object_class": "ModelLinkage",
+            "right_path": "/STATE/RCHRES_R001/HYDR/IVOL"
+        },
         "Listen to Children": {
             "broadcast_channel": {
                 "id": "7194646",
@@ -585,6 +591,7 @@
         "flow_mode": {
             "id": "7047668",
             "name": "flow_mode",
+            "object_class": "ModelConstant",
             "value": "3"
         },
         "host": "deq1.bse.vt.edu",
@@ -999,6 +1006,7 @@
         "run_mode": {
             "id": "7047667",
             "name": "run_mode",
+            "object_class": "ModelConstant",
             "value": "2"
         },
         "scenario": {

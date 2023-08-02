@@ -87,17 +87,28 @@ model_data['RCHRES_R001'][fac_name] = fac_model
 
 container = False 
 
+# Add object_class to the run_mode and flow_mode
+model_data['RCHRES_R001']['run_mode']['object_class'] = 'ModelConstant'
+model_data['RCHRES_R001']['flow_mode']['object_class'] = 'ModelConstant'
+model_data['RCHRES_R001']['IVOL']= {
+    'object_class' : 'ModelLinkage',
+    'right_path' : '/STATE/RCHRES_R001/HYDR/IVOL',
+    'name' : 'IVOL',
+    'link_type' : 2
+}
+
 # call it!
 model_loader_recursive(model_data, container)
 # this should be done as a lnkage in json:
 river = model_object_cache['/STATE/RCHRES_R001']
+river.add_input('IVOL', '/STATE/RCHRES_R001/HYDR/IVOL')
+run_mode = ModelConstant('run_mode', False, model_data['RCHRES_R001']['run_mode']['value'], '/STATE/run_mode')
+flow_mode = ModelConstant('flow_mode', False, model_data['RCHRES_R001']['flow_mode']['value'], '/STATE/flow_mode')
+
 # save the json to a file named after the riverseg
 with open("C:/usr/local/home/git/HSPsquared/tests/testcbp/HSP2results/" + river.model_props_parsed['riverseg']['value'] + ".json", "w") as river_file:
     json.dump(model_data, river_file, indent=4, sort_keys=True)
 
-river.add_input('IVOL', '/STATE/RCHRES_R001/HYDR/IVOL')
-run_mode = ModelConstant('run_mode', False, model_data['RCHRES_R001']['run_mode']['value'], '/STATE/run_mode')
-flow_mode = ModelConstant('run_mode', False, model_data['RCHRES_R001']['flow_mode']['value'], '/STATE/flow_mode')
 
 
 print("Loaded the following objects & paths")

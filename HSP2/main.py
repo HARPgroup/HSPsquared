@@ -64,7 +64,14 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     # Set up Things in state that will be used in all modular activitis like SPECL
     state = init_state_dicts()
     state_siminfo_hsp2(uci_obj, siminfo)
-    # Add support for dynamic functins to operate on STATE
+    # Iterate through all segments and add crucial paths to state 
+    # before loading dynamic components that may reference them
+    for _, operation, segment, delt in opseq.itertuples():
+        state_context_hsp2(state, operation, segment, activity)
+        if activity == 'HYDR':
+            print("Init HYDR state context for domain', domain)
+            hydr_init_ix(state_ix, state_paths, state['domain'])
+    # Parse dynamic components to operate on STATE
     # - Load any dynamic components if present, and store variables on objects 
     state_load_dynamics_hsp2(state, io_manager, siminfo)
     state_load_dynamics_om(state, io_manager, siminfo)
