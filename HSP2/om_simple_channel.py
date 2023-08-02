@@ -79,7 +79,9 @@ class SimpleChannel(ModelObject):
         super().tokenize()
         op_num = 0
         order_ops = ['solver', 'Qin', 'Rin', 'Qout', 'demand', 'storage']
+        print("DEBUG: adding op tokens from inputs", self.inputs)
         for i in order_ops:
+            print("DEBUG: adding op token for ", i)
             self.var_ops[op_num] = self.inputs_ix[i]
     
     def add_op_tokens(self):
