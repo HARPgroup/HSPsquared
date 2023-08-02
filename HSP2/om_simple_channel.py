@@ -24,6 +24,7 @@ class SimpleChannel(ModelObject):
         self.var_ops = [] # keep these separate to easily add to ops at tokenize
         self.autosetvars = True # this should default to False or True?
         self.parse_model_props(model_props)
+        self.add_input('dt','dt') # must have this 
         self.set_local_props()
     
     def parse_model_props(self, model_props, strict = False ):
@@ -78,7 +79,7 @@ class SimpleChannel(ModelObject):
         # call parent method to set basic ops common to all 
         super().tokenize()
         op_num = 0
-        order_ops = ['solver', 'Qin', 'Rin', 'Qout', 'demand', 'Storage']
+        order_ops = ['solver', 'dt', 'Qin', 'Rin', 'Qout', 'demand', 'Storage']
         for i in order_ops:
             self.var_ops.append(self.inputs_ix[i])
     
@@ -106,11 +107,12 @@ def step_simple_channel(op, state_ix, dict_ix):
     #   - 3: Newton's Method
     # type = op[0], ix = op[1]
     solver = op[2]
-    Qin_ix = op[3] # the data state index for the Qin variable (upstream inflow)
-    Rin_ix = op[4] # the data state index for the Rin variable (local inflow)
-    Qout_ix = op[5] # the data state index for the Qout variable 
-    demand_ix = op[6] # the data state index for the Qout variable 
-    storage_ix = op[7] # the data state index for the Qout variable 
+    dt = op[3]
+    Qin_ix = op[4] # the data state index for the Qin variable (upstream inflow)
+    Rin_ix = op[5] # the data state index for the Rin variable (local inflow)
+    Qout_ix = op[6] # the data state index for the Qout variable 
+    demand_ix = op[7] # the data state index for the Qout variable 
+    storage_ix = op[8] # the data state index for the Qout variable 
     # solver: op[2], Qin_ix = op[3], Qout_ix: op[4], demand_ix: op[5], storage_ix: op[6]
     # discharge_ix: op[7], et_ix: op[8], precip_ix: op[9]
     # if this object uses anything other than Qout = Qin
@@ -121,15 +123,17 @@ def step_simple_channel(op, state_ix, dict_ix):
     Qout = Qin
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
     # Simple Routing
+    dts = (dt * 60)
     if (solver == 0):
-        Qout = Qin - wd_mgd * 1.547 / dt + ps_mgd * 1.547 / dt
+        Qout = Qin - wd_mgd * 1.547 / dts + ps_mgd * 1.547 / dts
     elif (solver > 0):
         # all will be simple routing until end
-        Qout = Qin - wd_mgd * 1.547 / dt + ps_mgd * 1.547 / dt
+        Qout = Qin - wd_mgd * 1.547 / dts + ps_mgd * 1.547 / dts
     store_change = (Qin - Qout) * dt # change in storage in cubic feet 
-    S2 = S1 - store_change
-    if (S < 0):
-        S = 0
+    S2 = S1 + store_change
+    if (S2 < 0):
+        S2 = 0
+        Qout = S1 / dts # exact rate needed to empty channel in 1 step.
     state_ix[Qout_ix] = Qout
     state_ix[storage_ix] = S2
     # TBD (or not depending on what is useful)
