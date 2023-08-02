@@ -122,9 +122,9 @@ def step_simple_channel(op, state_ix, dict_ix):
     #ps_mgd = state_ix[discharge_ix]
     ps_mgd = 0 # temp for now
     Qout = Qin
-    print("Leaving simple channel")
-    return
+    print("Loading Storage with ix:", storage_ix)
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
+    return
     # Simple Routing
     dts = (dt * 60)
     if (solver == 0):
