@@ -125,6 +125,7 @@ def step_simple_channel(op, state_ix, dict_ix):
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
     # Simple Routing
     print("dt ix:", dt_ix)
+    return
     print("dt in minutes:", state_ix[dt_ix])
     dts = (state_ix[dt_ix] * 60)
     if (solver == 0):
