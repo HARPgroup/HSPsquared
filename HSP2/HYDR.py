@@ -350,7 +350,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
             state_step_hydr(state_info, state_paths, state_ix, dict_ix, ts_ix, hydr_ix, step)
         # Execute dynamic code if enabled
         if (state_info['state_step_om'] == 'enabled'):
-            #print("trying to execute state_step_om()")
+            print("trying to execute state_step_om()")
             # op_tokens[0] contains the model exec list.  Later we may amend this 
             # perhaps even storing a domain specific exec list under domain/exec_list?
             step_model(op_tokens[0], op_tokens, state_ix, dict_ix, ts_ix, step)
