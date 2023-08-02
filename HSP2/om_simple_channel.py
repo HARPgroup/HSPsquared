@@ -122,9 +122,7 @@ def step_simple_channel(op, state_ix, dict_ix):
     #ps_mgd = state_ix[discharge_ix]
     ps_mgd = 0 # temp for now
     Qout = Qin
-    print("Loading Storage with ix:", storage_ix)
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
-    return
     # Simple Routing
     dts = (dt * 60)
     if (solver == 0):
@@ -137,7 +135,9 @@ def step_simple_channel(op, state_ix, dict_ix):
     if (S2 < 0):
         S2 = 0
         Qout = S1 / dts # exact rate needed to empty channel in 1 step.
+    print("Loading Qout with ix:", Qout_ix)
     state_ix[Qout_ix] = Qout
+    return
     state_ix[storage_ix] = S2
     # TBD (or not depending on what is useful)
     #state_ix[V_ix] = Vout;
