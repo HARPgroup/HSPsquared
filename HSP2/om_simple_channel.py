@@ -15,7 +15,7 @@ class SimpleChannel(ModelObject):
         self.model_props_parsed = model_props
         self.optype = 13 # see list in om_model_object.py
         # add basic numeric state variables for outputs
-        self.rvars = {'Qin', 'Rin', 'drainage_area', 'area', 'demand'}
+        self.rvars = {'solver', 'Qin', 'Rin', 'drainage_area', 'area', 'demand'}
         # old method had q_var, then reported it as Qin this can just be a link or constant
         # and therefore handled by constant_or_path()
         self.wvars = {'Qout', 'depth', 'its', 'Storage', 'last_S', 'rejected_demand_mgd', 'rejected_demand_pct', 'area', 'demand', 'drainage_area'}
@@ -28,6 +28,8 @@ class SimpleChannel(ModelObject):
     def parse_model_props(self, model_props, strict = False ):
         # handle props array 
         super().parse_model_props(model_props, strict)
+        if model_props.get('solver') == None:
+            model_props['solver'] = 0 # use simple-routing by default 
         # ceck for inputs that this will use to get flows/demand inputs 
         for op_name in self.rvars:
             self.r_var_values[op_name] = self.handle_prop(model_props, op_name, False)
@@ -74,11 +76,16 @@ class SimpleChannel(ModelObject):
     def tokenize(self):
         # call parent method to set basic ops common to all 
         super().tokenize()
+        op_num = 0
+        order_ops = ['solver', 'Qin', 'Rin', 'Qout', 'demand', 'storage']
+        for i in order_ops:
+            self.var_ops[op_num] = self.inputs_ix[i]
     
     def add_op_tokens(self):
         # this puts the tokens into the global simulation queue 
         # can be customized by subclasses to add multiple lines if needed.
         super().add_op_tokens()
+        self.ops = self.ops + self.var_ops
 
 # njit functions for runtime
 @njit
@@ -88,8 +95,7 @@ def pre_step_simple_channel(op, state_ix, dict_ix):
     # Not yet completed. Maybe we do not need any pre-step actions?
 
 def step_simple_channel(op, state_ix, dict_ix):
-    ix = op[1]
-    dix = op[2]
+    ix = op[1] # note op[0] is op type which is known if we are here.
     # Not yet completed.
     # 3 options for solver:
     #   - 0: Qout = Qin
@@ -98,15 +104,16 @@ def step_simple_channel(op, state_ix, dict_ix):
     #   - 3: Newton's Method
     # type = op[0], ix = op[1]
     solver = op[2]
-    Qin_ix = op[3] # the data state index for the Qin variable 
-    Qout_ix = op[4] # the data state index for the Qout variable 
-    demand_ix = op[5] # the data state index for the Qout variable 
-    storage_ix = op[6] # the data state index for the Qout variable 
+    Qin_ix = op[3] # the data state index for the Qin variable (upstream inflow)
+    Rin_ix = op[4] # the data state index for the Rin variable (local inflow)
+    Qout_ix = op[5] # the data state index for the Qout variable 
+    demand_ix = op[6] # the data state index for the Qout variable 
+    storage_ix = op[7] # the data state index for the Qout variable 
     # solver: op[2], Qin_ix = op[3], Qout_ix: op[4], demand_ix: op[5], storage_ix: op[6]
     # discharge_ix: op[7], et_ix: op[8], precip_ix: op[9]
     # if this object uses anything other than Qout = Qin
     # get ix for: Qin,
-    Qin = state_ix[Qin_ix]
+    Qin = state_ix[Qin_ix] + state_ix[Rin_ix]
     #wd_mgd = state_ix[demand_ix]
     #ps_mgd = state_ix[discharge_ix]
     Qout = Qin
