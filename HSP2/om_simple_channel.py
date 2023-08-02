@@ -108,6 +108,8 @@ def step_simple_channel(op, state_ix, dict_ix):
     # type = op[0], ix = op[1]
     solver = op[2]
     dt_ix = op[3]
+    print("dt ix:", dt_ix)
+    return
     Qin_ix = op[4] # the data state index for the Qin variable (upstream inflow)
     Rin_ix = op[5] # the data state index for the Rin variable (local inflow)
     Qout_ix = op[6] # the data state index for the Qout variable 
@@ -122,8 +124,6 @@ def step_simple_channel(op, state_ix, dict_ix):
     #ps_mgd = state_ix[discharge_ix]
     ps_mgd = 0 # temp for now
     Qout = Qin
-    print("dt ix:", dt_ix)
-    return
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
     # Simple Routing
     print("dt in minutes:", state_ix[dt_ix])
