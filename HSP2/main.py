@@ -69,7 +69,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     for _, operation, segment, delt in opseq.itertuples():
         state_context_hsp2(state, operation, segment, activity)
         if activity == 'HYDR':
-            print("Init HYDR state context for domain', domain)
+            print("Init HYDR state context for domain", domain)
             hydr_init_ix(state_ix, state_paths, state['domain'])
     # Parse dynamic components to operate on STATE
     # - Load any dynamic components if present, and store variables on objects 
