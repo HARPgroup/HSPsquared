@@ -131,7 +131,7 @@ def step_simple_channel(op, state_ix, dict_ix):
         # all will be simple routing until end
         Qout = Qin - wd_mgd * 1.547 / dts + ps_mgd * 1.547 / dts
     print("Calcing store_change with ix:", storage_ix)
-    store_change = (Qin - Qout) * dt # change in storage in cubic feet 
+    store_change = (Qin - Qout) * dts # change in storage in cubic feet 
     return
     S2 = S1 + store_change
     if (S2 < 0):
