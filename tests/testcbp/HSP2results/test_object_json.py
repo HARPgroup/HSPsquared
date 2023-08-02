@@ -45,6 +45,8 @@ siminfo['delt'] =60
 siminfo['tindex'] = date_range("2001-01-01", "2001-12-31", freq=Minute(siminfo['delt']))[1:]
 steps = siminfo['steps'] = len(siminfo['tindex'])
 timer = SimTimer('timer', False, siminfo)
+# Set up basic hsp2 things for state
+hydr_init_ix(state_ix, state_paths, domain)
 # base array for the model json inputs before parsing
 model_data = {}
 
@@ -82,14 +84,22 @@ fac_name = list(fac_data.keys())[0]
 fac_model = fac_data[fac_name]
 model_data['RCHRES_R001'][fac_name] = fac_model
 
-# save the json to a file
-with open("C:/usr/local/home/git/HSPsquared/tests/testcbp/HSP2results/PL3_5250_0001.json", "w") as river_file:
-    json.dump(model_data, river_file, indent=4, sort_keys=True)
 
 container = False 
 
 # call it!
 model_loader_recursive(model_data, container)
+# this should be done as a lnkage in json:
+river = model_object_cache['/STATE/RCHRES_R001']
+# save the json to a file named after the riverseg
+with open("C:/usr/local/home/git/HSPsquared/tests/testcbp/HSP2results/" + river.model_props_parsed['riverseg']['value'] + ".json", "w") as river_file:
+    json.dump(model_data, river_file, indent=4, sort_keys=True)
+
+river.add_input('IVOL', '/STATE/RCHRES_R001/HYDR/IVOL')
+run_mode = ModelConstant('run_mode', False, model_data['RCHRES_R001']['run_mode']['value'], '/STATE/run_mode')
+flow_mode = ModelConstant('run_mode', False, model_data['RCHRES_R001']['flow_mode']['value'], '/STATE/flow_mode')
+
+
 print("Loaded the following objects & paths")
 print("Insuring all paths are valid, and connecting models as inputs")
 model_path_loader(model_object_cache)

@@ -33,7 +33,7 @@ class ModelObject:
         self.paths_found = False # this should be False at start
         self.default_value = 0.0
         self.ops = []
-        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input/ModelLinkage, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - SimpleChannel
+        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input/ModelLinkage, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 12 - ModelRegister, 13 - SimpleChannel
         # this is replaceable. to replace state_path/re-register the index :
         # - remove the old PATH from state_paths: del state_paths[self.state_path]
         # you should never create an object without knowing its container, but if you do
@@ -74,13 +74,14 @@ class ModelObject:
         elif type(prop_val) == dict:
             prop_val = prop_val.get('value')
         if strict and (prop_val == None):
-            raise Exception("Cannot find property", prop_name, " in properties passed to ", self.name, "and strict = True.  Object creation halted. Path to object with error is " . self.state_path)
+            raise Exception("Cannot find property " + prop_name + " in properties passed to "+ self.name + " and strict = True.  Object creation halted. Path to object with error is " + self.state_path)
         return prop_val
     
     def parse_model_props(self, model_props, strict = False ):
         # sub-classes will allow an create argument "model_props" and handle them here.
         # see also: handle_prop(), which will be called y parse_model_props 
         #           for all attributes supported by the class
+        self.model_props_parsed = model_props
         return True
     
     def set_state(self, set_value):
@@ -120,6 +121,8 @@ class ModelObject:
         else:
             var_path = self.find_var_path(var_name)
             var_ix = get_state_ix(self.state_ix, self.state_paths, var_path)
+        if (var_ix == False):
+            return False
         return self.state_ix[var_ix]
     
     def get_exec_order(self, var_name = False):
@@ -206,7 +209,7 @@ class ModelObject:
         #       this *should* search for month and find the STATE/month variable 
         #       BUT this only works if both var_name and var_path are month 
         #       so add_input('month', 'month', 1, True) works.
-        found_path = self.find_var_path(var_name)
+        found_path = self.find_var_path(var_path)
         #print("Searched", var_name, "with path", var_path,"found", found_path)
         var_ix = get_state_ix(self.state_ix, self.state_paths, found_path)
         if var_ix == False:
@@ -231,6 +234,15 @@ class ModelObject:
         self.inputs[var_name] = var_object.state_path
         self.inputs_ix[var_name] = var_object.ix
         return self.inputs_ix[var_name]
+    
+    def create_parent_var(self, parent_var_name, source_object):
+        # see decision points: https://github.com/HARPgroup/HSPsquared/issues/78
+        # This is used when an object sets an additional property on its parent
+        # Like in simple_channel sets [channel prop name]_Qout on its parent 
+        # Generally, this should have 2 components.  
+        # 1 - a state variable on the child (this could be an implicit sub-comp, or a constant sub-comp, the child handles the setup of this) see constant_or_path()
+        # 2 - an input link 
+        self.container.add_object_input(parent_var_name, source_object, 1)
     
     def insure_path(self, var_path):
         # if this path can be found in the hdf5 make sure that it is registered in state

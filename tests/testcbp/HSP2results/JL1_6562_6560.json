@@ -175,6 +175,7 @@
                         ]
                     ]
                 },
+                "mx_type": 1,
                 "name": "flowby",
                 "object_class": "dataMatrix",
                 "value": null,
@@ -391,6 +392,7 @@
                         ]
                     ]
                 },
+                "mx_type": 1,
                 "name": "historic_monthly_pct",
                 "object_class": "dataMatrix",
                 "value": null,
@@ -426,6 +428,11 @@
             }
         },
         "Listen to Children": {
+            "broadcast_channel": {
+                "id": "7194646",
+                "name": "broadcast_class",
+                "value": "hydroObject"
+            },
             "broadcast_class": {
                 "id": "7194646",
                 "name": "broadcast_class",
@@ -487,7 +494,7 @@
             },
             "id": "7194642",
             "name": "Listen to Children",
-            "object_class": "broadCastObject",
+            "object_class": "ModelBroadcast",
             "value": null
         },
         "Qlocal": {
@@ -631,7 +638,7 @@
                 "value": "0.095"
             },
             "name": "local_channel",
-            "object_class": "USGSChannelGeomObject_sub",
+            "object_class": "SimpleChannel",
             "province": {
                 "id": "7194371",
                 "name": "province",

@@ -58,6 +58,7 @@ from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
 from HSP2.om_data_matrix import *
 from HSP2.om_model_broadcast import *
+from HSP2.om_simple_channel import *
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
 def init_om_dicts():
@@ -185,32 +186,33 @@ def load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, di
     # Opening JSON file
     # load the json data from a pre-generated json file on github
     
-    local_path = os.getcwd()
-    print("Path:", local_path)
-    # try this
-    hdf5_path = io_manager._input.file_path
-    (fbase, fext) = os.path.splitext(hdf5_path)
-    # see if there is a code module with custom python 
-    print("Looking for custom python code ", (fbase + ".py"))
-    print("calling dynamic_module_import(",fbase, local_path + "/" + fbase + ".py", ", 'hsp2_local_py')")
-    hsp2_local_py = dynamic_module_import(fbase, local_path + "/" + fbase + ".py", "hsp2_local_py")
-    # Load a function from code if it exists 
-    if 'om_init_model' in dir(hsp2_local_py):
-        hsp2_local_py.om_init_model(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
-    if 'om_step_hydr' in dir(hsp2_local_py):
-        siminfo['om_step_hydr'] = True 
-    if 'state_step_hydr' in dir(hsp2_local_py):
-        siminfo['state_step_hydr'] = True 
-    
-    # see if there is custom json
-    fjson = fbase + ".json"
-    model_data = {}
-    if (os.path.isfile(fjson)):
-        print("Found local json file", fjson)
-        jfile = open(fjson)
-        model_data = json.load(jfile)
-    #print("Loaded json with keys:", model_data.keys())
-    print("hdf5_path=", hdf5_path)
+    # this allows this function to be called without an hdf5
+    if io_manager != False:
+        # try this
+        local_path = os.getcwd()
+        print("Path:", local_path)
+        (fbase, fext) = os.path.splitext(hdf5_path)
+        # see if there is a code module with custom python 
+        print("Looking for custom python code ", (fbase + ".py"))
+        print("calling dynamic_module_import(",fbase, local_path + "/" + fbase + ".py", ", 'hsp2_local_py')")
+        hsp2_local_py = dynamic_module_import(fbase, local_path + "/" + fbase + ".py", "hsp2_local_py")
+        # Load a function from code if it exists 
+        if 'om_init_model' in dir(hsp2_local_py):
+            hsp2_local_py.om_init_model(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache)
+        if 'om_step_hydr' in dir(hsp2_local_py):
+            siminfo['om_step_hydr'] = True 
+        if 'state_step_hydr' in dir(hsp2_local_py):
+            siminfo['state_step_hydr'] = True 
+        
+        # see if there is custom json
+        fjson = fbase + ".json"
+        model_data = {}
+        if (os.path.isfile(fjson)):
+            print("Found local json file", fjson)
+            jfile = open(fjson)
+            model_data = json.load(jfile)
+        #print("Loaded json with keys:", model_data.keys())
+        print("hdf5_path=", hdf5_path)
     # Opening JSON file from remote url
     # json_url = "https://raw.githubusercontent.com/HARPgroup/vahydro/master/R/modeling/nhd/nhd_simple_8566737.json"
     #jraw =  requests.get(json_url, verify=False)
@@ -229,6 +231,7 @@ def load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, di
     model_exec_list = []
     model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
     print("model_exec_list:", model_exec_list)
+    # This is used to stash the model_exec_list -- is this used?
     op_tokens[0] = np.asarray(model_exec_list, dtype="i8")
     ivol_state_path = '/STATE/RCHRES_R001' + "/IVOLin"
     if (ivol_state_path in state_paths):
@@ -239,6 +242,13 @@ def load_om_components(io_manager, siminfo, op_tokens, state_paths, state_ix, di
     else:
         print("Could not find",ivol_state_path)
         #print("Could not find",ivol_state_path,"in", state_paths)
+    return
+    # the resulting set of objects is returned.
+    state['model_object_cache'] = model_object_cache
+    state['op_tokens'] = op_tokens
+    state['state_step_om'] = 'disabled'
+    if len(op_tokens) > 1:
+        state['state_step_om'] = 'enabled' 
     return
 
 def state_load_dynamics_om(state, io_manager, siminfo):
@@ -340,6 +350,8 @@ def model_class_loader(model_name, model_props, container = False):
               return False
           model_object = Equation(model_props.get('name'), container, eqn_str )
           #remove_used_keys(model_props, 
+      elif object_class == 'SimpleChannel':
+          model_object = SimpleChannel(model_props.get('name'), container, model_props )
       elif object_class == 'Constant':
           model_object = ModelConstant(model_props.get('name'), container, model_props.get('value') )
       elif ( object_class.lower() == 'datamatrix'):
@@ -384,6 +396,9 @@ def model_class_loader(model_name, model_props, container = False):
           model_object = ModelObject(model_props.get('name'), container)
     # one way to insure no class attributes get parsed as sub-comps is:
     # model_object.remove_used_keys() 
+    if len(model_object.model_props_parsed) == 0:
+        # attach these to the object for posterity
+        model_object.model_props_parsed = model_props
     # better yet to just NOT send those attributes as typed object_class arrays, instead just name : value
     return model_object
 

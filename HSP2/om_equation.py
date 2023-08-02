@@ -25,6 +25,17 @@ class Equation(ModelObject):
         exprStack = []
         exprStack[:] = []
         self.ps = deconstruct_equation(self.equation)
+        # if ps is empty, we may have gotten a constant, so we will check it, 
+        # and create a set of ps [constant] + 0.0 and return
+        # if this does not yield ps > 0 we will throw an error
+        if (len(self.ps) == 0):
+            tps = deconstruct_equation(self.equation + " + 0.0")
+            if len(tps) == 1:
+               # seemed to have succeeded, try to use this now
+               self.ps = tps
+               self.equation = self.equation + " + 0.0"
+            else:
+                raise Exception("Error: Cannot parse equation: " + self.equation + " on object " + self.name + " Halting.") 
         #print(exprStack)
     
     def find_paths(self):
