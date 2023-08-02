@@ -33,7 +33,7 @@ class ModelObject:
         self.paths_found = False # this should be False at start
         self.default_value = 0.0
         self.ops = []
-        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input/ModelLinkage, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 12 - ModelRegister, 13 - SimpleChannel
+        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input/ModelLinkage, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 12 - ModelRegister, 13 - SimpleChannel, 14 - SimpleImpoundment
         # this is replaceable. to replace state_path/re-register the index :
         # - remove the old PATH from state_paths: del state_paths[self.state_path]
         # you should never create an object without knowing its container, but if you do
