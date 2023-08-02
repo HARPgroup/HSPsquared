@@ -15,10 +15,9 @@ class SimpleImpoundment(ModelObject):
         self.model_props_parsed = model_props
         self.optype = 14 # see list in om_model_object.py
         # add basic numeric state variables for outputs
-        self.rvars = {'solver', 'Qin', 'Rin', 'drainage_area', 'area', 'demand'}
-        # old method had q_var, then reported it as Qin this can just be a link or constant
-        # and therefore handled by constant_or_path()
-        self.wvars = {'Qout', 'depth', 'its', 'Storage', 'last_S', 'rejected_demand_mgd', 'rejected_demand_pct', 'area', 'demand', 'drainage_area'}
+        self.rvars = array{'et_in','precip_in','release','demand', 'Qin', 'refill'};
+        #since this is a subcomp need to explicitly declare which write on parent
+        self.wvars = array{'Qin', 'evap_mgd', 'precip_mgd','Qout','lake_elev','Storage', 'refill_full_mgd', 'demand', 'use_remain_mg', 'days_remaining', 'max_usable', 'riser_stage', 'riser_head', 'riser_mode', 'riser_flow', 'riser_diameter', 'demand_met_mgd', 'its', 'spill', 'release', 'area', 'refill');
         self.r_var_values = {}
         self.w_var_values = {}
         self.var_ops = [] # keep these separate to easily add to ops at tokenize
@@ -32,16 +31,7 @@ class SimpleImpoundment(ModelObject):
         super().parse_model_props(model_props, strict)
         if model_props.get('solver') == None:
             model_props['solver'] = 0 # use simple-routing by default 
-        # ceck for inputs that this will use to get flows/demand inputs 
-        for op_name in self.rvars:
-            self.r_var_values[op_name] = self.handle_prop(model_props, op_name, False)
-        # handle variables that used a weird convention in old model
-        if 'q_var' in model_props:
-            self.r_var_values['Qin'] = self.handle_prop(model_props, 'q_var', False)
-        if 'r_var' in model_props:
-            self.r_var_values['Rin'] = self.handle_prop(model_props, 'r_var', False)
-        if 'w_var' in model_props:
-            self.r_var_values['demand'] = self.handle_prop(model_props, 'w_var', False)
+        # see SimpleChannel for this use 
         return True
     
     def set_local_props(self):
@@ -56,30 +46,20 @@ class SimpleImpoundment(ModelObject):
     
     def find_paths(self):
         super().find_paths()
-        # todo:
-        #   - r_var, q_var, etc are inputs, that link to a remote variables
-        #   - their local state counterparts such as Qin, Rin, etc 
-        #     MUST be distinct entities, since they are recorded in STATE
-        #   - This, local state counterparts (all wvars and anything else we want to store)
-        #     must be created as ModelConstant with an appropriate path 
-        #   - When tokenizing, we need to store both source and local-state IDs for 
-        #     getting and setting 
-        #   NOTE: the below setting of constant_or_path for these local-state variables 
-        #         will be un-neccessary, since we will need to create constants earlier
-        #         in the model parsing process.
         self.paths_found = False # override parent setting until we verify everything
         # handle props array 
         for op_name in self.r_var_values:
             self.constant_or_path(op_name, self.r_var_values[op_name], False)
         # the above should result in all rvars as inputs, whether constant or variables
-        # then, when we tokenize, we just refer to self.inputs['q_var'] to get the ix 
+        # then, when we tokenize, we just refer to self.inputs['var_name'] to get the ix 
         self.paths_found = True
     
     def tokenize(self):
         # call parent method to set basic ops common to all 
         super().tokenize()
         op_num = 0
-        order_ops = ['solver', 'dt', 'Qin', 'Rin', 'Qout', 'demand', 'Storage']
+        # todo: add riser structure parameters
+        order_ops = ['solver', 'dt', 'Qin', 'Qout', 'release', 'demand', 'Storage']
         for i in order_ops:
             self.var_ops.append(self.inputs_ix[i])
         self.ops = self.ops + self.var_ops
@@ -101,10 +81,8 @@ def step_impoundment(op, state_ix, dict_ix, step):
     ix = op[1] # note op[0] is op type which is known if we are here.
     # Not yet completed.
     # 3 options for solver:
-    #   - 0: Qout = Qin
-    #   - 1: Euler
-    #   - 2: 3-d surface
-    #   - 3: Newton's Method
+    #   - 0: simple overflow max storage with release 
+    #   - 1: riser structure with release 
     # type = op[0], ix = op[1]
     solver = op[2]
     dt_ix = op[3]
@@ -137,12 +115,3 @@ def step_impoundment(op, state_ix, dict_ix, step):
         Qout = S1 / dts # exact rate needed to empty channel in 1 step.
     state_ix[Qout_ix] = Qout
     state_ix[storage_ix] = S2
-    # TBD (or not depending on what is useful)
-    #state_ix[V_ix] = Vout;
-    #state_ix[area_ix] = area;
-    #state_ix[depth_ix] = depth;
-    #state_ix['last_demand'] = $demand;
-    #state_ix['last_discharge'] = $discharge;
-    #state_ix['rejected_demand_mgd'] = $rejected_demand_mgd;
-    #state_ix['rejected_demand_pct'] = $rejected_demand_pct;
-    #state_ix['its'] = $its;
