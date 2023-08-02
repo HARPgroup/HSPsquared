@@ -21,6 +21,7 @@ class SimpleChannel(ModelObject):
         self.wvars = {'Qout', 'depth', 'its', 'Storage', 'last_S', 'rejected_demand_mgd', 'rejected_demand_pct', 'area', 'demand', 'drainage_area'}
         self.r_var_values = {}
         self.w_var_values = {}
+        self.var_ops = [] # keep these separate to easily add to ops at tokenize
         self.autosetvars = True # this should default to False or True?
         self.parse_model_props(model_props)
         self.set_local_props()
