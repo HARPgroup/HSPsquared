@@ -108,13 +108,13 @@ def step_simple_channel(op, state_ix, dict_ix):
     # type = op[0], ix = op[1]
     solver = op[2]
     dt_ix = op[3]
-    print("dt ix:", dt_ix)
-    return
     Qin_ix = op[4] # the data state index for the Qin variable (upstream inflow)
     Rin_ix = op[5] # the data state index for the Rin variable (local inflow)
     Qout_ix = op[6] # the data state index for the Qout variable 
     demand_ix = op[7] # the data state index for the Qout variable 
     storage_ix = op[8] # the data state index for the Qout variable 
+    print("storage_ix ix:", storage_ix)
+    return
     # solver: op[2], Qin_ix = op[3], Qout_ix: op[4], demand_ix: op[5], storage_ix: op[6]
     # discharge_ix: op[7], et_ix: op[8], precip_ix: op[9]
     # if this object uses anything other than Qout = Qin
