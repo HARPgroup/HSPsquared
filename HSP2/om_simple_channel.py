@@ -82,12 +82,12 @@ class SimpleChannel(ModelObject):
         order_ops = ['solver', 'dt', 'Qin', 'Rin', 'Qout', 'demand', 'Storage']
         for i in order_ops:
             self.var_ops.append(self.inputs_ix[i])
+        self.ops = self.ops + self.var_ops
     
     def add_op_tokens(self):
         # this puts the tokens into the global simulation queue 
         # can be customized by subclasses to add multiple lines if needed.
         super().add_op_tokens()
-        self.ops = self.ops + self.var_ops
 
 # njit functions for runtime
 @njit
