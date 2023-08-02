@@ -118,6 +118,8 @@ def step_simple_channel(op, state_ix, dict_ix):
     # if this object uses anything other than Qout = Qin
     # get ix for: Qin,
     print("Rin_ix ix:", Rin_ix)
+    print("state_ix:", state_ix)
+    print("op:", state_ix)
     return
     Qin = state_ix[Qin_ix] + state_ix[Rin_ix]
     wd_mgd = state_ix[demand_ix]
