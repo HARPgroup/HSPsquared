@@ -117,11 +117,6 @@ def step_simple_channel(op, state_ix, dict_ix, step):
     # discharge_ix: op[7], et_ix: op[8], precip_ix: op[9]
     # if this object uses anything other than Qout = Qin
     # get ix for: Qin,
-    if (step == 10):
-        print("Rin_ix ix:", Rin_ix)
-        print("state_ix:", state_ix)
-        print("op:", op)
-    return
     Qin = state_ix[Qin_ix] + state_ix[Rin_ix]
     wd_mgd = state_ix[demand_ix]
     #ps_mgd = state_ix[discharge_ix]
@@ -129,16 +124,13 @@ def step_simple_channel(op, state_ix, dict_ix, step):
     Qout = Qin
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
     # Simple Routing
-    print("dt in minutes:", state_ix[dt_ix])
     dts = (state_ix[dt_ix] * 60)
     if (solver == 0):
         Qout = Qin - wd_mgd * 1.547 / dts + ps_mgd * 1.547 / dts
     elif (solver > 0):
         # all will be simple routing until end
         Qout = Qin - wd_mgd * 1.547 / dts + ps_mgd * 1.547 / dts
-    print("Calcing store_change with Qin and Qout:", Qin, Qout)
     store_change = (Qin - Qout) * dts # change in storage in cubic feet 
-    return
     S2 = S1 + store_change
     if (S2 < 0):
         S2 = 0
