@@ -118,7 +118,7 @@ def step_simple_channel(op, state_ix, dict_ix):
     # if this object uses anything other than Qout = Qin
     # get ix for: Qin,
     Qin = state_ix[Qin_ix] + state_ix[Rin_ix]
-    #wd_mgd = state_ix[demand_ix]
+    wd_mgd = state_ix[demand_ix]
     #ps_mgd = state_ix[discharge_ix]
     Qout = Qin
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
