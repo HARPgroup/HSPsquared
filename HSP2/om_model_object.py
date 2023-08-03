@@ -106,7 +106,7 @@ class ModelObject:
             if not (self.container == False):
                 self.state_path = self.container.state_path + "/" + self.name
                 self.attribute_path = self.container.attribute_path + "/" + self.name
-            else if self.name == "":
+            elif self.name == "":
                 self.state_path = "/STATE" 
                 self.attribute_path = "/OBJECTS" 
             else:
