@@ -106,6 +106,9 @@ class ModelObject:
             if not (self.container == False):
                 self.state_path = self.container.state_path + "/" + self.name
                 self.attribute_path = self.container.attribute_path + "/" + self.name
+            else if self.name == "":
+                self.state_path = "/STATE" 
+                self.attribute_path = "/OBJECTS" 
             else:
                 self.state_path = "/STATE/" + self.name
                 self.attribute_path = "/OBJECTS/" + self.name
@@ -154,13 +157,9 @@ class ModelObject:
             #print(self.name,"looking to parent", self.container.name, "for", var_name)
             return self.container.find_var_path(var_name)
         # check for root state vars STATE + var_name
-        if var_name.startswith("/"):
-            sep = ""
-        else:
-            sep = "/"
-        if ("/STATE/" + sep + var_name) in self.state_paths.keys():
-            #return self.state_paths[("/STATE/" + sep + var_name)]
-            return ("/STATE/" + sep + var_name)
+        if ("/STATE/" + var_name) in self.state_paths.keys():
+            #return self.state_paths[("/STATE/" + var_name)]
+            return ("/STATE/" + var_name)
         # check for root state vars
         if var_name in self.state_paths.keys():
             #return self.state_paths[var_name]
