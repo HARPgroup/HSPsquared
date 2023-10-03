@@ -421,6 +421,12 @@ def model_class_translate(model_props, object_class):
     if object_class == 'USGSChannelGeomObject_sub':
         model_props['object_class'] = 'SimpleChannel'
         print("Handling USGSChannelGeomObject_sub as SimpleChannel")
+    if object_class == 'hydroImpoundment':
+        model_props['object_class'] = 'SimpleImpoundment'
+        print("Handling hydroImpoundment as SimpleImpoundment")
+    if object_class == 'hydroImpSmall':
+        model_props['object_class'] = 'SimpleImpoundment'
+        print("Handling hydroImpSmall as SimpleImpoundment")
 
 def model_loader_recursive(model_data, container):
     k_list = model_data.keys()

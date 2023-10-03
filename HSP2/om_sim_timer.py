@@ -33,16 +33,17 @@ class SimTimer(ModelObject):
         dt_ix = set_state(self.state_ix, self.state_paths, "/STATE/dt", float(self.time_array[0][8]))
         jd_ix = set_state(self.state_ix, self.state_paths, "/STATE/jday", float(self.time_array[0][9]))
         md_ix = set_state(self.state_ix, self.state_paths, "/STATE/modays", float(self.time_array[0][10]))
-        self.date_path_ix = [year_ix, month_ix, day_ix, hr_ix, min_ix, sec_ix, wd_ix, dt_ix, jd_ix, md_ix]
+        dts_ix = set_state(self.state_ix, self.state_paths, "/STATE/dts", float(self.time_array[0][8] * 60.0))
+        self.date_path_ix = [year_ix, month_ix, day_ix, hr_ix, min_ix, sec_ix, wd_ix, dt_ix, jd_ix, md_ix, dts_ix]
         self.dict_ix[self.ix] = self.time_array
         
         return self.ix
     
     def tokenize(self):
         # call parent method which sets standard ops 
-        super().tokenize()
         # returns an array of data pointers
-        self.ops = self.ops + [self.date_path_ix[0], self.date_path_ix[1], self.date_path_ix[2], self.date_path_ix[3], self.date_path_ix[4], self.date_path_ix[5], self.date_path_ix[6], self.date_path_ix[7], self.date_path_ix[8]]
+        super().tokenize() # resets ops to common base
+        self.ops = self.ops + self.date_path_ix # adds timer specific items
     
     def add_op_tokens(self):
         # this puts the tokens into the global simulation queue 
@@ -56,7 +57,7 @@ class SimTimer(ModelObject):
         dt = siminfo['delt']
         # sim timer is special, one entry for each time component for each timestep
         # convert DateIndex to numbers [int(i) for i in dateindex.year]
-        tdi = { 0: dateindex.astype(np.int64), 1:[float(i) for i in dateindex.year], 2:[float(i) for i in dateindex.month], 3:[float(i) for i in dateindex.day], 4:[float(i) for i in dateindex.hour], 5:[float(i) for i in dateindex.minute], 6:[float(i) for i in dateindex.second], 7:[float(i) for i in dateindex.weekday], 8:[float(dt) for i in dateindex], 9:[float(i) for i in dateindex.day_of_year], 10:[float(i) for i in dateindex.daysinmonth] }
+        tdi = { 0: dateindex.astype(np.int64), 1:[float(i) for i in dateindex.year], 2:[float(i) for i in dateindex.month], 3:[float(i) for i in dateindex.day], 4:[float(i) for i in dateindex.hour], 5:[float(i) for i in dateindex.minute], 6:[float(i) for i in dateindex.second], 7:[float(i) for i in dateindex.weekday], 8:[float(dt) for i in dateindex], 9:[float(i) for i in dateindex.day_of_year], 10:[float(i) for i in dateindex.daysinmonth], 11:[float(dt * 60.0) for i in dateindex] }
         #tdi = { 0:dateindex.year, 1:dateindex.month, 2:dateindex.day, 3:dateindex.hour, 4:dateindex.minute, 5:dateindex.second }
         tid = DataFrame(tdi)
         h = 1 # added to increase row count for debug testing.
@@ -79,5 +80,6 @@ def step_sim_timer(op_token, state_ix, dict_ix, ts_ix, step):
     state_ix[op_token[9]] = dict_ix[op_token[1]][step][8] # dt  
     state_ix[op_token[10]] = dict_ix[op_token[1]][step][9] # julian day  
     state_ix[op_token[11]] = dict_ix[op_token[1]][step][10] # modays 
+    state_ix[op_token[12]] = dict_ix[op_token[1]][step][11] # dts 
     return
 

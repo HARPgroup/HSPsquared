@@ -24,7 +24,7 @@ class SimpleChannel(ModelObject):
         self.var_ops = [] # keep these separate to easily add to ops at tokenize
         self.autosetvars = True # this should default to False or True?
         self.parse_model_props(model_props)
-        self.add_input('dt','dt') # must have this 
+        self.add_input('dts','dts') # must have this 
         self.set_local_props()
     
     def parse_model_props(self, model_props, strict = False ):
@@ -79,7 +79,7 @@ class SimpleChannel(ModelObject):
         # call parent method to set basic ops common to all 
         super().tokenize()
         op_num = 0
-        order_ops = ['solver', 'dt', 'Qin', 'Rin', 'Qout', 'demand', 'Storage']
+        order_ops = ['solver', 'dts', 'Qin', 'Rin', 'Qout', 'demand', 'Storage']
         for i in order_ops:
             self.var_ops.append(self.inputs_ix[i])
         self.ops = self.ops + self.var_ops
@@ -107,7 +107,7 @@ def step_simple_channel(op, state_ix, dict_ix, step):
     #   - 3: Newton's Method
     # type = op[0], ix = op[1]
     solver = op[2]
-    dt_ix = op[3]
+    dts_ix = op[3]
     Qin_ix = op[4] # the data state index for the Qin variable (upstream inflow)
     Rin_ix = op[5] # the data state index for the Rin variable (local inflow)
     Qout_ix = op[6] # the data state index for the Qout variable 
@@ -124,7 +124,7 @@ def step_simple_channel(op, state_ix, dict_ix, step):
     Qout = Qin
     S1 = state_ix[storage_ix] # initial storage from end of last time step 
     # Simple Routing
-    dts = (state_ix[dt_ix] * 60)
+    dts = state_ix[dts_ix]
     if (solver == 0):
         Qout = Qin - wd_mgd * 1.547 / dts + ps_mgd * 1.547 / dts
     elif (solver > 0):
