@@ -69,7 +69,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     # - finally stash specactions in state, not domain (segment) dependent so do it once
     state['specactions'] = specactions # stash the specaction dict in state
     #######################################################################################
-    
+    print("Special ACtions", specactions)
     # main processing loop
     msg(1, f'Simulation Start: {start}, Stop: {stop}')
     tscat = {}
