@@ -11,6 +11,7 @@ from datetime import datetime as dt
 import os
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 from HSP2.configuration import activities, noop, expand_masslinks
+from HSP2.state import *
 
 from HSP2IO.io import IOManager, SupportsReadTS, Category
 
@@ -35,7 +36,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
         raise FileNotFoundError(f'{hdfname} HDF5 File Not Found')
 
     msg = messages()
-    msg(1, f'(specl v0.1) Processing started for file {hdfname}; saveall={saveall}')
+    msg(1, f'Processing started for file {hdfname}; saveall={saveall}')
 
     # read user control, parameters, states, and flags uci and map to local variables
     uci_obj = io_manager.read_uci()
@@ -56,6 +57,19 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     copy_instances = {}
     gener_instances = {}
 
+    #######################################################################################
+    # initilize STATE dicts
+    #######################################################################################
+    # Set up Things in state that will be used in all modular activitis like SPECL
+    state = init_state_dicts()
+    state_siminfo_hsp2(uci_obj, siminfo)
+    # Add support for dynamic functins to operate on STATE
+    # - Load any dynamic components if present, and store variables on objects 
+    state_load_dynamics_hsp2(state, io_manager, siminfo)
+    # - finally stash specactions in state, not domain (segment) dependent so do it once
+    state['specactions'] = specactions # stash the specaction dict in state
+    #######################################################################################
+    
     # main processing loop
     msg(1, f'Simulation Start: {start}, Stop: {stop}')
     tscat = {}
@@ -69,14 +83,17 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
             copy_instances[segment] = activities[operation](io_manager, siminfo, ddext_sources[(operation,segment)]) 
         elif operation == 'GENER':
             try:
-                gener_instances[segment] = activities[operation](segment, copy_instances, gener_instances, ddlinks, ddgener) 
+                ts = get_timeseries(io_manager, ddext_sources[(operation, segment)], siminfo)
+                ts = get_gener_timeseries(ts, gener_instances, ddlinks[segment], ddmasslinks)
+                get_flows(io_manager, ts, {}, uci, segment, ddlinks, ddmasslinks, siminfo['steps'], msg)
+                gener_instances[segment] = activities[operation](segment, siminfo, copy_instances, gener_instances, ddlinks, ddmasslinks, ts, ddgener)
             except NotImplementedError as e:
-                print(f"GENER '{segment}' encountered unsupported feature during initialization and may not function correctly. Unsupported feature: '{e}'")
+                print(f"GENER '{segment}' may not function correctly. '{e}'")
         else:
 
             # now conditionally execute all activity modules for the op, segment
             ts = get_timeseries(io_manager,ddext_sources[(operation,segment)],siminfo)
-            ts = get_gener_timeseries(ts, gener_instances, ddlinks[segment])
+            ts = get_gener_timeseries(ts, gener_instances, ddlinks[segment],ddmasslinks)
             flags = uci[(operation, 'GENERAL', segment)]['ACTIVITY']
             if operation == 'RCHRES':
                 # Add nutrient adsorption flags:
@@ -99,7 +116,9 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                     continue
 
                 msg(3, f'{activity}')
-
+                # Set context for dynamic executables.
+                state_context_hsp2(state, operation, segment, activity)
+                
                 ui = uci[(operation, activity, segment)]   # ui is a dictionary
 
                 if operation == 'PERLND' and activity == 'SEDMNT':
@@ -212,7 +231,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                 ############ calls activity function like snow() ##############
                 if operation not in ['COPY','GENER']:
                     if (activity == 'HYDR'):
-                        errors, errmessages = function(io_manager, siminfo, ui, ts, ftables, specactions)
+                        errors, errmessages = function(io_manager, siminfo, ui, ts, ftables, state)
                     elif (activity != 'RQUAL'):
                         errors, errmessages = function(io_manager, siminfo, ui, ts)
                     else:
@@ -226,14 +245,30 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
                 for errorcnt, errormsg in zip(errors, errmessages):
                     if errorcnt > 0:
                         msg(4, f'Error count {errorcnt}: {errormsg}')
+
+                # default to hourly output
+                outstep = 2
+                outstep_oxrx = 2
+                outstep_nutrx = 2
+                outstep_plank = 2
+                outstep_phcarb = 2
+                if 'BINOUT' in uci[(operation, 'GENERAL', segment)]:
+                    if activity in uci[(operation, 'GENERAL', segment)]['BINOUT']:
+                        outstep = uci[(operation, 'GENERAL', segment)]['BINOUT'][activity]
+                    elif activity == 'RQUAL':
+                        outstep_oxrx = uci[(operation, 'GENERAL', segment)]['BINOUT']['OXRX']
+                        outstep_nutrx = uci[(operation, 'GENERAL', segment)]['BINOUT']['NUTRX']
+                        outstep_plank = uci[(operation, 'GENERAL', segment)]['BINOUT']['PLANK']
+                        outstep_phcarb = uci[(operation, 'GENERAL', segment)]['BINOUT']['PHCARB']
+
                 if 'SAVE' in ui:
-                    save_timeseries(io_manager,ts,ui['SAVE'],siminfo,saveall,operation,segment,activity,jupyterlab)
+                    save_timeseries(io_manager,ts,ui['SAVE'],siminfo,saveall,operation,segment,activity,jupyterlab,outstep)
     
                 if (activity == 'RQUAL'):
-                    if 'SAVE' in ui_oxrx:   save_timeseries(io_manager,ts,ui_oxrx['SAVE'],siminfo,saveall,operation,segment,'OXRX',jupyterlab)
-                    if 'SAVE' in ui_nutrx and flags['NUTRX'] == 1:   save_timeseries(io_manager,ts,ui_nutrx['SAVE'],siminfo,saveall,operation,segment,'NUTRX',jupyterlab)
-                    if 'SAVE' in ui_plank and flags['PLANK'] == 1:  save_timeseries(io_manager,ts,ui_plank['SAVE'],siminfo,saveall,operation,segment,'PLANK',jupyterlab)
-                    if 'SAVE' in ui_phcarb and flags['PHCARB'] == 1:   save_timeseries(io_manager,ts,ui_phcarb['SAVE'],siminfo,saveall,operation,segment,'PHCARB',jupyterlab)
+                    if 'SAVE' in ui_oxrx:   save_timeseries(io_manager,ts,ui_oxrx['SAVE'],siminfo,saveall,operation,segment,'OXRX',jupyterlab,outstep_oxrx)
+                    if 'SAVE' in ui_nutrx and flags['NUTRX'] == 1:   save_timeseries(io_manager,ts,ui_nutrx['SAVE'],siminfo,saveall,operation,segment,'NUTRX',jupyterlab,outstep_nutrx)
+                    if 'SAVE' in ui_plank and flags['PLANK'] == 1:  save_timeseries(io_manager,ts,ui_plank['SAVE'],siminfo,saveall,operation,segment,'PLANK',jupyterlab,outstep_plank)
+                    if 'SAVE' in ui_phcarb and flags['PHCARB'] == 1:   save_timeseries(io_manager,ts,ui_phcarb['SAVE'],siminfo,saveall,operation,segment,'PHCARB',jupyterlab,outstep_phcarb)
 
     msglist = msg(1, 'Done', final=True)
 
@@ -265,8 +300,7 @@ def messages():
 def get_flows(io_manager:SupportsReadTS, ts, flags, uci, segment, ddlinks, ddmasslinks, steps, msg):
     # get inflows to this operation
     for x in ddlinks[segment]:
-        mldata = ddmasslinks[x.MLNO]
-        for dat in mldata:
+        if x.SVOL != 'GENER':   # gener already handled in get_gener_timeseries
             recs = []
             if x.MLNO == '':  # Data from NETWORK part of Links table
                 rec = {}
@@ -280,23 +314,25 @@ def get_flows(io_manager:SupportsReadTS, ts, flags, uci, segment, ddlinks, ddmas
                 rec['TMEMSB2'] = x.TMEMSB2
                 rec['SVOL'] = x.SVOL
                 recs.append(rec)
-            else:  # Data from SCHEMATIC part of Links table
-                if dat.SMEMN != '':
-                    rec = {}
-                    rec['MFACTOR'] = dat.MFACTOR
-                    rec['SGRPN'] = dat.SGRPN
-                    rec['SMEMN'] = dat.SMEMN
-                    rec['SMEMSB1'] = dat.SMEMSB1
-                    rec['SMEMSB2'] = dat.SMEMSB2
-                    rec['TMEMN'] = dat.TMEMN
-                    rec['TMEMSB1'] = dat.TMEMSB1
-                    rec['TMEMSB2'] = dat.TMEMSB2
-                    rec['SVOL'] = dat.SVOL
-                    recs.append(rec)
-                else:
-                    # this is the kind that needs to be expanded
-                    if dat.SGRPN == "ROFLOW" or dat.SGRPN == "OFLOW":
-                        recs = expand_masslinks(flags,uci,dat,recs)
+            else: # Data from SCHEMATIC part of Links table
+                mldata = ddmasslinks[x.MLNO]
+                for dat in mldata:
+                    if dat.SMEMN != '':
+                        rec = {}
+                        rec['MFACTOR'] = dat.MFACTOR
+                        rec['SGRPN'] = dat.SGRPN
+                        rec['SMEMN'] = dat.SMEMN
+                        rec['SMEMSB1'] = dat.SMEMSB1
+                        rec['SMEMSB2'] = dat.SMEMSB2
+                        rec['TMEMN'] = dat.TMEMN
+                        rec['TMEMSB1'] = dat.TMEMSB1
+                        rec['TMEMSB2'] = dat.TMEMSB2
+                        rec['SVOL'] = dat.SVOL
+                        recs.append(rec)
+                    else:
+                        # this is the kind that needs to be expanded
+                        if dat.SGRPN == "ROFLOW" or dat.SGRPN == "OFLOW":
+                            recs = expand_masslinks(flags,uci,dat,recs)
 
             for rec in recs:
                 mfactor = rec['MFACTOR']
@@ -308,13 +344,17 @@ def get_flows(io_manager:SupportsReadTS, ts, flags, uci, segment, ddlinks, ddmas
                 tmemsb1 = rec['TMEMSB1']
                 tmemsb2 = rec['TMEMSB2']
 
-                afactr = x.AFACTR
-                factor = afactr * mfactor
+                if x.AFACTR != '':
+                    afactr = x.AFACTR
+                    factor = afactr * mfactor
+                else:
+                    factor = mfactor
 
                 # KLUDGE until remaining HSP2 modules are available.
-                if tmemn not in {'IVOL', 'ICON', 'IHEAT', 'ISED', 'ISED1', 'ISED2', 'ISED3', 
+                if tmemn not in {'IVOL', 'ICON', 'IHEAT', 'ISED', 'ISED1', 'ISED2', 'ISED3',
                                     'IDQAL', 'ISQAL1', 'ISQAL2', 'ISQAL3',
-                                    'OXIF', 'NUIF1', 'NUIF2', 'PKIF', 'PHIF'}:
+                                    'OXIF', 'NUIF1', 'NUIF2', 'PKIF', 'PHIF',
+                                    'ONE', 'TWO'}:
                     continue
                 if (sgrpn == 'OFLOW' and smemn == 'OVOL') or (sgrpn == 'ROFLOW' and smemn == 'ROVOL'):
                     sgrpn = 'HYDR'
@@ -334,11 +374,13 @@ def get_flows(io_manager:SupportsReadTS, ts, flags, uci, segment, ddlinks, ddmas
                     sgrpn = 'PLANK'
                 if (sgrpn == 'OFLOW' and smemn == 'PHCF2') or (sgrpn == 'ROFLOW' and smemn == 'PHCF1'):
                     sgrpn = 'PHCARB'
-                
+
                 if tmemn == 'ISED' or tmemn == 'ISQAL':
                     tmemn = tmemn + tmemsb1    # need to add sand, silt, clay subscript
                 if (sgrpn == 'HYDR' and smemn == 'OVOL') or (sgrpn == 'HTRCH' and smemn == 'OHEAT'):
                     smemsb2 = ''
+                if sgrpn == 'GQUAL' and smemsb2 == '':
+                    smemsb2 = '1'
 
                 smemn, tmemn = expand_timeseries_names(sgrpn, smemn, smemsb1, smemsb2, tmemn, tmemsb1, tmemsb2)
 
@@ -351,7 +393,7 @@ def get_flows(io_manager:SupportsReadTS, ts, flags, uci, segment, ddlinks, ddmas
                 try:
                     if data in data_frame.columns: t = data_frame[data].astype(float64).to_numpy()[0:steps]
                     else: t = data_frame[smemn].astype(float64).to_numpy()[0:steps]
-                    
+
                     if MFname in ts and AFname in ts:
                         t *= ts[MFname][:steps] * ts[AFname][0:steps]
                         msg(4, f'MFACTOR modified by timeseries {MFname}')
@@ -379,7 +421,7 @@ def get_flows(io_manager:SupportsReadTS, ts, flags, uci, segment, ddlinks, ddmas
 
                 except KeyError:
                     print('ERROR in FLOWS, cant resolve ', path + ' ' + smemn)
-                
+
     return
 
 '''
