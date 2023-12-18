@@ -608,6 +608,9 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
         val = 0 
     elif ops[0] == 13:
         step_simple_channel(ops, state_ix, dict_ix, step)
+    # Op 100 is Basic ACTION in Special Actions
+    elif ops[0] == 100:
+        state_ix[ops[1]] = step_saction(ops, state_ix, dict_ix)
     return 
 
 

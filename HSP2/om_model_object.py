@@ -17,7 +17,7 @@ class ModelObject:
     model_object_cache = {} # Shared with actual objects, keyed by their path 
     model_exec_list = {} # Shared with actual objects, keyed by their path 
     
-    def __init__(self, name, container = False):
+    def __init__(self, name, container = False, model_props = []):
         self.name = name
         self.container = container # will be a link to another object
         self.log_path = "" # Ex: "/RESULTS/RCHRES_001/SPECL" 
