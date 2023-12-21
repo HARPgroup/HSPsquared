@@ -78,7 +78,7 @@ def main(io_manager:IOManager, saveall:bool=False, jupyterlab:bool=True) -> None
     # Parse dynamic Operational Model components to operate on STATE
     state_load_dynamics_om(state, io_manager, siminfo)
     # - finally stash specactions in state, not domain (segment) dependent so do it once
-    state['specactions'] = specactions # stash the specaction dict in state
+    state['specactions'] = specactions # deprecated: stash the specaction dict in state
     #######################################################################################
     
     # main processing loop

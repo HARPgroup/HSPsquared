@@ -10,6 +10,7 @@ from numba import int8, float32, njit, types, typed # import the types
 import os
 import importlib.util
 import sys
+from HSP2.om import *
 
 def init_state_dicts():
     """
@@ -136,6 +137,9 @@ def state_load_dynamics_hsp2(state, io_manager, siminfo):
     # if a local file with state_step_hydr() was found in load_dynamics(), we add it to state 
     state['state_step_hydr'] = siminfo['state_step_hydr'] # enabled or disabled 
     state['hsp2_local_py'] = hsp2_local_py # Stores the actual function in state
+
+def state_load_hdf5_components(io_manager, siminfo, op_tokens, state_paths, state_ix, dict_ix, ts_ix, model_object_cache):
+    # Implement population of model_object_cache etc from components in a hdf5 such as Special ACTIONS
 
 def hydr_init_ix(state_ix, state_paths, domain):
     # get a list of keys for all hydr state variables
