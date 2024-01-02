@@ -72,15 +72,19 @@ class SpecialAction(ModelObject):
         # 11 LN T= Ln(A) 
         # 12 LOG T= Log10(A)
         # 13 MOD T= Mod(T,A)
-        if not (is_float_digit(self.ac)):
-            if not (self.ac in cop_codes.values()):
+        if not (is_float_digit(ac)):
+            if not (ac in cop_codes.keys()):
                raise Exception("Error: in "+ self.name + " AC (" + self.ac + ") not supported.  Object creation halted. Path to object with error is " + self.state_path)
-            ac = self.ac
+            self.ac = cop_codes[ac]
+            opid = ac
         else:
             # this will fail catastrophically if the requested function is not supported
             # which is a good thing
-            ac = cop_codes[self.ac]
-        self.opid = ac
+            if not (ac in cop_codes.values()):
+               raise Exception("Error: in "+ self.name + "numeric AC (" + self.ac + ") not supported.  Object creation halted. Path to object with error is " + self.state_path)
+            self.ac = list(cop_codes.keys())[list(cop_codes.values()).index(ac) ]
+            opid = ac
+        self.opid = opid
 
     def tokenize(self):
         # call parent method to set basic ops common to all 
