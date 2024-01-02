@@ -24,10 +24,10 @@ from HSP2.om import *
 from HSP2.om_model_object import *
 from HSP2.om_sim_timer import *
 from HSP2.om_special_action import *
-#from HSP2.om_equation import *
+from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
-#from HSP2.om_data_matrix import *
-#from HSP2.om_model_broadcast import *
+from HSP2.om_data_matrix import *
+from HSP2.om_model_broadcast import *
 
 
 ERRMSGS =('HYDR: SOLVE equations are indeterminate',             #ERRMSG0
@@ -303,7 +303,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
     volev = 0.0
     IVOL0   = ts['IVOL']                   # the actual inflow in simulation native units 
     # prepare for dynamic state
-    hydr_ix = hydr_get_ix(state_ix, state_paths, state_info['domain'])
+    hydr_ix = hydr_get_ix(state_ix, state_paths, state_info['domain']) # alternative: do generic domain /STATE/RCHRES/HYDR to override all functions
     # these are integer placeholders faster than calling the array look each timestep
     o1_ix, o2_ix, o3_ix, ivol_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3'], hydr_ix['IVOL']
     ro_ix, rovol_ix, volev_ix, vol_ix = hydr_ix['RO'], hydr_ix['ROVOL'], hydr_ix['VOLEV'], hydr_ix['VOL']

@@ -55,11 +55,11 @@ def is_float_digit(n: str) -> bool:
 # Import Code Classes
 from HSP2.om_model_object import *
 from HSP2.om_sim_timer import *
-#from HSP2.om_equation import *
+from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
 from HSP2.om_special_action import *
-#from HSP2.om_data_matrix import *
-#from HSP2.om_model_broadcast import *
+from HSP2.om_data_matrix import *
+from HSP2.om_model_broadcast import *
 #from HSP2.om_simple_channel import *
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
@@ -219,7 +219,6 @@ def model_class_loader(model_name, model_props, container = False):
           model_object = DataMatrix(model_props.get('name'), container, model_props)
       elif object_class == 'ModelBroadcast':
           # add a matrix with the data, then add a matrix accessor for each required variable 
-          #print("Loading ModelBroadcast class ")
           has_props = ModelBroadcast.check_properties(model_props)
           if has_props == False:
               print("ModelBroadcast object must have", ModelBroadcast.required_properties())
@@ -407,7 +406,7 @@ def pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
             pass
         elif op_tokens[i][0] == 12:
             # register type data (like broadcast accumulators) 
-            # disabled till broadcasts are defined pre_step_register(op_tokens[i], state_ix, dict_ix)
+            pre_step_register(op_tokens[i], state_ix, dict_ix)
             pass
     return
 
@@ -431,7 +430,7 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     if debug == 1:
         print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
     if ops[0] == 1:
-        pass #state_ix[ops[1]] = step_equation(ops, state_ix)
+        state_ix[ops[1]] = step_equation(ops, state_ix)
     elif ops[0] == 2:
         # todo: this should be moved into a single function, 
         # with the conforming name step_matrix(op_tokens, ops, state_ix, dict_ix)
@@ -441,12 +440,12 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
             # this insures a matrix with variables in it is up to date 
             # only need to do this if the matrix data and matrix config are on same object
             # otherwise, the matrix data is an input and has already been evaluated
-            pass# state_ix[ops[1]] = exec_tbl_values(ops, state_ix, dict_ix)
+            state_ix[ops[1]] = exec_tbl_values(ops, state_ix, dict_ix)
         if (ops[3] > 0):
             # this evaluates a single value from a matrix if the matrix is configured to do so.
             if debug == 1:
                 print("DEBUG: Calling exec_tbl_eval", ops)
-            pass# state_ix[ops[1]] = exec_tbl_eval(op_tokens, ops, state_ix, dict_ix)
+            state_ix[ops[1]] = exec_tbl_eval(op_tokens, ops, state_ix, dict_ix)
     elif ops[0] == 3:
         step_model_link(ops, state_ix, ts_ix, step)
     elif ops[0] == 4:
