@@ -27,6 +27,7 @@ class SpecialAction(ModelObject):
         self.op_type = self.handle_prop(model_props, 'OPTYP')
         self.range1 = self.handle_prop(model_props, 'RANGE1')
         self.range2 = self.handle_prop(model_props, 'RANGE2')
+        self.ac = '=' # set the default, and also adds a property for later testing.
         self.ac = self.handle_prop(model_props, 'AC') # must handle this before we handle the operand to check for DIV by Zero
         self.vari = self.handle_prop(model_props, 'VARI')
         self.op2_val = self.handle_prop(model_props, 'VALUE')
