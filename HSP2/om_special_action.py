@@ -72,7 +72,7 @@ class SpecialAction(ModelObject):
         # 12 LOG T= Log10(A)
         # 13 MOD T= Mod(T,A)
         if not (is_float_digit(self.ac)):
-            if not (self.ac in cop_codes.values())
+            if not (self.ac in cop_codes.values()):
                raise Exception("Error: in "+ self.name + " AC (" + self.ac + ") not supported.  Object creation halted. Path to object with error is " + self.state_path)
             ac = self.ac
         else:
