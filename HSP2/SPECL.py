@@ -11,6 +11,9 @@ from pandas import DataFrame, date_range
 import h5py
 
 def specl_load_actions(state, io_manager, siminfo):
+    if not ('ACTIONS' in state['specactions'].keys()):
+        state['specactions']['ACTIONS'] = {}
+        return
     dc = state['specactions']['ACTIONS']
     #print(dc.index)
     #print("speca entry 0:0", dc[0:0])

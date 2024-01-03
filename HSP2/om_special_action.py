@@ -32,6 +32,7 @@ class SpecialAction(ModelObject):
         self.vari = self.handle_prop(model_props, 'VARI')
         self.op2_val = self.handle_prop(model_props, 'VALUE')
         self.op2_ix = self.constant_or_path('op_val', self.op2_val) # constant values must be added to STATE and thus are referenced by their state_ix number
+        self.ctr_ix = self.constant_or_path('ctr', 0) # constant values must be added to STATE and thus are referenced by their state_ix number
         # now add the state value that we are operating on (the target) as an input, so that this gets executed AFTER this is set initially
         self.add_input('op1', ('/STATE/' + self.op_type + '_' + self.op_type[0] + str(self.range1).zfill(3) + "/" + self.vari ), 2, True )
         # @tbd: support time enable/disable
@@ -89,7 +90,7 @@ class SpecialAction(ModelObject):
     def tokenize(self):
         # call parent method to set basic ops common to all 
         super().tokenize() # sets self.ops = op_type, op_ix
-        self.ops = self.ops + [self.inputs_ix['op1'], self.opid, self.op2_ix]
+        self.ops = self.ops + [self.inputs_ix['op1'], self.opid, self.op2_ix, self.timer_ix, self.ctr_ix]
         # @tbd: check if time ops have been set and tokenize accordingly
         print("Specl", self.name, "tokens", self.ops)
     
@@ -118,7 +119,8 @@ def step_special_action(op, state_ix, dict_ix, step):
     # @tbd: check if time ops have been set and enable/disable accordingly
     #     - 2 ops will be added for each time matching switch, the state_ix of the time element (year, month, ...) and the state_ix of the constant to match
     #     - matching should be as simple as if (state_ix[tix1] <> state_ix[vtix1]): return state_ix[ix1] (don't modify the value)
-    # 
+    #     - alternative: save the integer timestamp or timestep of the start, and if step/stamp > value, enable
+    # @tbd: add number of repeats, and save the value of repeats in a register
     ix1 = op[2] # ID of source of data and destination of data
     sop = op[3]
     ix2 = op[4]
