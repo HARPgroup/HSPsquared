@@ -68,6 +68,7 @@ class SimTimer(ModelObject):
 @njit(cache=True)
 def step_sim_timer(op_token, state_ix, dict_ix, ts_ix, step):
     # note: the op_token and state index are off by 1 since the dict_ix does not store type 
+    #       in slot 0 like the op_token does
     #print("Exec step_sim_timer at step:", step, "jday", dict_ix[op_token[1]][step][9] )
     state_ix[op_token[1]] = dict_ix[op_token[1]][step][0] # unix timestamp here 
     state_ix[op_token[2]] = dict_ix[op_token[1]][step][1] # year  
