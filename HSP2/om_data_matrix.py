@@ -13,8 +13,8 @@ from HSP2.om import *
 from HSP2.om_model_object import *
 
 class DataMatrix(ModelObject):
-    def __init__(self, name, container = False, model_props = []):
-        super(DataMatrix, self).__init__(name, container)
+    def __init__(self, name, container = False, model_props = {}):
+        super(DataMatrix, self).__init__(name, container, model_props)
         if not DataMatrix.check_properties(model_props):
             raise Exception("DataMatrix requires: " + ','.join(DataMatrix.required_properties()) + " ... process terminated.")
         # check this fitrst, because it may determine how we process the inputted matrix
@@ -234,7 +234,7 @@ exec_tbl_values() updates the values in the dict_ix state for a data matrix as i
         actual variable references, instead of the current method of storing a ix pointer for every single 
         matrix cell.
 """
-@njit
+@njit(cache=True)
 def exec_tbl_values(op, state_ix, dict_ix):
     # this f
     ix = op[1]
@@ -250,7 +250,7 @@ def exec_tbl_values(op, state_ix, dict_ix):
     dict_ix[ix] = data_matrix 
     return 0.0
 
-@njit
+@njit(cache=True)
 def exec_tbl_eval(op_tokens, op, state_ix, dict_ix):
     # Note: these indices must be adjusted to reflect the number of common op tokens
     # check this first, if it is type = 0, then it is just a matrix, and only needs to be loaded, not evaluated

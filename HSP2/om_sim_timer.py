@@ -10,10 +10,10 @@ from pandas import DataFrame, DatetimeIndex
 from numba import njit
 
 class SimTimer(ModelObject):
-    def __init__(self, name, container, siminfo):
-        super(SimTimer, self).__init__(name, container)
+    def __init__(self, name, container, model_props):
+        super(SimTimer, self).__init__(name, container, model_props)
         self.state_path = '/STATE/timer'
-        self.time_array = self.dti_to_time_array(siminfo) # creates numpy formatted array of year, mo, day, ... for each timestep
+        self.time_array = self.dti_to_time_array(model_props) # creates numpy formatted array of year, mo, day, ... for each timestep
         self.date_path_ix = [] # where are the are components stored in the state_ix Dict
         self.optype = 5 # 0 - ModelObject, 1 - Equation, 2 - datamatrix, 3 - ModelLinkage, 4 - BroadcastChannel, 5 - SimTimer 
         self.register_components() # now that we have a time array, we set the basic state and all time comps into state
@@ -65,7 +65,7 @@ class SimTimer(ModelObject):
         return time_array
 
 # Function for use during model simulations of tokenized objects
-@njit
+@njit(cache=True)
 def step_sim_timer(op_token, state_ix, dict_ix, ts_ix, step):
     # note: the op_token and state index are off by 1 since the dict_ix does not store type 
     #print("Exec step_sim_timer at step:", step, "jday", dict_ix[op_token[1]][step][9] )

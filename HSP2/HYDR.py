@@ -135,6 +135,9 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     state_info = Dict.empty(key_type=types.unicode_type, value_type=types.unicode_type)
     state_info['operation'], state_info['segment'], state_info['activity'] = state['operation'], state['segment'], state['activity']
     state_info['domain'], state_info['state_step_hydr'], state_info['state_step_om'] = state['domain'], state['state_step_hydr'], state['state_step_om']
+    # commented to disable dynamic python
+    state_step_hydr = False # this disables the dynamic code
+    """
     hsp2_local_py = state['hsp2_local_py']
     # It appears necessary to load this here, instead of from main.py, otherwise,
     # _hydr_() does not recognize the function state_step_hydr()? 
@@ -142,6 +145,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
         from hsp2_local_py import state_step_hydr
     else:
         from HSP2.state_fn_defaults import state_step_hydr
+    """
     # must split dicts out of state Dict since numba cannot handle mixed-type nested Dicts
     state_ix, dict_ix, ts_ix = state['state_ix'], state['dict_ix'], state['ts_ix']
     state_paths = state['state_paths']
@@ -337,8 +341,12 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
         #   when no objects are defined.
         if (state_info['state_step_om'] == 'enabled'):
             pre_step_model(op_tokens[0], op_tokens, state_ix, dict_ix, ts_ix, step)
+        
+        # commented to disable dynamic python
+        """
         if (state_info['state_step_hydr'] == 'enabled'):
             state_step_hydr(state_info, state_paths, state_ix, dict_ix, ts_ix, hydr_ix, step)
+        """
         # Execute dynamic code if enabled
         if (state_info['state_step_om'] == 'enabled'):
             #print("trying to execute state_step_om()")

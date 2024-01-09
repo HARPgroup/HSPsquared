@@ -17,7 +17,7 @@ class ModelObject:
     model_object_cache = {} # Shared with actual objects, keyed by their path 
     model_exec_list = {} # Shared with actual objects, keyed by their path 
     
-    def __init__(self, name, container = False, model_props = []):
+    def __init__(self, name, container = False, model_props = {}):
         self.name = name
         self.container = container # will be a link to another object
         self.log_path = "" # Ex: "/RESULTS/RCHRES_001/SPECL" 
@@ -61,7 +61,7 @@ class ModelObject:
         # this checks to see if the prop is in dict with value form, or just a value 
         # strict = True causes an exception if property is missing from model_props dict 
         prop_val = model_props.get(prop_name)
-        if type(prop_val) == list:
+        if type(prop_val) == list: # this doesn't work, but nothing gets passed in like this? Except broadcast params, but they are handled in the sub-class
             prop_val = prop_val.get('value')
         elif type(prop_val) == dict:
             prop_val = prop_val.get('value')
@@ -317,7 +317,7 @@ class ModelConstant(ModelObject):
 
 # njit functions for runtime
 
-@njit
+@njit(cache=True)
 def exec_model_object( op, state_ix, dict_ix):
     ix = op[1]
     return 0.0

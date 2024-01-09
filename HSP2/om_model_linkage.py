@@ -8,8 +8,8 @@ from HSP2.om import *
 from HSP2.om_model_object import ModelObject
 from numba import njit
 class ModelLinkage(ModelObject):
-    def __init__(self, name, container = False, model_props = []):
-        super(ModelLinkage, self).__init__(name, container)
+    def __init__(self, name, container = False, model_props = {}):
+        super(ModelLinkage, self).__init__(name, container, model_props)
         # ModelLinkage copies a values from right to left
         # right_path: is the data source for the link 
         # left_path: is the destination of the link 
@@ -26,9 +26,9 @@ class ModelLinkage(ModelObject):
             # this is required
             print("Error: a link must have a container object to serve as the destination")
             return False
-        right_path = self.handle_prop(model_props, 'right_path')
-        link_type = self.handle_prop(model_props, 'link_type', False, 0)
-        left_path = self.handle_prop(model_props, 'left_path')
+        self.right_path = self.handle_prop(model_props, 'right_path')
+        self.link_type = self.handle_prop(model_props, 'link_type', False, 0)
+        self.left_path = self.handle_prop(model_props, 'left_path')
         
         if self.left_path == False:
             # self.state_path gets set when creating at the parent level
@@ -69,13 +69,14 @@ class ModelLinkage(ModelObject):
         # - if this is a data property link then we add op codes to do a copy of data from one state address to another 
         # - if this is simply a parent-child connection, we do not render op-codes, but we do use this for assigning
         # - execution hierarchy
+        #print("Linkage/link_type ", self.name, self.link_type,"created with params", self.model_props_parsed)
         if self.link_type in (2, 3):
             src_ix = get_state_ix(self.state_ix, self.state_paths, self.right_path)
             if not (src_ix == False):
                 self.ops = self.ops + [src_ix, self.link_type]
             else:
                 print("Error: link ", self.name, "does not have a valid source path")
-            #print("tokenize() result", self.ops)
+            #print(self.name,"tokenize() result", self.ops)
         if (self.link_type == 4) or (self.link_type == 5):
             # we push to the remote path in this one 
             left_ix = get_state_ix(self.state_ix, self.state_paths, self.left_path)
@@ -87,10 +88,10 @@ class ModelLinkage(ModelObject):
             #print("tokenize() result", self.ops)
 
 # Function for use during model simulations of tokenized objects
-@njit
+@njit(cache=True)
 def step_model_link(op_token, state_ix, ts_ix, step):
-    if step == 2:
-        print("step_model_link() called at step 2 with op_token=", op_token)
+    #if step == 2:
+        #print("step_model_link() called at step 2 with op_token=", op_token)
     if op_token[3] == 1:
         return True
     elif op_token[3] == 2:

@@ -106,7 +106,7 @@ def state_load_om_python(state, io_manager, siminfo):
     hsp2_local_py = state['hsp2_local_py']
     # Load a function from code if it exists 
     if 'om_init_model' in dir(hsp2_local_py):
-        hsp2_local_py.om_init_model(io_manager, siminfo, state['op_tokenModelObject.model_object_caches'], state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'], state['model_object_cache'])
+        hsp2_local_py.om_init_model(io_manager, siminfo, state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'], state['model_object_cache'])
     
 
 def state_load_dynamics_om(state, io_manager, siminfo):
@@ -125,7 +125,10 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     #       occuring within this function call, since this function is also called from another runtime engine
     #       but if things fail post develop-specact-1 pull requests we may investigate here
     # also, it may be that this should be loaded elsewhere?
+    # commented to disable dynamic python
+    """
     state_load_om_python(state, io_manager, siminfo)
+    """
     state_load_om_json(state, io_manager, siminfo)
     return
 
@@ -191,19 +194,7 @@ def model_class_loader(model_name, model_props, container = False):
       #       for attributes to pass in. 
       #       ".get()" will return NoValue if it does not exist or the value. 
       if object_class == 'Equation':
-          eqn = model_props.get('equation')
-          if type(eqn) is str:
-              eqn_str = eqn
-          else:
-              if eqn == None:
-                  # try for equation stored as normal propcode
-                  eqn_str = model_props.get('value')
-              else:
-                  eqn_str = eqn.get('value')
-          if eqn_str == None:
-              raise Exception("Equation object", model_name, "does not have a valid equation string. Halting. ")
-              return False
-          model_object = Equation(model_props.get('name'), container, eqn_str )
+          model_object = Equation(model_props.get('name'), container, model_props )
           #remove_used_keys(model_props, 
       elif object_class == 'SimpleChannel':
           model_object = SimpleChannel(model_props.get('name'), container, model_props )
@@ -239,7 +230,7 @@ def model_class_loader(model_name, model_props, container = False):
           model_object = SpecialAction(model_props.get('name'), container, model_props)
       else:
           print("Loading", model_props.get('name'), "with object_class", object_class,"as ModelObject")
-          model_object = ModelObject(model_props.get('name'), container)
+          model_object = ModelObject(model_props.get('name'), container, model_props)
     # one way to insure no class attributes get parsed as sub-comps is:
     # model_object.remove_used_keys() 
     if len(model_object.model_props_parsed) == 0:
@@ -374,6 +365,56 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
     model_exec_list.append(model_object.ix)
 
 
+def model_order_recursive(model_object, model_object_cache, model_exec_list, model_touch_list = []):
+    """
+    Given a root model_object, trace the inputs to load things in order
+    Store this order in model_exec_list
+    Note: All ordering is as-needed organic, except Broadcasts
+          - read from children is completed after all other inputs 
+          - read from parent is completed before all other inputs 
+          - could this be accomplished by more sophisticated handling of read 
+            broadcasts?  
+            - When loading a read broadcast, can we iterate through items 
+            that are sending to that broadcast? 
+            - Or is it better to let it as it is, 
+    """
+    if model_object.ix in model_exec_list:
+        return
+    if model_object.ix in model_touch_list:
+        #print("Already touched", model_object.name, model_object.ix, model_object.state_path)
+        return
+    # record as having been called, and will ultimately return, to prevent recursions
+    model_touch_list.append(model_object.ix)
+    k_list = model_object.inputs.keys()
+    input_names = dict.fromkeys(k_list , 1)
+    if type(input_names) is not dict:
+        return 
+    # isolate broadcasts, and sort out -- what happens if an equation references a broadcast var?
+    # is this a limitation of treating all children as inputs? 
+    # alternative, leave broadcasts organic, but load children first?
+    # children first, then local sub-comps is old method? old method:
+    #   - read parent broadcasts
+    #   - get inputs (essentially, linked vars)
+    #   - send child broadcasts (will send current step parent reads, last step local proc data)
+    #   - execute children
+    #   - execute local sub-comps
+    for input_name in input_names:
+        #print("Checking input", input_name)
+        input_path = model_object.inputs[input_name]
+        if input_path in model_object_cache.keys():
+            input_object = model_object_cache[input_path]
+            model_order_recursive(input_object, model_object_cache, model_exec_list, model_touch_list)
+        else:
+            if input_path in model_object.state_paths.keys():
+                # this is a valid state reference without an object 
+                # thus, it is likely part of internals that are manually added 
+                # which should be fine.  tho perhaps we should have an object for these too.
+                continue
+            print("Problem loading input", input_name, "input_path", input_path, "not in model_object_cache.keys()")
+            return
+    # now after loading input dependencies, add this to list
+    model_exec_list.append(model_object.ix)
+
 def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
     # Decide on using from utilities.py:
     # - save_timeseries(io_manager, ts, savedict, siminfo, saveall, operation, segment, activity, compress=True)
@@ -383,7 +424,7 @@ def save_object_ts(io_manager, siminfo, op_tokens, ts_ix, ts):
     x = 0 # dummy
     return
 
-@njit
+@njit(cache=True)
 def iterate_models(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, steps):
     checksum = 0.0
     for step in range(steps):
@@ -391,7 +432,7 @@ def iterate_models(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, steps):
         step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
     return checksum
 
-@njit
+@njit(cache=True)
 def pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     for i in model_exec_list:
         if op_tokens[i][0] == 1:
@@ -410,18 +451,18 @@ def pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
             pass
     return
 
-@njit 
+@njit(cache=True)
 def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     val = 0
     for i in model_exec_list:
         step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
     return 
 
-@njit 
+@njit(cache=True)
 def post_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     return 
 
-@njit
+@njit(cache=True)
 def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     # op_tokens is passed in for ops like matrices that have lookups from other 
     # locations.  All others rely only on ops 

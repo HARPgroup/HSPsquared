@@ -6,7 +6,7 @@ from HSP2.om import *
 from HSP2.om_model_object import ModelObject
 from numba import njit
 class SpecialAction(ModelObject):
-    def __init__(self, name, container = False, model_props = []):
+    def __init__(self, name, container = False, model_props = {}):
         super(SpecialAction, self).__init__(name, container, model_props)
 
         self.optype = 100 # Special Actions start indexing at 100 
@@ -24,15 +24,18 @@ class SpecialAction(ModelObject):
         # - action(operation) to perform = AC
         # - operand2, a numeric value for simple ACTION = [VALUE]
         # note: [op_abbrev] is *maybe* the first letter of the OPTYP?  Not a very good idea to have a coded convention like that
+        print("Creating ACTION with props", model_props) 
         self.op_type = self.handle_prop(model_props, 'OPTYP')
         self.range1 = self.handle_prop(model_props, 'RANGE1')
         self.range2 = self.handle_prop(model_props, 'RANGE2')
         self.ac = '=' # set the default, and also adds a property for later testing.
-        self.ac = self.handle_prop(model_props, 'AC') # must handle this before we handle the operand to check for DIV by Zero
+        self.ac = self.handle_prop(model_props, 'AC') # must handle this before we handle the operand VALUE to check for DIV by Zero
         self.vari = self.handle_prop(model_props, 'VARI')
         self.op2_val = self.handle_prop(model_props, 'VALUE')
         self.op2_ix = self.constant_or_path('op_val', self.op2_val) # constant values must be added to STATE and thus are referenced by their state_ix number
-        self.ctr_ix = self.constant_or_path('ctr', 0) # constant values must be added to STATE and thus are referenced by their state_ix number
+        self.num = self.handle_prop(model_props, 'NUM', False, 1) # number of times to perform action
+        self.timer_ix = self.handle_prop(model_props, 'when', False, 1) # when to begin the first attempt at action
+        self.ctr_ix = self.constant_or_path('ctr', 0) # this initializes the counter for how many times an action has been performed
         # now add the state value that we are operating on (the target) as an input, so that this gets executed AFTER this is set initially
         self.add_input('op1', ('/STATE/' + self.op_type + '_' + self.op_type[0] + str(self.range1).zfill(3) + "/" + self.vari ), 2, True )
         # @tbd: support time enable/disable
@@ -47,6 +50,12 @@ class SpecialAction(ModelObject):
                 raise Exception("Error: in properties passed to "+ self.name + " AC must be non-zero or non-Null .  Object creation halted. Path to object with error is " + self.state_path)
         if (prop_name == 'AC'):
            self.handle_ac(prop_val)
+        if (prop_name == 'when'):
+           # when to perform this?  timestamp or time-step index
+           # for now we just do 0, but @tbd, grab the date parts and figure out which time slot it falls in (prefer timestamp to allow for varying timesteps?)
+           prop_val = 0
+        if (prop_name == 'NUM') and (pop_val == ''):
+            prop_val = default_value
         return prop_val
     
     def handle_ac(self, ac):
@@ -90,7 +99,7 @@ class SpecialAction(ModelObject):
     def tokenize(self):
         # call parent method to set basic ops common to all 
         super().tokenize() # sets self.ops = op_type, op_ix
-        self.ops = self.ops + [self.inputs_ix['op1'], self.opid, self.op2_ix, self.timer_ix, self.ctr_ix]
+        self.ops = self.ops + [self.inputs_ix['op1'], self.opid, self.op2_ix, self.timer_ix, self.ctr_ix, self.num]
         # @tbd: check if time ops have been set and tokenize accordingly
         print("Specl", self.name, "tokens", self.ops)
     
@@ -108,7 +117,7 @@ class SpecialAction(ModelObject):
 
 # njit functions for runtime
 
-@njit
+@njit(cache=True)
 def step_special_action(op, state_ix, dict_ix, step):
     ix = op[1] # ID of this op
     # these indices must be adjusted to reflect the number of common op tokens
@@ -124,16 +133,24 @@ def step_special_action(op, state_ix, dict_ix, step):
     ix1 = op[2] # ID of source of data and destination of data
     sop = op[3]
     ix2 = op[4]
-    if sop == 1:
-      result = state_ix[ix2]
-    if sop == 2:
-      result = state_ix[ix1] + state_ix[ix2]
-    if sop == 3:
-      result = state_ix[ix1] - state_ix[ix2]
-    if sop == 4:
-      result = state_ix[ix1] * state_ix[ix2]
-    if sop == 5:
-      result = state_ix[ix1] / state_ix[ix2]
+    tix = op[5] # which slot is the time comparison in?
+    ctr_ix = op[6] # id of the counter variable
+    num_done = state_ix[ctr_ix]
+    num = state_ix[ctr_ix] # num completed
+    if (num_done >= num):
+       result = state_ix[ix1]
+    else:
+        if sop == 1:
+            result = state_ix[ix2]
+        elif sop == 2:
+            result = state_ix[ix1] + state_ix[ix2]
+        elif sop == 3:
+            result = state_ix[ix1] - state_ix[ix2]
+        elif sop == 4:
+            result = state_ix[ix1] * state_ix[ix2]
+        elif sop == 5:
+            result = state_ix[ix1] / state_ix[ix2]
+    
     # set value in target
     # tbd: handle this with a model linkage? cons: this makes a loop since the ix1 is source and destination
     state_ix[ix1] = result

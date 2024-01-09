@@ -10,8 +10,8 @@ from numba import njit
 import warnings
 
 class ModelBroadcast(ModelObject):
-    def __init__(self, name, container = False, model_props = []):
-        super(ModelBroadcast, self).__init__(name, container)
+    def __init__(self, name, container = False, model_props = {}):
+        super(ModelBroadcast, self).__init__(name, container, model_props)
         self.model_props_parsed = model_props
         # broadcast_params = [ [local_name1, remote_name1], [local_name2, remote_name2], ...]
         # broadcast_channel = state_path/[broadcast_channel]
@@ -20,7 +20,7 @@ class ModelBroadcast(ModelObject):
         self.linkages = {} # store of objects created by this  
         self.optype = 4 # 0 - shell object, 1 - equation, 2 - DataMatrix, 3 - input, 4 - broadcastChannel, 5 - ?
         self.bc_type_id = 2 # assume read -- is this redundant?  is it really the input type ix?
-        self.parse_model_props(model_props)
+        #self.parse_model_props(model_props)
         self.setup_broadcast(self.broadcast_type, self.broadcast_params, self.broadcast_channel, self.broadcast_hub)
     
     
@@ -38,8 +38,14 @@ class ModelBroadcast(ModelObject):
             self.broadcast_hub = 'self'
         if self.broadcast_params == None:
             self.broadcast_params = []
-            
-        
+    
+    def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
+        # parent method handles most cases, but subclass handles special situations.
+        if ( prop_name == 'broadcast_params'):
+            prop_val = model_props['broadcast_params'] # check that this is OK
+        else:
+            prop_val = super().handle_prop(model_props, prop_name, strict, default_value)
+        return prop_val
     
     def setup_broadcast(self, broadcast_type, broadcast_params, broadcast_channel, broadcast_hub):
         if (broadcast_hub == 'parent') and (self.container.container == False):
@@ -77,11 +83,16 @@ class ModelBroadcast(ModelObject):
                 self.bc_type_id = 2 # pull type 
                 register_varname = b_pair[0]
                 # create a link object of type 2, property reader to local state 
-                print("Adding broadcast read as input from ", channel_path, " as local var named ",register_varname)
+                #print("Adding broadcast read as input from ", channel_path, " as local var named ",register_varname)
                 # create a register if it does not exist already 
                 var_register = self.insure_register(register_varname, 0.0, channel)
                 # add input to parent container for this variable from the hub path 
                 self.container.add_input(register_varname, var_register.state_path, 1, True)
+                # this registers a variable on the parent so the channel is not required to access it
+                # this is redundant for the purpose of calculation, all model components will know how to find it by tracing inputs
+                # but this makes it easier for tracking
+                puller = ModelLinkage(register_varname, self.container, {'right_path':var_register.state_path, 'link_type':2} )
+                added = True
             else:
                 # a broadcast hub (if not yet created) 
                 # + a register to hold the data (if not yet created) 
@@ -90,16 +101,16 @@ class ModelBroadcast(ModelObject):
                 self.bc_type_id = 4 # push accumulator type
                 local_varname = b_pair[0] # this is where we take the data from 
                 register_varname = b_pair[1] # this is the name that will be stored on the register
-                print("Adding send from local var ", local_varname, " to ",channel.name)
+                #print("Adding send from local var ", local_varname, " to ",channel.name)
                 # create a register as a placeholder for the data at the hub path 
                 # in case there are no readers
                 var_register = self.insure_register(register_varname, 0.0, channel)
                 dest_path = var_register.state_path
                 src_path = self.find_var_path(local_varname)
                 # this linkage pushes from local value to the remote path 
-                pusher = ModelLinkage(register_varname, self, src_path, self.bc_type_id, dest_path)
+                pusher = ModelLinkage(register_varname, self, {'right_path':src_path, 'link_type':self.bc_type_id, 'left_path':dest_path} )
                 # try adding the linkage an input, just to see if it influences the ordering
-                print("Adding broadcast source ", local_varname, " as input to register ",var_register.name)
+                #print("Adding broadcast source ", local_varname, " as input to register ",var_register.name)
                 # we do an object connection here, as this is a foolproof way to 
                 # add already created objects as inputs
                 var_register.add_object_input(register_varname + str(pusher.ix), pusher, 1)
@@ -113,14 +124,14 @@ class ModelBroadcast(ModelObject):
             hub_name = '/STATE/global'
             channel_path = False
         else:
-            print("Looking for channel ", broadcast_channel, " on ", hub_container.name)
+            #print("Looking for channel ", broadcast_channel, " on ", hub_container.name)
             # must create absolute path, otherwise, it will seek upstream and get the parent 
             # we send with local_only = True so it won't go upstream 
             channel_path = hub_container.find_var_path(broadcast_channel, True)
             hub_name = hub_container.name
         if channel_path == False:
-            print("Creating broadcast hub ", broadcast_channel, " on ", hub_name)
-            hub_object = ModelConstant(broadcast_channel, hub_container, 0.0, hub_name)
+            print(self.state_path, "is Creating broadcast hub ", broadcast_channel, " on ", hub_name)
+            hub_object = ModelObject(broadcast_channel, hub_container)
         else:
             hub_object = self.model_object_cache[channel_path]
         return hub_object
@@ -186,13 +197,13 @@ class ModelRegister(ModelConstant):
         return req_props
 
 # njit functions for runtime
-@njit
+@njit(cache=True)
 def pre_step_register(op, state_ix, dict_ix):
     ix = op[1]
     #print("Resetting register", ix,"to zero")
     state_ix[ix] = 0.0
 
-@njit
+@njit(cache=True)
 def pre_step_broadcast(op, state_ix, dict_ix):
     ix = op[1]
     dix = op[2]

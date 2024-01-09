@@ -12,14 +12,24 @@ from numba import njit
 class Equation(ModelObject):
     # the following are supplied by the parent class: name, log_path, attribute_path, state_path, inputs
     
-    def __init__(self, name, container = False, eqn = ""):
-        super(Equation, self).__init__(name, container)
-        self.equation = eqn
+    def __init__(self, name, container = False, model_props = {}):
+        super(Equation, self).__init__(name, container, model_props)
+        self.equation = self.handle_prop(model_props, 'equation') 
         self.ps = False 
         self.ps_names = [] # Intermediate with constants turned into variable references in state_paths
         self.var_ops = [] # keep these separate since the equation functions should not have to handle overhead
         self.optype = 1 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - ?
         self.deconstruct_eqn()
+    
+    def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
+        prop_val = super().handle_prop(model_props, prop_name, strict, default_value )
+        if (prop_name == 'equation'):
+            if type(prop_val) is str:
+                return prop_val
+            elif prop_val == None:
+                # try for equation stored as normal propcode
+                prop_val = str(self.handle_prop(model_props, 'value', True))
+        return prop_val
     
     def deconstruct_eqn(self):
         exprStack = []
@@ -343,7 +353,7 @@ def pre_evaluate_stack(s, ps):
         return op
 
 
-@njit
+@njit(cache=True)
 def step_equation(op_token, state_ix):
     op_class = op_token[0] # we actually use this in the calling function, which will decide what 
                       # next level function to use 

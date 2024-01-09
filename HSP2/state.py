@@ -25,6 +25,7 @@ def init_state_dicts():
     state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'] = state_paths, state_ix, dict_ix, ts_ix
     # add a generic place to stash model_data for dynamic components
     state['model_data'] = {}
+    state['state_step_hydr'] = 'disabled'
     return state
 
 
