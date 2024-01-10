@@ -33,7 +33,11 @@ class ModelObject:
         self.paths_found = False # this should be False at start
         self.default_value = 0.0
         self.ops = []
-        self.optype = 0 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input/ModelLinkage, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 12 - ModelRegister, 13 - SimpleChannel, 14 - SimpleImpoundment
+        self.optype = 0 # OpTypes are as follows:
+        #                 0 - model object, 1 - equation, 2 - datamatrix, 3 - input/ModelLinkage, 
+        #                 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 
+        #                 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 
+        #                 12 - ModelRegister, 13 - SimpleChannel, 14 - SimpleImpoundment, 15 - FlowBy
         self.register_path()
         self.parse_model_props(model_props)
     
