@@ -60,7 +60,7 @@ from HSP2.om_model_linkage import *
 from HSP2.om_special_action import *
 from HSP2.om_data_matrix import *
 from HSP2.om_model_broadcast import *
-#from HSP2.om_simple_channel import *
+from HSP2.om_simple_channel import *
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
 def init_om_dicts():
@@ -125,10 +125,8 @@ def state_load_dynamics_om(state, io_manager, siminfo):
     #       occuring within this function call, since this function is also called from another runtime engine
     #       but if things fail post develop-specact-1 pull requests we may investigate here
     # also, it may be that this should be loaded elsewhere?
-    # commented to disable dynamic python
-    """
+    # comment state_load_om_python() to disable dynamic python
     state_load_om_python(state, io_manager, siminfo)
-    """
     state_load_om_json(state, io_manager, siminfo)
     return
 
@@ -155,7 +153,8 @@ def state_om_model_run_prep(state, io_manager, siminfo):
     print("Tokenizing models")
     model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
     # model_exec_list is the ordered list of component operations
-    print("model_exec_list:", model_exec_list)
+    print("op_tokens has", len(model_object_cache),"elements")
+    print("model_exec_list(", len(model_exec_list),"items):", model_exec_list)
     # This is used to stash the model_exec_list -- is this used?
     op_tokens[0] = np.asarray(model_exec_list, dtype="i8") 
     # the resulting set of objects is returned.
@@ -451,8 +450,25 @@ def pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
             pass
     return
 
-@njit(cache=True)
+#@njit(cache=True)
 def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
+    val = 0
+    for i in model_exec_list:
+        step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
+    return 
+
+#@njit(cache=True)
+def step_pcode_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
+    '''
+    This routine includes support for dynamically loaded python code which is powerful but slow
+    This is not yet implemented anywhere, just an idea. But in theory it would allow easy switching between
+    the faster runtime without dynamic code if the user did not request it.
+    At minimum, this could be used to more efficiently enable/disable this feature for testing by simply calling
+    a separate routine.
+    - to do so we would need to add state_paths to the variables passed to step_model which should be OK?
+    '''
+    hydr_ix = hydr_get_ix(state_ix, state_paths, state_info['domain']) # could be done more efficiently, once per model run
+    state_step_hydr(state_info, state_paths, state_ix, dict_ix, ts_ix, hydr_ix, step)
     val = 0
     for i in model_exec_list:
         step_one(op_tokens, op_tokens[i], state_ix, dict_ix, ts_ix, step, 0)
@@ -462,7 +478,7 @@ def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
 def post_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     return 
 
-@njit(cache=True)
+#@njit(cache=True)
 def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     # op_tokens is passed in for ops like matrices that have lookups from other 
     # locations.  All others rely only on ops 
@@ -471,7 +487,7 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     if debug == 1:
         print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
     if ops[0] == 1:
-        state_ix[ops[1]] = step_equation(ops, state_ix)
+        step_equation(ops, state_ix)
     elif ops[0] == 2:
         # todo: this should be moved into a single function, 
         # with the conforming name step_matrix(op_tokens, ops, state_ix, dict_ix)
@@ -496,10 +512,10 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     elif ops[0] == 9:
         val = 0 
     elif ops[0] == 13:
-        pass #step_simple_channel(ops, state_ix, dict_ix, step)
+        step_simple_channel(ops, state_ix, dict_ix, step)
     # Op 100 is Basic ACTION in Special Actions
     elif ops[0] == 100:
-        state_ix[ops[1]] = step_special_action(ops, state_ix, dict_ix, step)
+        step_special_action(ops, state_ix, dict_ix, step)
     return 
 
 

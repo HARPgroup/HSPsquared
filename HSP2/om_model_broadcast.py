@@ -26,6 +26,7 @@ class ModelBroadcast(ModelObject):
     
     def parse_model_props(self, model_props, strict = False ):
         # handle props array 
+        super().parse_model_props(model_props, strict)
         self.broadcast_type = self.handle_prop(model_props, 'broadcast_type')
         self.broadcast_hub = self.handle_prop(model_props, 'broadcast_hub')
         self.broadcast_channel = self.handle_prop(model_props, 'broadcast_channel')
@@ -130,7 +131,7 @@ class ModelBroadcast(ModelObject):
             channel_path = hub_container.find_var_path(broadcast_channel, True)
             hub_name = hub_container.name
         if channel_path == False:
-            print(self.state_path, "is Creating broadcast hub ", broadcast_channel, " on ", hub_name)
+            #print(self.state_path, "is Creating broadcast hub ", broadcast_channel, " on ", hub_name)
             hub_object = ModelObject(broadcast_channel, hub_container)
         else:
             hub_object = self.model_object_cache[channel_path]
@@ -142,7 +143,7 @@ class ModelBroadcast(ModelObject):
         if register_path == False:
             # create a register as a placeholder for the data at the hub path 
             # in case there are no senders
-            print("Creating a register for data for hub ", register_container.name, "(", register_container.state_path, ")", " var name ",var_name)
+            #print("Creating a register for data for hub ", register_container.name, "(", register_container.state_path, ")", " var name ",var_name)
             var_register = ModelRegister(var_name, register_container, default_value)
         else:
             var_register = self.model_object_cache[register_path]
@@ -207,6 +208,5 @@ def pre_step_register(op, state_ix, dict_ix):
 def pre_step_broadcast(op, state_ix, dict_ix):
     ix = op[1]
     dix = op[2]
-    # Need to iterate through the destinations (left side) and set to zero 
-    # at the beginning of each timestep.
-    # Not completed.
+    # broadcasts do not need to act, as they are now handled as MdelLinkage
+    # with type = accumulate

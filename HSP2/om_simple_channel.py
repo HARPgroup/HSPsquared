@@ -11,16 +11,15 @@ import warnings
 
 class SimpleChannel(ModelObject):
     def __init__(self, name, container = False, model_props = []):
+        # add basic numeric state variables for outputs
+        self.rvars = {'solver', 'Qin', 'Rin', 'drainage_area', 'area', 'demand'}
+        self.r_var_values = {}
+        # add list of vars to write
+        self.wvars = {'Qout', 'depth', 'its', 'Storage', 'last_S', 'rejected_demand_mgd', 'rejected_demand_pct', 'area', 'demand', 'drainage_area'}
+        self.w_var_ix = {} # where to store indices for writign vars
         super(SimpleChannel, self).__init__(name, container)
         self.model_props_parsed = model_props
         self.optype = 13 # see list in om_model_object.py
-        # add basic numeric state variables for outputs
-        self.rvars = {'solver', 'Qin', 'Rin', 'drainage_area', 'area', 'demand'}
-        # old method had q_var, then reported it as Qin this can just be a link or constant
-        # and therefore handled by constant_or_path()
-        self.wvars = {'Qout', 'depth', 'its', 'Storage', 'last_S', 'rejected_demand_mgd', 'rejected_demand_pct', 'area', 'demand', 'drainage_area'}
-        self.r_var_values = {}
-        self.w_var_values = {}
         self.var_ops = [] # keep these separate to easily add to ops at tokenize
         self.autosetvars = True # this should default to False or True?
         self.parse_model_props(model_props)
@@ -34,25 +33,43 @@ class SimpleChannel(ModelObject):
             model_props['solver'] = 0 # use simple-routing by default 
         # ceck for inputs that this will use to get flows/demand inputs 
         for op_name in self.rvars:
-            self.r_var_values[op_name] = self.handle_prop(model_props, op_name, False)
+            self.r_var_values[op_name] = self.handle_prop(model_props, op_name, False, 0.0)
         # handle variables that used a weird convention in old model
         if 'q_var' in model_props:
             self.r_var_values['Qin'] = self.handle_prop(model_props, 'q_var', False)
+        else:
+            self.r_var_values['Qin'] = self.handle_prop(model_props, 'Qin', False, 0.0)
         if 'r_var' in model_props:
             self.r_var_values['Rin'] = self.handle_prop(model_props, 'r_var', False)
+        else:
+            self.r_var_values['Rin'] = self.handle_prop(model_props, 'Rin', False, 0.0)
         if 'w_var' in model_props:
             self.r_var_values['demand'] = self.handle_prop(model_props, 'w_var', False)
+        else:
+            self.r_var_values['demand'] = self.handle_prop(model_props, 'demand', False, 0.0)
         return True
     
     def set_local_props(self):
-       # this sets up local variables.  These are with a parent path, or self path 
-       # [channel name]_Qout - the outflow from this channel 
-       for i in self.wvars:
-           # Passing a numeric value (like 0.0) to this forces creation of ModelConstant
-           self.constant_or_path(i, 0.0, True)
-           if self.autosetvars == True:
-               i_object = self.get_object(i)
-               self.container.add_object_input(self.name + '_' + i, i_object, 1)
+        # this sets up local variables.  These are with a parent path, or self path 
+        # [channel name]_Qout - the outflow from this channel 
+        for i in self.wvars:
+            # Create a numeric slot by passing 0.0 (or any numeric value) to constant_or_path()
+            iix = self.constant_or_path(i, 0.0, True) 
+            # store iix somewhere for tokenizing
+            self.w_var_ix[i] = iix
+            if (self.autosetvars == True):
+                src_path = get_ix_path(self.state_paths, iix)
+                dest_path = self.state_path + "/" + i 
+                # this make a copy of this value on the parent object
+                pusher = ModelLinkage(self.name + "_" + i, self.container, {'right_path':src_path, 'link_type':2} )
+                # adding input insure this will be found in a local path search
+                self.container.add_object_input(self.name + '_' + i, pusher, 1) 
+        for ri in self.r_var_values.keys():
+            # Passing a numeric value (like 0.0) to this forces creation of ModelConstant
+            iix = self.constant_or_path(ri, self.r_var_values[ri], True)
+            src_path = get_ix_path(self.state_paths, iix)
+            # creates a copy on the parent like local_channel_Qin etc
+            pusher = ModelLinkage(self.name + "_" + ri, self.container, {'right_path':src_path, 'link_type':2} )
     
     def find_paths(self):
         super().find_paths()
@@ -96,7 +113,7 @@ def pre_step_simple_channel(op, state_ix, dict_ix):
     dix = op[2]
     # Not yet completed. Maybe we do not need any pre-step actions?
 
-@njit
+#@njit
 def step_simple_channel(op, state_ix, dict_ix, step):
     ix = op[1] # note op[0] is op type which is known if we are here.
     # Not yet completed.
@@ -146,3 +163,4 @@ def step_simple_channel(op, state_ix, dict_ix, step):
     #state_ix['rejected_demand_mgd'] = $rejected_demand_mgd;
     #state_ix['rejected_demand_pct'] = $rejected_demand_pct;
     #state_ix['its'] = $its;
+    return True

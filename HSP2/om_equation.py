@@ -19,6 +19,9 @@ class Equation(ModelObject):
         self.ps_names = [] # Intermediate with constants turned into variable references in state_paths
         self.var_ops = [] # keep these separate since the equation functions should not have to handle overhead
         self.optype = 1 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - ?
+        self.non_neg = self.handle_prop(model_props, 'nonnegative', False, 0)
+        min_value = self.handle_prop(model_props, 'minvalue', False, 0.0)
+        self.min_value_ix = ModelConstant('min_value', self, min_value).ix
         self.deconstruct_eqn()
     
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
@@ -115,7 +118,7 @@ class Equation(ModelObject):
         # finds the ix value for each operand 
         self.tokenize_vars()
         # renders tokens for high speed execution
-        self.ops = self.ops + self.var_ops
+        self.ops = self.ops + [self.non_neg, self.min_value_ix] + self.var_ops
  
 
 from pyparsing import (
@@ -358,17 +361,21 @@ def step_equation(op_token, state_ix):
     op_class = op_token[0] # we actually use this in the calling function, which will decide what 
                       # next level function to use 
     result = 0
-    num_ops = op_token[2] # this index is equal to the number of ops common to all classes + 1.  See om_model_object for base ops and adjust
     s = np.array([0.0])
     s_ix = -1 # pointer to the top of the stack
     s_len = 1
+    # handle special equation settings like "non-negative", etc.
+    non_neg = op_token[2]
+    min_ix = op_token[3]
+    num_ops = op_token[4] # this index is equal to the number of ops common to all classes + 1.  See om_model_object for base ops and adjust
+    op_loc = 5 # where do the operators and operands start in op_token
     #print(num_ops, " operations")
     for i in range(num_ops): 
         # the number of ops common to all classes + 1 (the counter for math operators) is offset for this
         # currently 3  (2 common ops (0,1), plus 1 to indicate number of equation operand sets(2), so this is ix 3)      
-        op = op_token[3 + 3*i]
-        t1 = op_token[3 + 3*i + 1]
-        t2 = op_token[3 + 3*i + 2]
+        op = op_token[op_loc + 3*i]
+        t1 = op_token[op_loc + 3*i + 1]
+        t2 = op_token[op_loc + 3*i + 2]
         # if val1 or val2 are < 0 this means they are to come from the stack
         # if token is negative, means we need to use a stack value
         #print("s", s)
@@ -404,4 +411,7 @@ def step_equation(op_token, state_ix):
             s_len += 1
         s[s_ix] = result
     result = s[s_ix]
-    return result
+    if (non_neg == 1) and (result < 0):
+        result = state_ix[min_ix]
+    state_ix[op_token[1]] = result
+    return True

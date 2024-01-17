@@ -26,6 +26,7 @@ def init_state_dicts():
     # add a generic place to stash model_data for dynamic components
     state['model_data'] = {}
     state['state_step_hydr'] = 'disabled'
+    state['hsp2_local_py'] = False # disable his by default
     return state
 
 
@@ -199,7 +200,7 @@ def load_dynamics(io_manager, siminfo):
     hdf5_path = io_manager._input.file_path
     (fbase, fext) = os.path.splitext(hdf5_path)
     # see if there is a code module with custom python 
-    # print("Looking for SPECL with custom python code ", (fbase + ".py"))
+    print("Looking for SPECL with custom python code ", (fbase + ".py"))
     hsp2_local_py = dynamic_module_import(fbase, fbase + ".py", "hsp2_local_py")
     siminfo['state_step_hydr'] = 'disabled'
     if 'state_step_hydr' in dir(hsp2_local_py):

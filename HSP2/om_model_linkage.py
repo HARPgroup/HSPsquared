@@ -33,14 +33,25 @@ class ModelLinkage(ModelObject):
         if self.left_path == False:
             # self.state_path gets set when creating at the parent level
             self.left_path = self.state_path 
-        # this breaks for some reason, doesn't like the input name being different than the variable path ending?        
+        if (self.link_type == 0):
+            # if this is a simple input  we remove the object from the model_object_cache, and pass back to parent as an input 
+            del self.model_object_cache[self.state_path]
+            del self.state_ix[self.ix]
+            container.add_input(self.name, self.right_path)
+        # this breaks for some reason, doesn't like the input name being different than the variable path ending? 
+        # maybe because we should be adding the input to the container, not the self?       
         self.add_input(self.right_path, self.right_path)
     
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
         # parent method handles most cases, but subclass handles special situations.
         prop_val = super().handle_prop(model_props, prop_name, strict, default_value)
-        if ( (prop_name == 'right_value') and (prop_val == None) or (prop_val == '')):
+        if ( (prop_name == 'right_path') and (prop_val == None) or (prop_val == '')):
             raise Exception("right_path cannot be empty.  Object creation halted. Path to object with error is " + self.state_path)
+        if ( (prop_name == 'right_path')):
+            # check for special keyword [parent]
+            pre_val = prop_val
+            prop_val.replace("[parent]", self.container.state_path)
+            #print("Changed ", pre_val, " to ", prop_val)
         return prop_val
     
     @staticmethod

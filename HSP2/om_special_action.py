@@ -12,7 +12,7 @@ class SpecialAction(ModelObject):
         self.optype = 100 # Special Actions start indexing at 100 
     
     def parse_model_props(self, model_props, strict=False):
-        print("SpecialAction.parse_model_props() called")
+        super().parse_model_props(model_props, strict)
         # comes in as row from special ACTIONS table
         # ex: {
         #   'OPTYP': 'RCHRES', 'RANGE1': '1', 'RANGE2': '', 'DC': 'DY', 'DS': '', 
@@ -154,5 +154,6 @@ def step_special_action(op, state_ix, dict_ix, step):
     # set value in target
     # tbd: handle this with a model linkage? cons: this makes a loop since the ix1 is source and destination
     state_ix[ix1] = result
+    state_ix[op[1]] = result
     return result
 

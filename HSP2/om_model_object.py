@@ -38,7 +38,7 @@ class ModelObject:
         #                 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 
         #                 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 
         #                 12 - ModelRegister, 13 - SimpleChannel, 14 - SimpleImpoundment, 15 - FlowBy
-        self.register_path()
+        self.register_path() # note this registers the path AND stores the object in model_object_cache 
         self.parse_model_props(model_props)
     
     @staticmethod
@@ -61,6 +61,14 @@ class ModelObject:
             return False 
         return True
     
+    def handle_inputs(self, model_props):
+        if 'inputs' in model_props.keys():
+            for i_pair in model_props['inputs']:
+                i_name = i_pair[0]
+                i_target = i_pair[1]
+                i_target.replace("[parent]", self.container.state_path)
+                self.add_input(i_name, i_target)
+    
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
         # this checks to see if the prop is in dict with value form, or just a value 
         # strict = True causes an exception if property is missing from model_props dict 
@@ -71,12 +79,17 @@ class ModelObject:
             prop_val = prop_val.get('value')
         if strict and (prop_val == None):
             raise Exception("Cannot find property " + prop_name + " in properties passed to "+ self.name + " and strict = True.  Object creation halted. Path to object with error is " + self.state_path)
+        if (prop_val == None) and not (default_value == None):
+            prop_val = default_value
         return prop_val
     
     def parse_model_props(self, model_props, strict = False ):
         # sub-classes will allow an create argument "model_props" and handle them here.
+        #  - subclasses should insure that they call super().parse_model_props() or include all code below
         # see also: handle_prop(), which will be called y parse_model_props 
         #           for all attributes supported by the class
+        # this base object only handles inputs
+        self.handle_inputs(model_props)
         self.model_props_parsed = model_props
         return True
     
@@ -273,7 +286,7 @@ class ModelObject:
         # can be customized by subclasses to add multiple lines if needed.
         if self.ops == []:
             self.tokenize()
-        #print(self.name, "tokens", self.ops)
+        #print(self.state_path, "tokens", self.ops)
         self.op_tokens[self.ix] = np.asarray(self.ops, dtype="i8")
     
     def step(self, step):

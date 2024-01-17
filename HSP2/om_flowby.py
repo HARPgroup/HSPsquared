@@ -11,7 +11,8 @@ class FlowBy(ModelObject):
         self.optype = 15 # Special Actions start indexing at 100 
     
     def parse_model_props(self, model_props, strict=False):
-        print("SpecialAction.parse_model_props() called")
+        print("FlowBy.parse_model_props() called")
+        super().parse_model_props(model_props, strict)
         # Handle props for a basic flowby
         #   - cfb_condition: eq / lt / gt / lte / gte	 	 
         #   - cfb_var: string (reference input)
@@ -48,7 +49,7 @@ class FlowBy(ModelObject):
     def tokenize(self):
         # call parent method to set basic ops common to all 
         super().tokenize() # sets self.ops = op_type, op_ix
-        self.ops = self.ops + [self.enable_cfb, self.inputs_ix['cfb'], self.cfb_con_int]
+        self.ops = self.ops + [self.inputs_ix['flowby'], self.enable_cfb, self.inputs_ix['cfb'], self.cfb_con_int]
         # @tbd: check if time ops have been set and tokenize accordingly
         print("Flowby", self.name, "tokens", self.ops)
     
@@ -73,29 +74,20 @@ def step_flowby(op, state_ix, dict_ix, step):
     #     - matching should be as simple as if (state_ix[tix1] <> state_ix[vtix1]): return state_ix[ix1] (don't modify the value)
     #     - alternative: save the integer timestamp or timestep of the start, and if step/stamp > value, enable
     # @tbd: add number of repeats, and save the value of repeats in a register
-    ix1 = op[2] # ID of source of data and destination of data
-    sop = op[3]
-    ix2 = op[4]
-    tix = op[5] # which slot is the time comparison in?
-    ctr_ix = op[6] # id of the counter variable
-    num_done = state_ix[ctr_ix]
-    num = state_ix[ctr_ix] # num completed
-    if (num_done >= num):
-       result = state_ix[ix1]
-    else:
-        if sop == 1:
-            result = state_ix[ix2]
-        elif sop == 2:
-            result = state_ix[ix1] + state_ix[ix2]
-        elif sop == 3:
-            result = state_ix[ix1] - state_ix[ix2]
-        elif sop == 4:
-            result = state_ix[ix1] * state_ix[ix2]
-        elif sop == 5:
-            result = state_ix[ix1] / state_ix[ix2]
-    
-    # set value in target
-    # tbd: handle this with a model linkage? cons: this makes a loop since the ix1 is source and destination
-    state_ix[ix1] = result
-    return result
+    flowby = state_ix[op[3]] # self.ops + [self.enable_cfb, self.inputs_ix['cfb'], self.cfb_con_int]
+    enable_cfb = state_ix[op[3]] # 
+    cfb_val = state_ix[op[4]]
+    cfb_op = state_ix[op[5]]
+    # set preliminary value as computed flowby
+    result = flowby
+    if (enable_cfb == 1):
+        if cfb_op == 0:
+            if (cfb_val < flowby):
+                result = cfb_val
+        elif cfb_op == 1:
+            if (cfb_val > flowby):
+                result = cfb_val
+    # set value in state
+    state_ix[ix] = result
+    return True
 
