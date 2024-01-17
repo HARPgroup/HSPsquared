@@ -113,7 +113,7 @@ def pre_step_simple_channel(op, state_ix, dict_ix):
     dix = op[2]
     # Not yet completed. Maybe we do not need any pre-step actions?
 
-#@njit
+@njit
 def step_simple_channel(op, state_ix, dict_ix, step):
     ix = op[1] # note op[0] is op type which is known if we are here.
     # Not yet completed.
