@@ -357,6 +357,31 @@ def pre_evaluate_stack(s, ps):
 
 
 @njit(cache=True)
+def evaluate_eq_ops(op, val1, val2):
+    if op == 1:
+        #print(val1, " - ", val2)
+        result = val1 - val2
+        return result
+    if op == 2:
+        #print(val1, " + ", val2)
+        result = val1 + val2
+        return result
+    if op == 3:
+        #print(val1, " * ", val2)
+        result = val1 * val2 
+        return result
+    if op == 4:
+        #print(val1, " / ", val2)
+        result = val1 / val2 
+        return result
+    if op == 5:
+        #print(val1, " ^ ", val2)
+        result = pow(val1, val2) 
+        return result
+    return 0
+
+
+@njit
 def step_equation(op_token, state_ix):
     op_class = op_token[0] # we actually use this in the calling function, which will decide what 
                       # next level function to use 
@@ -370,47 +395,37 @@ def step_equation(op_token, state_ix):
     num_ops = op_token[4] # this index is equal to the number of ops common to all classes + 1.  See om_model_object for base ops and adjust
     op_loc = 5 # where do the operators and operands start in op_token
     #print(num_ops, " operations")
-    for i in range(num_ops): 
-        # the number of ops common to all classes + 1 (the counter for math operators) is offset for this
-        # currently 3  (2 common ops (0,1), plus 1 to indicate number of equation operand sets(2), so this is ix 3)      
-        op = op_token[op_loc + 3*i]
-        t1 = op_token[op_loc + 3*i + 1]
-        t2 = op_token[op_loc + 3*i + 2]
-        # if val1 or val2 are < 0 this means they are to come from the stack
-        # if token is negative, means we need to use a stack value
-        #print("s", s)
-        if t1 < 0: 
-            val1 = s[s_ix]
-            s_ix -= 1
-        else:
-            val1 = state_ix[t1]
-        if t2 < 0: 
-            val2 = s[s_ix]
-            s_ix -= 1
-        else:
-            val2 = state_ix[t2]
-        #print(s_ix, op, val1, val2)
-        if op == 1:
-            #print(val1, " - ", val2)
-            result = val1 - val2
-        elif op == 2:
-            #print(val1, " + ", val2)
-            result = val1 + val2
-        elif op == 3:
-            #print(val1, " * ", val2)
-            result = val1 * val2 
-        elif op == 4:
-            #print(val1, " / ", val2)
-            result = val1 / val2 
-        elif op == 5:
-            #print(val1, " ^ ", val2)
-            result = pow(val1, val2) 
-        s_ix += 1
-        if s_ix >= s_len: 
-            s = np.append(s, 0)
-            s_len += 1
-        s[s_ix] = result
-    result = s[s_ix]
+    # is the below faster since it avoids a brief loop and a couple ifs for 2 op equations?
+    if num_ops == 1:
+        result = evaluate_eq_ops(op_token[op_loc], state_ix[op_token[op_loc + 1]], state_ix[op_token[op_loc + 2]])
+    else:
+        for i in range(num_ops): 
+            # the number of ops common to all classes + 1 (the counter for math operators) is offset for this
+            # currently 3  (2 common ops (0,1), plus 1 to indicate number of equation operand sets(2), so this is ix 3)      
+            op = op_token[op_loc + 3*i]
+            t1 = op_token[op_loc + 3*i + 1]
+            t2 = op_token[op_loc + 3*i + 2]
+            # if val1 or val2 are < 0 this means they are to come from the stack
+            # if token is negative, means we need to use a stack value
+            #print("s", s)
+            if t1 < 0: 
+                val1 = s[s_ix]
+                s_ix -= 1
+            else:
+                val1 = state_ix[t1]
+            if t2 < 0: 
+                val2 = s[s_ix]
+                s_ix -= 1
+            else:
+                val2 = state_ix[t2]
+            #print(s_ix, op, val1, val2)
+            result = evaluate_eq_ops(op, val1, val2)
+            s_ix += 1
+            if s_ix >= s_len: 
+                s = np.append(s, 0)
+                s_len += 1
+            s[s_ix] = result
+        result = s[s_ix]
     if (non_neg == 1) and (result < 0):
         result = state_ix[min_ix]
     state_ix[op_token[1]] = result

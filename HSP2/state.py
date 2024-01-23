@@ -38,6 +38,12 @@ def find_state_path(state_paths, parent_path, varname):
     var_path = parent_path + "/states/" + str(varname)
     return var_path
 
+def search_path(state_paths, varname, search_mode = 'min'):
+    if (search_mode == 'min'):
+        return min(dict(filter(lambda item: varname in item[0], state_paths.items())).keys())
+    if (search_mode == 'max'):
+        return max(dict(filter(lambda item: varname in item[0], state_paths.items())).keys())
+
 def op_path_name(operation, id):
     """
     Used to generate hdf5 operation name in a central fashion to avoid naming convention slip-ups

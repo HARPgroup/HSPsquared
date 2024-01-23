@@ -23,6 +23,7 @@ class SimTimer(ModelObject):
         self.ix = set_state(self.state_ix, self.state_paths, self.state_path, float(self.time_array[0][0]))
         # now register all other paths.
         # register "year", "month" "day", ...
+        ut_ix = set_state(self.state_ix, self.state_paths, "/STATE/year", float(self.time_array[0][0]))
         year_ix = set_state(self.state_ix, self.state_paths, "/STATE/year", float(self.time_array[0][1]))
         month_ix = set_state(self.state_ix, self.state_paths, "/STATE/month", float(self.time_array[0][2]))
         day_ix = set_state(self.state_ix, self.state_paths, "/STATE/day", float(self.time_array[0][3]))
@@ -67,9 +68,8 @@ class SimTimer(ModelObject):
 # Function for use during model simulations of tokenized objects
 @njit(cache=True)
 def step_sim_timer(op_token, state_ix, dict_ix, ts_ix, step):
-    # note: the op_token and state index are off by 1 since the dict_ix does not store type 
-    #       in slot 0 like the op_token does
-    #print("Exec step_sim_timer at step:", step, "jday", dict_ix[op_token[1]][step][9] )
+    # set current time step values in state
+    # opt token 1 is this simtimer, which is also the location of the unix time stamp
     state_ix[op_token[1]] = dict_ix[op_token[1]][step][0] # unix timestamp here 
     state_ix[op_token[2]] = dict_ix[op_token[1]][step][1] # year  
     state_ix[op_token[3]] = dict_ix[op_token[1]][step][2] # month  

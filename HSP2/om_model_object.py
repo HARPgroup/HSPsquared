@@ -7,15 +7,18 @@ from HSP2.state import *
 from HSP2.om import *
 from pandas import Series, DataFrame, concat, HDFStore, set_option, to_numeric
 from pandas import Timestamp, Timedelta, read_hdf, read_csv
+from numpy import pad
 
 class ModelObject:
     state_ix = {} # Shared Dict with the numerical state of each object 
     state_paths = {} # Shared Dict with the hdf5 path of each object 
     dict_ix = {} # Shared Dict with the hdf5 path of each object 
     ts_ix = {} # Shared Dict with the hdf5 path of each object 
-    op_tokens = {} # Shared Dict with the tokenized representation of each object 
-    model_object_cache = {} # Shared with actual objects, keyed by their path 
+    op_tokens = {} # Shared Dict with the tokenized representation of each object, will be turned into array of ints
+    moc = {} # Shared with actual objects, keyed by their path 
     model_exec_list = {} # Shared with actual objects, keyed by their path 
+    max_token_length = 64 # limit on complexity of tokenized objects since op_tokens must be fixed dimensions for numba
+    runnables = [1,2,5,6,8,9,10,11,12,13,14,15] # runnable components important for optimization
     
     def __init__(self, name, container = False, model_props = {}):
         self.name = name
@@ -38,7 +41,7 @@ class ModelObject:
         #                 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 
         #                 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 
         #                 12 - ModelRegister, 13 - SimpleChannel, 14 - SimpleImpoundment, 15 - FlowBy
-        self.register_path() # note this registers the path AND stores the object in model_object_cache 
+        self.register_path() # note this registers the path AND stores the object in moc 
         self.parse_model_props(model_props)
     
     @staticmethod
@@ -49,6 +52,30 @@ class ModelObject:
         # req_props = super(DataMatrix, DataMatrix).required_properties()
         req_props = ['name']
         return req_props
+    
+    @staticmethod
+    def make_op_tokens(num_ops = 5000):
+        op_tokens = int32(zeros((num_ops,64)))
+        return op_tokens
+    
+    @staticmethod
+    def runnable_op_list(op_tokens, meo):
+        # only return those objects that do something at runtime
+        rmeo = []
+        run_ops = {}
+        for ops in ModelObject.op_tokens:
+            if ops[0] in ModelObject.runnables:
+                run_ops[ops[1]] = ops
+                print("Found runnable", ops[1], "type", ops[0])
+        for ix in meo:
+            if ix in run_ops.keys():
+                rmeo.append(ix)
+        rmeo = np.asarray(rmeo, dtype="i8") 
+        return rmeo
+    
+    def format_ops(self):
+        ops = pad(self.ops,(0,self.max_token_length))[0:self.max_token_length]
+        return ops
     
     @classmethod
     def check_properties(cls, model_props):
@@ -148,10 +175,10 @@ class ModelObject:
     
     def get_object(self, var_name = False):
         if var_name == False:
-            return self.model_object_cache[self.state_path]
+            return self.moc[self.state_path]
         else:
             var_path = self.find_var_path(var_name)
-            return self.model_object_cache[var_path]
+            return self.moc[var_path]
         
         
     def find_var_path(self, var_name, local_only = False):
@@ -187,9 +214,9 @@ class ModelObject:
         if self.state_path == '':
             self.make_paths()
         self.ix = set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
-        # store object in model_object_cache
-        if not (self.state_path in self.model_object_cache.keys()):
-            self.model_object_cache[self.state_path] = self 
+        # store object in moc
+        if not (self.state_path in self.moc.keys()):
+            self.moc[self.state_path] = self 
         # this should check to see if this object has a parent, and if so, register the name on the parent 
         # default is as a child object. 
         if not (self.container == False):
@@ -229,6 +256,10 @@ class ModelObject:
                 var_path = found_path
         self.inputs[var_name] = var_path
         self.inputs_ix[var_name] = var_ix
+        # Should we create a register for the input to be reported here?
+        # i.e., if we have an input named Qin on RCHRES_R001, shouldn't we be able 
+        # to find the data in /STATE/RCHRES_R001/Qin ???  It is redundant data and writing
+        # but matches a complete data model and prevents stale data?
         return self.inputs_ix[var_name]
     
     def add_object_input(self, var_name, var_object, link_type = 1):
@@ -278,7 +309,7 @@ class ModelObject:
     def tokenize(self):
         # renders tokens for high speed execution
         if (self.paths_found == False):
-            raise Exception("path_found False for object" + self.name + "(" + self.state_path + "). " + "Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(model_object_cache)`)")
+            raise Exception("path_found False for object" + self.name + "(" + self.state_path + "). " + "Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(moc)`)")
         self.ops = [self.optype, self.ix]
     
     def add_op_tokens(self):
@@ -287,7 +318,10 @@ class ModelObject:
         if self.ops == []:
             self.tokenize()
         #print(self.state_path, "tokens", self.ops)
-        self.op_tokens[self.ix] = np.asarray(self.ops, dtype="i8")
+        if len(self.ops) > self.max_token_length:
+            raise Exception("op tokens cannot exceed max length of" + self.max_token_length + "(" + self.state_path + "). ")
+        self.op_tokens[self.ix] = self.format_ops()
+        #self.op_tokens[self.ix] = np.asarray(self.ops, dtype="i8")
     
     def step(self, step):
         # this tests the model for a single timestep.

@@ -148,7 +148,8 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     state_paths = state['state_paths']
     # initialize the hydr paths in case they don't already reside here
     hydr_init_ix(state_ix, state_paths, state['domain'])
-    
+    # meo = model exec order; this should be dynamically assessed based on domain, but for now we just take them all
+    meo = state['model_exec_list']
     
     ###########################################################################
     # OM - load the tokens to pass in.
@@ -158,7 +159,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     ###########################################################################
     # Do the simulation with _hydr_()
     ###########################################################################
-    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, state_info, state_paths, state_ix, dict_ix, ts_ix, state_step_hydr, op_tokens) # run reaches simulation code
+    errors = _hydr_(ui, ts, COLIND, OUTDGT, rchtab, funct, Olabels, OVOLlabels, state_info, state_paths, state_ix, dict_ix, ts_ix, state_step_hydr, op_tokens, meo) # run reaches simulation code
     ###########################################################################
 
     if 'O'    in ts:  del ts['O']
@@ -173,7 +174,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
 
 
 @njit(cache=True)
-def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_info, state_paths, state_ix, dict_ix, ts_ix, state_step_hydr, op_tokens):
+def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_info, state_paths, state_ix, dict_ix, ts_ix, state_step_hydr, op_tokens, meo):
     errors = zeros(int(ui['errlen'])).astype(int64)
 
     steps  = int(ui['steps'])            # number of simulation steps
@@ -337,7 +338,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
         # - these if statements may be irrelevant if default functions simply return
         #   when no objects are defined.
         if (state_info['state_step_om'] == 'enabled'):
-            pre_step_model(op_tokens[0], op_tokens, state_ix, dict_ix, ts_ix, step)
+            pre_step_model(meo, op_tokens, state_ix, dict_ix, ts_ix, step)
         
         # commented to disable dynamic python
         if (state_info['state_step_hydr'] == 'enabled'):
@@ -347,7 +348,7 @@ def _hydr_(ui, ts, COLIND, OUTDGT, rowsFT, funct, Olabels, OVOLlabels, state_inf
             #print("trying to execute state_step_om()")
             # op_tokens[0] contains the model exec list.  Later we may amend this
             # perhaps even storing a domain specific exec list under domain/exec_list?
-            step_model(op_tokens[0], op_tokens, state_ix, dict_ix, ts_ix, step)
+            step_model(meo, op_tokens, state_ix, dict_ix, ts_ix, step)
         # Execute dynamic code if enabled
         if ( (state_info['state_step_hydr'] == 'enabled')
             or (state_info['state_step_om'] == 'enabled')

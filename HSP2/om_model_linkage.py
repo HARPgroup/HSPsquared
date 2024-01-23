@@ -34,8 +34,8 @@ class ModelLinkage(ModelObject):
             # self.state_path gets set when creating at the parent level
             self.left_path = self.state_path 
         if (self.link_type == 0):
-            # if this is a simple input  we remove the object from the model_object_cache, and pass back to parent as an input 
-            del self.model_object_cache[self.state_path]
+            # if this is a simple input  we remove the object from the moc, and pass back to parent as an input 
+            del self.moc[self.state_path]
             del self.state_ix[self.ix]
             container.add_input(self.name, self.right_path)
         # this breaks for some reason, doesn't like the input name being different than the variable path ending? 

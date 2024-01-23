@@ -68,7 +68,7 @@ class ModelBroadcast(ModelObject):
             if hub_exists == False:
                 hub_container = False
             else:
-                hub_container = self.model_object_cache[hub_path]
+                hub_container = self.moc[hub_path]
         # add the channel to the hub path
         channel_path = hub_path + "/" + broadcast_channel
         channel = self.insure_channel(broadcast_channel, hub_container)
@@ -134,7 +134,7 @@ class ModelBroadcast(ModelObject):
             #print(self.state_path, "is Creating broadcast hub ", broadcast_channel, " on ", hub_name)
             hub_object = ModelObject(broadcast_channel, hub_container)
         else:
-            hub_object = self.model_object_cache[channel_path]
+            hub_object = self.moc[channel_path]
         return hub_object
     
     def insure_register(self, var_name, default_value, register_container):
@@ -146,7 +146,7 @@ class ModelBroadcast(ModelObject):
             #print("Creating a register for data for hub ", register_container.name, "(", register_container.state_path, ")", " var name ",var_name)
             var_register = ModelRegister(var_name, register_container, default_value)
         else:
-            var_register = self.model_object_cache[register_path]
+            var_register = self.moc[register_path]
         return var_register
     
     def tokenize(self):
