@@ -114,14 +114,15 @@ select_ops = model_exec_list
 #select_ops = np.asarray([Qmulti.ix, Qout.ix], dtype="i8") 
 # does it go faster if we know which ones are runnable and dont try those that are static?
 rmeo = ModelObject.runnable_op_list(ModelObject.op_tokens, model_exec_list)
+# using onlye these runnables cuts runtime by over 40%
 select_ops = rmeo
+#siminfo['steps'] = 100000
 
 # Test and time the run
 # this is a testing mode for running, the last arg is the step to report exec for each component
 # to allow to trace, that is, the last ix that the model reports will be the one that failed 
 start = time.time()
 
-siminfo['steps'] = 100000
 iterate_perf(select_ops, op_tokens, state_ix, dict_ix, ts_ix, siminfo['steps'], -1)
 #iterate_perf(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 3, -1)
 end = time.time()

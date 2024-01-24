@@ -362,7 +362,8 @@ def model_tokenizer_recursive(model_object, moc, model_exec_list, model_touch_li
             return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
-    model_exec_list.append(model_object.ix)
+    if model_object.optype in ModelObject.runnables:
+        model_exec_list.append(model_object.ix)
 
 
 def model_order_recursive(model_object, moc, model_exec_list, model_touch_list = []):
@@ -436,20 +437,9 @@ def iterate_models(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, steps, 
 @njit
 def pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     for i in model_exec_list:
-        if op_tokens[i][0] == 1:
-            pass
-        elif op_tokens[i][0] == 2:
-            pass
-        elif op_tokens[i][0] == 3:
-            pass
-        elif op_tokens[i][0] == 4:
-            pass
-        elif op_tokens[i][0] == 5:
-            pass
-        elif op_tokens[i][0] == 12:
+        if op_tokens[i][0] == 12:
             # register type data (like broadcast accumulators) 
             pre_step_register(op_tokens[i], state_ix, dict_ix)
-            pass
     return
 
 @njit
@@ -470,11 +460,7 @@ def step_model_test(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step, 
         # locations.  All others rely only on ops 
         # todo: decide if all step_[class() functions should set value in state_ix instead of returning value?
         val = 0
-        if ops[0] == 0:
-            continue
-        elif ops[0] == 7:
-            continue
-        elif ops[0] == 1:
+        if ops[0] == 1:
             step_equation(ops, state_ix)
         elif ops[0] == 2:
             # todo: this should be moved into a single function, 

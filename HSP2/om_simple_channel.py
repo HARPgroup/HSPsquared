@@ -31,7 +31,9 @@ class SimpleChannel(ModelObject):
         super().parse_model_props(model_props, strict)
         if model_props.get('solver') == None:
             model_props['solver'] = 0 # use simple-routing by default 
-        # ceck for inputs that this will use to get flows/demand inputs 
+        # check for inputs that this will use to get flows/demand inputs 
+        # Rin = local flow cfs
+        # Qin = upstream flow cfs
         for op_name in self.rvars:
             self.r_var_values[op_name] = self.handle_prop(model_props, op_name, False, 0.0)
         # handle variables that used a weird convention in old model

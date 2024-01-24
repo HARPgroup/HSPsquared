@@ -52,7 +52,8 @@ class SpecialAction(ModelObject):
            self.handle_ac(prop_val)
         if (prop_name == 'when'):
            # when to perform this?  timestamp or time-step index
-           # for now we just do 0, but @tbd, grab the date parts and figure out which time slot it falls in (prefer timestamp to allow for varying timesteps?)
+           # TODO: find the timestep matching the date supplied for now we just do 0, 
+           #       does SimTimer or oter HSP2 code have a way of translating date or Unix timestamp to step?
            prop_val = 0
         if (prop_name == 'NUM') and (pop_val == ''):
             prop_val = default_value
@@ -134,11 +135,14 @@ def step_special_action(op, state_ix, dict_ix, step):
     sop = op[3]
     ix2 = op[4]
     tix = op[5] # which slot is the time comparison in?
+    if (step < state_ix[tix]):
+        return
     ctr_ix = op[6] # id of the counter variable
+    num_ix = op[7] # max times to complete
     num_done = state_ix[ctr_ix]
-    num = state_ix[ctr_ix] # num completed
+    num = state_ix[num_ix] # num to complete
     if (num_done >= num):
-       result = state_ix[ix1]
+       return
     else:
         if sop == 1:
             result = state_ix[ix2]
@@ -153,6 +157,7 @@ def step_special_action(op, state_ix, dict_ix, step):
     
     # set value in target
     # tbd: handle this with a model linkage? cons: this makes a loop since the ix1 is source and destination
+    
     state_ix[ix1] = result
     state_ix[op[1]] = result
     return result

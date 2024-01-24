@@ -385,7 +385,7 @@ def get_flows(io_manager:SupportsReadTS, ts, flags, uci, segment, ddlinks, ddmas
 
                     smemn, tmemn = expand_timeseries_names(sgrpn, smemn, smemsb1, smemsb2, tmemn, tmemsb1, tmemsb2)
 
-                    path = f'RESULTS/{x.SVOL}_{x.SVOLNO}/{sgrpn}'
+                    path = f'RESULTS/{x.SVOL}_{x.SVOLNO}/{sgrpn}' # note: this is only used in an info statement, obsolete?
                     MFname = f'{x.SVOL}{x.SVOLNO}_MFACTOR'
                     AFname = f'{x.SVOL}{x.SVOLNO}_AFACTR'
                     data = f'{smemn}{smemsb1}{smemsb2}'

@@ -93,6 +93,13 @@ class HDF5():
 		except KeyError:
 			return pd.DataFrame()
 
+	def read_path_ts(self, 
+			path=None) -> pd.DataFrame:
+		try:
+			return read_hdf(self._store, path)
+		except KeyError:
+			return pd.DataFrame()
+
 	def write_ts(self, 
 			data_frame:pd.DataFrame, 
 			category: Category,
