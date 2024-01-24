@@ -55,7 +55,7 @@ class ModelObject:
     
     @staticmethod
     def make_op_tokens(num_ops = 5000):
-        op_tokens = int32(zeros((num_ops,64)))
+        op_tokens = int32(zeros((num_ops,64))) # was Dict.empty(key_type=types.int64, value_type=types.i8[:])
         return op_tokens
     
     @staticmethod
