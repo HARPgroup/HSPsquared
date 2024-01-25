@@ -25,8 +25,6 @@ def init_state_dicts():
     state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'] = state_paths, state_ix, dict_ix, ts_ix
     # add a generic place to stash model_data for dynamic components
     state['model_data'] = {}
-    state['state_step_hydr'] = 'disabled'
-    state['hsp2_local_py'] = False # disable his by default
     return state
 
 
@@ -37,12 +35,6 @@ def find_state_path(state_paths, parent_path, varname):
     # this is a bandaid, we should have an object routine that searches the parent for variables or inputs
     var_path = parent_path + "/states/" + str(varname)
     return var_path
-
-def search_path(state_paths, varname, search_mode = 'min'):
-    if (search_mode == 'min'):
-        return min(dict(filter(lambda item: varname in item[0], state_paths.items())).keys())
-    if (search_mode == 'max'):
-        return max(dict(filter(lambda item: varname in item[0], state_paths.items())).keys())
 
 def op_path_name(operation, id):
     """
@@ -132,7 +124,7 @@ def state_context_hsp2(state, operation, segment, activity):
     state['segment'] = segment # 
     state['activity'] = activity
     # give shortcut to state path for the upcoming function 
-    state['domain'] = "/STATE/" + operation + "_" + segment + "/" + activity 
+    state['domain'] = "/STATE/" + operation + "_" + segment # + "/" + activity   # may want to comment out activity?
 
 def state_siminfo_hsp2(uci_obj, siminfo):
     # Add crucial simulation info for dynamic operation support
@@ -160,7 +152,17 @@ def hydr_init_ix(state_ix, state_paths, domain):
         #var_path = f'{domain}/{i}'
         var_path = domain + "/" + i
         hydr_ix[i] = set_state(state_ix, state_paths, var_path, 0.0)
-    return hydr_ix    
+    return hydr_ix
+
+def sedtrn_init_ix(state_ix, state_paths, domain):
+    # get a list of keys for all sedtrn state variables
+    sedtrn_state = ["RSED4","RSED5","RSED6"]
+    sedtrn_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
+    for i in sedtrn_state:
+        #var_path = f'{domain}/{i}'
+        var_path = domain + "/" + i
+        sedtrn_ix[i] = set_state(state_ix, state_paths, var_path, 0.0)
+    return sedtrn_ix
     
 @njit
 def hydr_get_ix(state_ix, state_paths, domain):
@@ -172,6 +174,15 @@ def hydr_get_ix(state_ix, state_paths, domain):
         var_path = domain + "/" + i
         hydr_ix[i] = state_paths[var_path]
     return hydr_ix    
+
+def sedtrn_get_ix(state_ix, state_paths, domain):
+    # get a list of keys for all sedtrn state variables
+    sedtrn_state = ["RSED4", "RSED5", "RSED6"]
+    sedtrn_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
+    for i in sedtrn_state:
+        var_path = domain + "/" + i
+        sedtrn_ix[i] = state_paths[var_path]
+    return sedtrn_ix
 
 # function to dynamically load module, based on "Using imp module" in https://www.tutorialspoint.com/How-I-can-dynamically-import-Python-module#
 #def dynamic_module_import(module_name, class_name):
@@ -206,7 +217,7 @@ def load_dynamics(io_manager, siminfo):
     hdf5_path = io_manager._input.file_path
     (fbase, fext) = os.path.splitext(hdf5_path)
     # see if there is a code module with custom python 
-    print("Looking for SPECL with custom python code ", (fbase + ".py"))
+    # print("Looking for SPECL with custom python code ", (fbase + ".py"))
     hsp2_local_py = dynamic_module_import(fbase, fbase + ".py", "hsp2_local_py")
     siminfo['state_step_hydr'] = 'disabled'
     if 'state_step_hydr' in dir(hsp2_local_py):
