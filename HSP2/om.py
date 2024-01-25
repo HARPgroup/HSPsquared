@@ -61,6 +61,7 @@ from HSP2.om_special_action import *
 from HSP2.om_data_matrix import *
 from HSP2.om_model_broadcast import *
 from HSP2.om_simple_channel import *
+from HSP2.om_impoundment import *
 from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
 def init_om_dicts():
@@ -198,6 +199,8 @@ def model_class_loader(model_name, model_props, container = False):
           #remove_used_keys(model_props, 
       elif object_class == 'SimpleChannel':
           model_object = SimpleChannel(model_props.get('name'), container, model_props )
+      elif object_class == 'Impoundment':
+          model_object = Impoundment(model_props.get('name'), container, model_props )
       elif object_class == 'Constant':
           model_object = ModelConstant(model_props.get('name'), container, model_props.get('value') )
       elif ( object_class.lower() == 'datamatrix'):
@@ -259,11 +262,11 @@ def model_class_translate(model_props, object_class):
         model_props['object_class'] = 'SimpleChannel'
         print("Handling USGSChannelGeomObject_sub as SimpleChannel")
     if object_class == 'hydroImpoundment':
-        model_props['object_class'] = 'SimpleImpoundment'
-        print("Handling hydroImpoundment as SimpleImpoundment")
+        model_props['object_class'] = 'Impoundment'
+        print("Handling hydroImpoundment as Impoundment")
     if object_class == 'hydroImpSmall':
-        model_props['object_class'] = 'SimpleImpoundment'
-        print("Handling hydroImpSmall as SimpleImpoundment")
+        model_props['object_class'] = 'Impoundment'
+        print("Handling hydroImpSmall as Impoundment")
 
 def model_loader_recursive(model_data, container):
     k_list = model_data.keys()

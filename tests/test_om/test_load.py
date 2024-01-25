@@ -68,6 +68,14 @@ if lfile == True:
     # a test of complex versus simple equation
 else:
     facility = ModelObject('facility', model_root_object)
+    model_data['RCHRES_R001']['run_mode']['object_class'] = 'ModelConstant'
+    model_data['RCHRES_R001']['flow_mode']['object_class'] = 'ModelConstant'
+    model_data['RCHRES_R001']['IVOL']= {
+        'object_class' : 'ModelLinkage',
+        'right_path' : '/STATE/RCHRES_R001/HYDR/IVOL',
+        'name' : 'IVOL',
+        'link_type' : 2
+    }
     c=["flowby", "wd_mgd", "Qintake"]
     flowby = Equation('flowby', facility, {'equation':'10.0'} )
     wd_mgd = Equation('wd_mgd', facility, {'equation':'2.5'} )

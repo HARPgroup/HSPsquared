@@ -140,14 +140,14 @@ class ModelObject:
     def make_paths(self, base_path = False):
         if base_path == False: # we are NOT forcing paths
             if not (self.container == False):
-                self.state_path = self.container.state_path + "/" + self.name
-                self.attribute_path = self.container.attribute_path + "/" + self.name
+                self.state_path = self.container.state_path + "/" + str(self.name)
+                self.attribute_path = self.container.attribute_path + "/" + str(self.name)
             elif self.name == "":
                 self.state_path = "/STATE" 
                 self.attribute_path = "/OBJECTS" 
             else:
-                self.state_path = "/STATE/" + self.name
-                self.attribute_path = "/OBJECTS/" + self.name
+                self.state_path = "/STATE/" + str(self.name)
+                self.attribute_path = "/OBJECTS/" + str(self.name)
         else:
             # base_path is a Dict with state_path and attribute_path set 
             self.state_path = base_path['STATE'] + self.name
