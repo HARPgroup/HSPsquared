@@ -24,15 +24,15 @@ from HSP2.utilities import versions, get_timeseries, expand_timeseries_names, sa
 from HSP2.SPECL import specl
 
 state = init_state_dicts()
-op_tokens, moc = init_om_dicts()
+op_tokens, model_object_cache = init_om_dicts()
 state_context_hsp2(state, 'RCHRES', 'R001', 'HYDR')
 hydr_init_ix(state['state_ix'], state['state_paths'], state['domain'])
 state_paths, state_ix, dict_ix, ts_ix = state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix']
 # set globals on ModelObject, this makes them persistent throughout all subsequent object instantiation and use
-ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.moc = (
-    op_tokens, state_paths, state_ix, dict_ix, moc
+ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache = (
+    op_tokens, state_paths, state_ix, dict_ix, model_object_cache
 )
-state['op_tokens'], state['moc'] = op_tokens, moc 
+state['op_tokens'], state['model_object_cache'] = op_tokens, model_object_cache 
 
 domain = "/STATE/RCHRES_R001/HYDR" # any objects that are connected to this object should be loaded 
 # initialize runtime Dicts
@@ -46,7 +46,7 @@ siminfo['delt'] =60
 siminfo['tindex'] = date_range("1984-01-01", "2020-12-31", freq=Minute(siminfo['delt']))[1:]
 
 steps = siminfo['steps'] = len(siminfo['tindex'])
-moc = state['moc']
+model_object_cache = state['model_object_cache']
 op_tokens = state['op_tokens']
 
 container = False 
@@ -80,29 +80,29 @@ else:
 
 # add a handful of helpful objects
 model_loader_recursive(state['model_data'], model_root_object)
-Qmulti = Equation("Qmulti", moc['/STATE/RCHRES_R001'], {'equation':'1.0 * Qin * (1.0 + 0.0 * 11.5) / 1.0'} )
-Qout = moc[Qmulti.find_var_path('Qout')]
+Qmulti = Equation("Qmulti", model_object_cache['/STATE/RCHRES_R001'], {'equation':'1.0 * Qin * (1.0 + 0.0 * 11.5) / 1.0'} )
+Qout = model_object_cache[Qmulti.find_var_path('Qout')]
 
 # now instantiate and link objects
 # state['model_data'] has alread been prepopulated from json, .py files, hdf5, etc.
 
 print("Loaded objects & paths: insures all paths are valid, connects models as inputs")
-# both state['moc'] and the moc property of the ModelObject class def 
+# both state['model_object_cache'] and the model_object_cache property of the ModelObject class def 
 
 # will hold a global repo for this data this may be redundant?  They DO point to the same datset?
 # since this is a function that accepts state as an argument and these were both set in state_load_dynamics_om
 # we can assume they are there and functioning
-model_path_loader(moc)
+model_path_loader(model_object_cache)
 # len() will be 1 if we only have a simtimer, but > 1 if we have a river being added
 model_exec_list = []
 # put all objects in token form for fast runtime execution and sort according to dependency order
 print("Tokenizing models")
-model_tokenizer_recursive(model_root_object, moc, model_exec_list, model_touch_list )
+model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list, model_touch_list )
 # model_exec_list is the ordered list of component operations
 print("model_exec_list:", model_exec_list)
 model_exec_list = np.asarray(model_exec_list, dtype="i8") 
 # the resulting set of objects is returned.
-state['moc'] = moc
+state['model_object_cache'] = model_object_cache
 state['op_tokens'] = ModelObject.op_tokens
 state['state_step_om'] = 'disabled'
 
@@ -133,15 +133,15 @@ print(len(select_ops), "components iterated over", siminfo['steps'], "time steps
 # if a model fails on a given ix, search for it, for example, (if last ix reported is 234 then:
 # get_ix_path(state_paths, 234)
 # or direct like so: 
-#    moc['/STATE/facility'].add_op_tokens()
+#    model_object_cache['/STATE/facility'].add_op_tokens()
 # or 
-#    moc['/STATE/facility/Qintake'].get_state()
-# Runit = moc['/STATE/RCHRES_R001/Runit']
-# local_channel = moc['/STATE/RCHRES_R001/local_channel']
-# moc['/STATE/RCHRES_R001/drainage_area_sqmi'].get_state()
+#    model_object_cache['/STATE/facility/Qintake'].get_state()
+# Runit = model_object_cache['/STATE/RCHRES_R001/Runit']
+# local_channel = model_object_cache['/STATE/RCHRES_R001/local_channel']
+# model_object_cache['/STATE/RCHRES_R001/drainage_area_sqmi'].get_state()
 # Runit.get_state()
 # even step:
 # step_equation(np.asarray(Qintake.ops, dtype="i8"), state_ix)
 # can find paths for ested variables like so: search_path(state_paths,'nhd_8566699')
 # - use a 3rd argument 'max' if you want the longest matching path, not the shortest. 
-# trib = moc[search_path(state_paths,'nhd_8566699')]
+# trib = model_object_cache[search_path(state_paths,'nhd_8566699')]

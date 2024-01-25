@@ -15,7 +15,7 @@ class ModelObject:
     dict_ix = {} # Shared Dict with the hdf5 path of each object 
     ts_ix = {} # Shared Dict with the hdf5 path of each object 
     op_tokens = {} # Shared Dict with the tokenized representation of each object, will be turned into array of ints
-    moc = {} # Shared with actual objects, keyed by their path 
+    model_object_cache = {} # Shared with actual objects, keyed by their path 
     model_exec_list = {} # Shared with actual objects, keyed by their path 
     max_token_length = 64 # limit on complexity of tokenized objects since op_tokens must be fixed dimensions for numba
     runnables = [1,2,5,6,8,9,10,11,12,13,14,15] # runnable components important for optimization
@@ -41,7 +41,7 @@ class ModelObject:
         #                 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelConstant (numeric), 
         #                 8 - matrix accessor, 9 - MicroWatershedModel, 10 - MicroWatershedNetwork, 11 - ModelTimeseries, 
         #                 12 - ModelRegister, 13 - SimpleChannel, 14 - SimpleImpoundment, 15 - FlowBy
-        self.register_path() # note this registers the path AND stores the object in moc 
+        self.register_path() # note this registers the path AND stores the object in model_object_cache 
         self.parse_model_props(model_props)
     
     @staticmethod
@@ -175,10 +175,10 @@ class ModelObject:
     
     def get_object(self, var_name = False):
         if var_name == False:
-            return self.moc[self.state_path]
+            return self.model_object_cache[self.state_path]
         else:
             var_path = self.find_var_path(var_name)
-            return self.moc[var_path]
+            return self.model_object_cache[var_path]
         
         
     def find_var_path(self, var_name, local_only = False):
@@ -214,9 +214,9 @@ class ModelObject:
         if self.state_path == '':
             self.make_paths()
         self.ix = set_state(self.state_ix, self.state_paths, self.state_path, self.default_value)
-        # store object in moc
-        if not (self.state_path in self.moc.keys()):
-            self.moc[self.state_path] = self 
+        # store object in model_object_cache
+        if not (self.state_path in self.model_object_cache.keys()):
+            self.model_object_cache[self.state_path] = self 
         # this should check to see if this object has a parent, and if so, register the name on the parent 
         # default is as a child object. 
         if not (self.container == False):
@@ -309,7 +309,7 @@ class ModelObject:
     def tokenize(self):
         # renders tokens for high speed execution
         if (self.paths_found == False):
-            raise Exception("path_found False for object" + self.name + "(" + self.state_path + "). " + "Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(moc)`)")
+            raise Exception("path_found False for object" + self.name + "(" + self.state_path + "). " + "Tokens cannot be generated until method '.find_paths()' is run for all model objects ... process terminated. (see function `model_path_loader(model_object_cache)`)")
         self.ops = [self.optype, self.ix]
     
     def add_op_tokens(self):

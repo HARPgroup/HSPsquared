@@ -70,8 +70,8 @@ def init_om_dicts():
     op_tokens = ModelObject.make_op_tokens() # this is just to start, layer it is resized to the object needs
     # Was
     #op_tokens = Dict.empty(key_type=types.int64, value_type=types.i8[:])
-    moc = {} # this does not need to be a special Dict as it is not used in numba 
-    return op_tokens, moc
+    model_object_cache = {} # this does not need to be a special Dict as it is not used in numba 
+    return op_tokens, model_object_cache
 
 
 def state_load_om_json(state, io_manager, siminfo):
@@ -108,20 +108,20 @@ def state_load_om_python(state, io_manager, siminfo):
     hsp2_local_py = state['hsp2_local_py']
     # Load a function from code if it exists 
     if 'om_init_model' in dir(hsp2_local_py):
-        hsp2_local_py.om_init_model(io_manager, siminfo, state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'], state['moc'])
+        hsp2_local_py.om_init_model(io_manager, siminfo, state['op_tokens'], state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix'], state['model_object_cache'])
     
 
 def state_load_dynamics_om(state, io_manager, siminfo):
     # this function will check to see if any of the multiple paths to loading
     # dynamic operational model objects has been supplied for the model.
     # Grab globals from state for easy handling
-    op_tokens, moc = init_om_dicts()
+    op_tokens, model_object_cache = init_om_dicts()
     state_paths, state_ix, dict_ix, ts_ix = state['state_paths'], state['state_ix'], state['dict_ix'], state['ts_ix']
     # set globals on ModelObject, this makes them persistent throughout all subsequent object instantiation and use
-    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.moc, ModelObject.ts_ix = (
-        op_tokens, state_paths, state_ix, dict_ix, moc, ts_ix
+    ModelObject.op_tokens, ModelObject.state_paths, ModelObject.state_ix, ModelObject.dict_ix, ModelObject.model_object_cache, ModelObject.ts_ix = (
+        op_tokens, state_paths, state_ix, dict_ix, model_object_cache, ts_ix
     )
-    state['op_tokens'], state['moc'] = op_tokens, moc 
+    state['op_tokens'], state['model_object_cache'] = op_tokens, model_object_cache 
     # load dynamic coding libraries if defined by user
     # note: this used to be inside this function, I think that the loaded module should be no problem 
     #       occuring within this function call, since this function is also called from another runtime engine
@@ -142,24 +142,24 @@ def state_om_model_run_prep(state, io_manager, siminfo):
     # state['model_data'] has alread been prepopulated from json, .py files, hdf5, etc.
     model_loader_recursive(state['model_data'], model_root_object)
     print("Loaded objects & paths: insures all paths are valid, connects models as inputs")
-    # both state['moc'] and the moc property of the ModelObject class def 
+    # both state['model_object_cache'] and the model_object_cache property of the ModelObject class def 
     # will hold a global repo for this data this may be redundant?  They DO point to the same datset?
     # since this is a function that accepts state as an argument and these were both set in state_load_dynamics_om
     # we can assume they are there and functioning
-    moc = state['moc']
+    model_object_cache = state['model_object_cache']
     op_tokens = state['op_tokens']
-    model_path_loader(moc)
+    model_path_loader(model_object_cache)
     # len() will be 1 if we only have a simtimer, but > 1 if we have a river being added
     model_exec_list = []
     # put all objects in token form for fast runtime execution and sort according to dependency order
     print("Tokenizing models")
-    model_tokenizer_recursive(model_root_object, moc, model_exec_list)
+    model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list)
     # model_exec_list is the ordered list of component operations
-    print("op_tokens has", len(moc),"elements")
+    print("op_tokens has", len(model_object_cache),"elements")
     #print("model_exec_list(", len(model_exec_list),"items):", model_exec_list)
     # This is used to stash the model_exec_list in the dict_ix, this might be slow, need to verify.
     # the resulting set of objects is returned.
-    state['moc'] = moc
+    state['model_object_cache'] = model_object_cache
     state['model_exec_list'] = np.asarray(model_exec_list, dtype="i8") 
     state['state_step_om'] = 'disabled'
     if len(op_tokens) > 0:
@@ -304,16 +304,16 @@ def model_loader_recursive(model_data, container):
         if type(model_props) is dict:
             model_loader_recursive(model_props, model_object)
 
-def model_path_loader(moc):
-    k_list = moc.keys()
+def model_path_loader(model_object_cache):
+    k_list = model_object_cache.keys()
     model_names = dict.fromkeys(k_list , 1)
     for model_name in model_names:
         #print("Loading paths for", model_name)
-        model_object = moc[model_name]
+        model_object = model_object_cache[model_name]
         model_object.find_paths()
 
 
-def model_tokenizer_recursive(model_object, moc, model_exec_list, model_touch_list = []):
+def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list, model_touch_list = []):
     """
     Given a root model_object, trace the inputs to load things in order
     Store this order in model_exec_list
@@ -349,16 +349,16 @@ def model_tokenizer_recursive(model_object, moc, model_exec_list, model_touch_li
     for input_name in input_names:
         #print("Checking input", input_name)
         input_path = model_object.inputs[input_name]
-        if input_path in moc.keys():
-            input_object = moc[input_path]
-            model_tokenizer_recursive(input_object, moc, model_exec_list, model_touch_list)
+        if input_path in model_object_cache.keys():
+            input_object = model_object_cache[input_path]
+            model_tokenizer_recursive(input_object, model_object_cache, model_exec_list, model_touch_list)
         else:
             if input_path in model_object.state_paths.keys():
                 # this is a valid state reference without an object 
                 # thus, it is likely part of internals that are manually added 
                 # which should be fine.  tho perhaps we should have an object for these too.
                 continue
-            print("Problem loading input", input_name, "input_path", input_path, "not in moc.keys()")
+            print("Problem loading input", input_name, "input_path", input_path, "not in model_object_cache.keys()")
             return
     # now after tokenizing all inputs this should be OK to tokenize
     model_object.add_op_tokens()
@@ -366,7 +366,7 @@ def model_tokenizer_recursive(model_object, moc, model_exec_list, model_touch_li
         model_exec_list.append(model_object.ix)
 
 
-def model_order_recursive(model_object, moc, model_exec_list, model_touch_list = []):
+def model_order_recursive(model_object, model_object_cache, model_exec_list, model_touch_list = []):
     """
     Given a root model_object, trace the inputs to load things in order
     Store this order in model_exec_list
@@ -402,16 +402,16 @@ def model_order_recursive(model_object, moc, model_exec_list, model_touch_list =
     for input_name in input_names:
         #print("Checking input", input_name)
         input_path = model_object.inputs[input_name]
-        if input_path in moc.keys():
-            input_object = moc[input_path]
-            model_order_recursive(input_object, moc, model_exec_list, model_touch_list)
+        if input_path in model_object_cache.keys():
+            input_object = model_object_cache[input_path]
+            model_order_recursive(input_object, model_object_cache, model_exec_list, model_touch_list)
         else:
             if input_path in model_object.state_paths.keys():
                 # this is a valid state reference without an object 
                 # thus, it is likely part of internals that are manually added 
                 # which should be fine.  tho perhaps we should have an object for these too.
                 continue
-            print("Problem loading input", input_name, "input_path", input_path, "not in moc.keys()")
+            print("Problem loading input", input_name, "input_path", input_path, "not in model_object_cache.keys()")
             return
     # now after loading input dependencies, add this to list
     model_exec_list.append(model_object.ix)
