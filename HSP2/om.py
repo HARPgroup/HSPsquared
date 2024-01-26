@@ -329,7 +329,7 @@ def model_tokenizer_recursive(model_object, model_object_cache, model_exec_list,
             that are sending to that broadcast? 
             - Or is it better to let it as it is, 
     """
-    print("Handling", model_object.name, " ", model_object.state_path)
+    #print("Handling", model_object.name, " ", model_object.state_path)
     if model_object.ix in model_exec_list:
         return
     if model_object.ix in model_touch_list:

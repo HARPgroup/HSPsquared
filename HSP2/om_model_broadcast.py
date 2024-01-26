@@ -75,7 +75,7 @@ class ModelBroadcast(ModelObject):
         channel = self.insure_channel(broadcast_channel, hub_container)
         # now iterate through pairs of source/destination broadcast lines
         i = 0
-        print("broadcast params", broadcast_params)
+        #print("broadcast params", broadcast_params)
         for b_pair in broadcast_params:
             # create an object for each element in the array 
             if (broadcast_type == 'read'):
