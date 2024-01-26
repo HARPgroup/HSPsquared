@@ -44,7 +44,11 @@ class ModelBroadcast(ModelObject):
         # parent method handles most cases, but subclass handles special situations.
         if ( prop_name == 'broadcast_params'):
             prop_val = model_props.get(prop_name)
-            prop_val = prop_val.get('value') # check that this is OK
+            print("broadcast params from model_props = ", prop_val)
+            if type(prop_val) == list: # this doesn't work, but nothing gets passed in like this? Except broadcast params, but they are handled in the sub-class
+                prop_val = prop_val
+            elif type(prop_val) == dict:
+                prop_val = prop_val.get('value')
         else:
             prop_val = super().handle_prop(model_props, prop_name, strict, default_value)
         return prop_val

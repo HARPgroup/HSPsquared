@@ -101,7 +101,7 @@ class ModelObject:
         # strict = True causes an exception if property is missing from model_props dict 
         prop_val = model_props.get(prop_name)
         if type(prop_val) == list: # this doesn't work, but nothing gets passed in like this? Except broadcast params, but they are handled in the sub-class
-            prop_val = prop_val.get('value')
+            prop_val = prop_val
         elif type(prop_val) == dict:
             prop_val = prop_val.get('value')
         if strict and (prop_val == None):
