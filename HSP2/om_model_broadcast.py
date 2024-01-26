@@ -43,7 +43,8 @@ class ModelBroadcast(ModelObject):
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
         # parent method handles most cases, but subclass handles special situations.
         if ( prop_name == 'broadcast_params'):
-            prop_val = model_props['broadcast_params'] # check that this is OK
+            prop_val = model_props.get(prop_name)
+            prop_val = prop_val.get('value') # check that this is OK
         else:
             prop_val = super().handle_prop(model_props, prop_name, strict, default_value)
         return prop_val
@@ -74,6 +75,7 @@ class ModelBroadcast(ModelObject):
         channel = self.insure_channel(broadcast_channel, hub_container)
         # now iterate through pairs of source/destination broadcast lines
         i = 0
+        print("broadcast params", broadcast_params)
         for b_pair in broadcast_params:
             # create an object for each element in the array 
             if (broadcast_type == 'read'):

@@ -1,0 +1,2361 @@
+{
+    "RCHRES_R001": {
+        "name": "RCHRES_R001",
+        "object_class": "ModelObject",
+        "Switzer Reservoir on Skidmore Fork": {
+            "host": "deq1.bse.vt.edu:81",
+            "id": "7404368",
+            "name": "Switzer Reservoir on Skidmore Fork",
+            "scenario": {
+                "name": "scenario",
+                "object_class": "textField",
+                "value": "vahydro-1.0"
+            },
+            "object_class": "waterSupplyModelNode",
+            "riverseg": {
+                "id": "7404370",
+                "name": "riverseg",
+                "value": ""
+            },
+            "run_mode": {
+                "id": "7404371",
+                "name": "run_mode",
+                "value": "0"
+            },
+            "flow_mode": {
+                "id": "7404372",
+                "name": "flow_mode",
+                "value": "0"
+            },
+            "run_info": {
+                "id": "7404373",
+                "name": "run_info",
+                "value": "-1"
+            },
+            "defaultval": {
+                "id": "7404374",
+                "name": "defaultval",
+                "value": ""
+            },
+            "cache_date": {
+                "id": "7404375",
+                "name": "cache_date",
+                "value": "-1"
+            },
+            "om_element_connection": {
+                "host": "deq1.bse.vt.edu:81",
+                "id": "7404376",
+                "name": "om_element_connection",
+                "value": "353103",
+                "code": "1",
+                "om_template_id": {
+                    "id": "7404377",
+                    "name": "om_template_id",
+                    "value": "176615"
+                },
+                "remote_parentid": {
+                    "id": "7404378",
+                    "name": "remote_parentid",
+                    "value": "-1"
+                }
+            },
+            "Broadcast Mainstem": {
+                "id": "7404386",
+                "name": "Broadcast Mainstem",
+                "object_class": "ModelBroadcast",
+                "value": null,
+                "broadcast_params": {
+                    "name": "broadcast_params",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "Qout",
+                            "Qup_mainstem"
+                        ]
+                    ]
+                },
+                "exec_hierarch": {
+                    "id": "7404388",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404389",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "broadcast_class": {
+                    "id": "7404390",
+                    "name": "broadcast_class",
+                    "value": "mainstemKludge"
+                },
+                "broadcast_hub": {
+                    "id": "7404391",
+                    "name": "broadcast_hub",
+                    "value": "child"
+                },
+                "broadcast_mode": {
+                    "id": "7404392",
+                    "name": "broadcast_mode",
+                    "value": "cast"
+                },
+                "broadcast_channel": {
+                    "id": "7404390",
+                    "name": "broadcast_class",
+                    "value": "mainstemKludge"
+                }
+            },
+            "zero": {
+                "id": "7404379",
+                "name": "zero",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "0.0"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404381",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404382",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404383",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404384",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404385",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "Listen on Parent": {
+                "id": "7404393",
+                "name": "Listen on Parent",
+                "object_class": "ModelBroadcast",
+                "value": null,
+                "broadcast_params": {
+                    "name": "broadcast_params",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "Qreach",
+                            "Qreach"
+                        ],
+                        [
+                            "run_mode",
+                            "run_mode"
+                        ],
+                        [
+                            "wd_last_mgd",
+                            "wd_last_mgd"
+                        ],
+                        [
+                            "ps_last_mgd",
+                            "ps_last_mgd"
+                        ],
+                        [
+                            "drought_status",
+                            "drought_status"
+                        ],
+                        [
+                            "lake_elev",
+                            "lake_elev"
+                        ],
+                        [
+                            "flow_mode",
+                            "flow_mode"
+                        ],
+                        [
+                            "et_in",
+                            "et_in"
+                        ],
+                        [
+                            "precip_in",
+                            "precip_in"
+                        ],
+                        [
+                            "Runit",
+                            "Runit"
+                        ],
+                        [
+                            "Qup",
+                            "Qup"
+                        ]
+                    ]
+                },
+                "exec_hierarch": {
+                    "id": "7404395",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404396",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "broadcast_class": {
+                    "id": "7404397",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                },
+                "broadcast_hub": {
+                    "id": "7404398",
+                    "name": "broadcast_hub",
+                    "value": "parent"
+                },
+                "broadcast_mode": {
+                    "id": "7404399",
+                    "name": "broadcast_mode",
+                    "value": "read"
+                },
+                "broadcast_channel": {
+                    "id": "7404397",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                }
+            },
+            "Broadcast to Child": {
+                "id": "7404400",
+                "name": "Broadcast to Child",
+                "object_class": "ModelBroadcast",
+                "value": null,
+                "broadcast_params": {
+                    "name": "broadcast_params",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "run_mode",
+                            "run_mode"
+                        ],
+                        [
+                            "local_channel_Qout",
+                            "Qreach"
+                        ],
+                        [
+                            "wd_mgd",
+                            "wd_last_mgd"
+                        ],
+                        [
+                            "ps_mgd",
+                            "ps_last_mgd"
+                        ],
+                        [
+                            "drought_status",
+                            "drought_status"
+                        ],
+                        [
+                            "impoundment_lake_elev",
+                            "lake_elev"
+                        ],
+                        [
+                            "pct_full",
+                            "pct_full"
+                        ],
+                        [
+                            "precip_in",
+                            "precip_in"
+                        ],
+                        [
+                            "et_in",
+                            "et_in"
+                        ],
+                        [
+                            "flow_mode",
+                            "flow_mode"
+                        ],
+                        [
+                            "impoundment_Qin",
+                            "Qin_lake"
+                        ],
+                        [
+                            "local_channel_area",
+                            "reach_area_sqmi"
+                        ],
+                        [
+                            "impoundment_use_remain_mg",
+                            "impoundment_use_remain_mg"
+                        ],
+                        [
+                            "local_channel_Qout",
+                            "Qriver"
+                        ],
+                        [
+                            "impoundment_refill_full_mgd",
+                            "impoundment_refill_full_mgd"
+                        ],
+                        [
+                            "Qreach",
+                            "Qnextdown"
+                        ],
+                        [
+                            "Runit_mode",
+                            "Runit"
+                        ],
+                        [
+                            "impoundment_pct_use_remain",
+                            "impoundment_pct_use_remain"
+                        ]
+                    ]
+                },
+                "broadcast_mode": {
+                    "id": "7404406",
+                    "name": "broadcast_mode",
+                    "value": "cast"
+                },
+                "exec_hierarch": {
+                    "id": "7404402",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404403",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "broadcast_class": {
+                    "id": "7404404",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                },
+                "broadcast_hub": {
+                    "id": "7404405",
+                    "name": "broadcast_hub",
+                    "value": "child"
+                },
+                "broadcast_channel": {
+                    "id": "7404404",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                }
+            },
+            "Broadcast to Parent": {
+                "id": "7404407",
+                "name": "Broadcast to Parent",
+                "object_class": "ModelBroadcast",
+                "value": null,
+                "broadcast_params": {
+                    "name": "broadcast_params",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "wd_cumulative_mgd",
+                            "wd_upstream_mgd"
+                        ],
+                        [
+                            "Qout",
+                            "Qout"
+                        ],
+                        [
+                            "local_channel_drainage_area",
+                            "area_sqmi"
+                        ],
+                        [
+                            "ps_nextdown_mgd",
+                            "ps_mgd"
+                        ],
+                        [
+                            "ps_cumulative_mgd",
+                            "ps_upstream_mgd"
+                        ],
+                        [
+                            "ps_refill_pump_mgd",
+                            "wd_mgd"
+                        ]
+                    ]
+                },
+                "defaultval": {
+                    "id": "7404410",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "broadcast_class": {
+                    "id": "7404411",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                },
+                "broadcast_hub": {
+                    "id": "7404412",
+                    "name": "broadcast_hub",
+                    "value": "parent"
+                },
+                "exec_hierarch": {
+                    "id": "7404409",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "broadcast_mode": {
+                    "id": "7404413",
+                    "name": "broadcast_mode",
+                    "value": "cast"
+                },
+                "broadcast_channel": {
+                    "id": "7404411",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                }
+            },
+            "local_channel": {
+                "host": "deq1.bse.vt.edu:81",
+                "id": "7404414",
+                "name": "local_channel",
+                "scenario": {
+                    "name": "scenario",
+                    "object_class": "textField",
+                    "value": ""
+                },
+                "object_class": "SimpleChannel",
+                "depth": {
+                    "id": "7404416",
+                    "name": "depth",
+                    "value": "0"
+                },
+                "tol": {
+                    "id": "7404417",
+                    "name": "tol",
+                    "value": "0.01"
+                },
+                "n": {
+                    "id": "7404418",
+                    "name": "n",
+                    "value": "0.038"
+                },
+                "slope": {
+                    "id": "7404419",
+                    "name": "slope",
+                    "value": "0.020156"
+                },
+                "Z": {
+                    "id": "7404420",
+                    "name": "Z",
+                    "value": "3.9549522488723"
+                },
+                "length": {
+                    "id": "7404421",
+                    "name": "length",
+                    "value": "5000"
+                },
+                "base": {
+                    "id": "7404422",
+                    "name": "base",
+                    "value": "20.470884331755"
+                },
+                "drainage_area": {
+                    "id": "7404423",
+                    "name": "drainage_area",
+                    "value": "14.784"
+                },
+                "area": {
+                    "id": "7404424",
+                    "name": "area",
+                    "value": "14.784"
+                },
+                "province": {
+                    "id": "7404425",
+                    "name": "province",
+                    "value": "2"
+                },
+                "reset_channelprops": {
+                    "id": "7404426",
+                    "name": "reset_channelprops",
+                    "value": "1"
+                },
+                "q_var": {
+                    "id": "7404427",
+                    "name": "q_var",
+                    "value": "Qtrib"
+                },
+                "r_var": {
+                    "id": "7404428",
+                    "name": "r_var",
+                    "value": "Qlocal"
+                },
+                "w_var": {
+                    "id": "7404429",
+                    "name": "w_var",
+                    "value": "wd_channel_cfs"
+                },
+                "run_info": {
+                    "id": "7404430",
+                    "name": "run_info",
+                    "value": "-1"
+                },
+                "defaultval": {
+                    "id": "7404431",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "cache_date": {
+                    "id": "7404432",
+                    "name": "cache_date",
+                    "value": "-1"
+                },
+                "riverseg": {
+                    "id": "7404433",
+                    "name": "riverseg",
+                    "value": ""
+                },
+                "solver": 0
+            },
+            "impoundment": {
+                "host": "deq1.bse.vt.edu:81",
+                "id": "7404448",
+                "name": "impoundment",
+                "scenario": {
+                    "name": "scenario",
+                    "object_class": "textField",
+                    "value": ""
+                },
+                "area": {
+                    "id": "7404463",
+                    "name": "area",
+                    "value": "0"
+                },
+                "object_class": "Impoundment",
+                "Qin": {
+                    "id": "7404450",
+                    "name": "Qin",
+                    "value": "local_channel_Qout"
+                },
+                "et_in": {
+                    "id": "7404451",
+                    "name": "et_in",
+                    "value": "et_in"
+                },
+                "precip_in": {
+                    "id": "7404452",
+                    "name": "precip_in",
+                    "value": "precip_in"
+                },
+                "release": {
+                    "id": "7404453",
+                    "name": "release",
+                    "value": "zero"
+                },
+                "demand": {
+                    "id": "7404454",
+                    "name": "demand",
+                    "value": "wd_imp_mgd"
+                },
+                "refill": {
+                    "id": "7404455",
+                    "name": "refill",
+                    "value": "ps_refill_pump_mgd"
+                },
+                "riser_length": {
+                    "id": "7404456",
+                    "name": "riser_length",
+                    "value": "0"
+                },
+                "riser_diameter": {
+                    "id": "7404457",
+                    "name": "riser_diameter",
+                    "value": "0"
+                },
+                "riser_pipe_flow_head": {
+                    "id": "7404458",
+                    "name": "riser_pipe_flow_head",
+                    "value": "0"
+                },
+                "riser_opening_storage": {
+                    "id": "7404459",
+                    "name": "riser_opening_storage",
+                    "value": "0"
+                },
+                "riser_opening_elev": {
+                    "id": "7404460",
+                    "name": "riser_opening_elev",
+                    "value": "0"
+                },
+                "riser_enabled": {
+                    "id": "7404461",
+                    "name": "riser_enabled",
+                    "value": "0"
+                },
+                "exec_hierarch": {
+                    "id": "7404462",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "full_surface_area": {
+                    "id": "7404464",
+                    "name": "full_surface_area",
+                    "value": "0"
+                },
+                "initstorage": {
+                    "id": "7404465",
+                    "name": "initstorage",
+                    "value": "4367.0"
+                },
+                "maxcapacity": {
+                    "id": "7404466",
+                    "name": "maxcapacity",
+                    "value": "4367.0"
+                },
+                "unusable_storage": {
+                    "id": "7404467",
+                    "name": "unusable_storage",
+                    "value": "1228.0"
+                },
+                "run_info": {
+                    "id": "7404482",
+                    "name": "run_info",
+                    "value": "-1"
+                },
+                "defaultval": {
+                    "id": "7404483",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "cache_date": {
+                    "id": "7404484",
+                    "name": "cache_date",
+                    "value": "-1"
+                },
+                "riverseg": {
+                    "id": "7404485",
+                    "name": "riverseg",
+                    "value": ""
+                },
+                "matrix": {
+                    "name": "matrix",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "storage",
+                            "stage",
+                            "surface_area"
+                        ],
+                        [
+                            "0.0",
+                            "2170.0",
+                            "0.0"
+                        ],
+                        [
+                            "307.0",
+                            "2207.0",
+                            "20.0"
+                        ],
+                        [
+                            "338.0",
+                            "2208.0",
+                            "42.0"
+                        ],
+                        [
+                            "614.0",
+                            "2216.0",
+                            "50.0"
+                        ],
+                        [
+                            "798.0",
+                            "2220.0",
+                            "60.0"
+                        ],
+                        [
+                            "921.0",
+                            "2223.0",
+                            "70.0"
+                        ],
+                        [
+                            "1105.0",
+                            "2228.5",
+                            "78.0"
+                        ],
+                        [
+                            "1243.0",
+                            "2231.5",
+                            "81.0"
+                        ],
+                        [
+                            "1382.0",
+                            "2234.0",
+                            "87.0"
+                        ],
+                        [
+                            "1657.0",
+                            "2239.0",
+                            "93.0"
+                        ],
+                        [
+                            "1933.0",
+                            "2243.5",
+                            "98.0"
+                        ],
+                        [
+                            "2072.0",
+                            "2245.5",
+                            "105.0"
+                        ],
+                        [
+                            "2210.0",
+                            "2247.5",
+                            "112.0"
+                        ],
+                        [
+                            "2348.0",
+                            "2249.5",
+                            "114.0"
+                        ],
+                        [
+                            "2486.0",
+                            "2251.5",
+                            "117.0"
+                        ],
+                        [
+                            "2762.0",
+                            "2255.5",
+                            "123.0"
+                        ],
+                        [
+                            "3038.0",
+                            "2259.0",
+                            "140.0"
+                        ],
+                        [
+                            "3315.0",
+                            "2262.0",
+                            "150.0"
+                        ],
+                        [
+                            "3591.0",
+                            "2265.0",
+                            "155.0"
+                        ],
+                        [
+                            "3867.0",
+                            "2268.0",
+                            "158.0"
+                        ],
+                        [
+                            "4144.0",
+                            "2271.0",
+                            "165.0"
+                        ],
+                        [
+                            "4367.0",
+                            "2272.5",
+                            "171.0"
+                        ]
+                    ]
+                }
+            },
+            "latdd": {
+                "id": "7404434",
+                "name": "latdd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "37.72577"
+                },
+                "nonnegative": {
+                    "id": "7404438",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404439",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404440",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404436",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404437",
+                    "name": "defaultval",
+                    "value": "0"
+                }
+            },
+            "londd": {
+                "id": "7404441",
+                "name": "londd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "-78.179701"
+                },
+                "exec_hierarch": {
+                    "id": "7404443",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404444",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404445",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404446",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404447",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation"
+            },
+            "release": {
+                "id": "7404486",
+                "name": "release",
+                "object_class": "wsp_1tierflowby",
+                "value": null,
+                "matrix": {
+                    "name": "matrix",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "0",
+                            "0"
+                        ]
+                    ]
+                },
+                "enable_cfb": {
+                    "id": "7404488",
+                    "name": "enable_cfb",
+                    "value": "0"
+                },
+                "keycol2": {
+                    "id": "7404496",
+                    "name": "keycol2",
+                    "value": "",
+                    "object_class": "textField"
+                },
+                "lutype2": {
+                    "id": "7404502",
+                    "name": "lutype2",
+                    "value": null
+                },
+                "cfb_condition": {
+                    "id": "7404491",
+                    "name": "cfb_condition",
+                    "value": "lt"
+                },
+                "exec_hierarch": {
+                    "id": "7404492",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404493",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "keycol1": {
+                    "id": "7404494",
+                    "name": "keycol1",
+                    "value": "",
+                    "object_class": "textField"
+                },
+                "valuetype": {
+                    "id": "7404498",
+                    "name": "valuetype",
+                    "value": "1"
+                },
+                "eval_type": {
+                    "id": "7404499",
+                    "name": "eval_type",
+                    "value": "auto"
+                },
+                "value_dbcolumntype": {
+                    "id": "7404500",
+                    "name": "value_dbcolumntype",
+                    "value": "float8"
+                },
+                "lutype1": {
+                    "id": "7404501",
+                    "name": "lutype1",
+                    "value": "2"
+                },
+                "autosetvars": {
+                    "id": "7404503",
+                    "name": "autosetvars",
+                    "value": "0"
+                },
+                "cfb_var": {
+                    "id": "7404489",
+                    "name": "cfb_var",
+                    "value": "",
+                    "object_class": "textField"
+                }
+            },
+            "Qout": {
+                "id": "7404504",
+                "name": "Qout",
+                "object_class": "dataMatrix",
+                "value": null,
+                "matrix": {
+                    "name": "matrix",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "0",
+                            "impoundment_Qout"
+                        ],
+                        [
+                            "1",
+                            "local_channel_Qout"
+                        ]
+                    ]
+                },
+                "keycol1": {
+                    "id": "7404508",
+                    "name": "keycol1",
+                    "value": "imp_off",
+                    "object_class": "textField"
+                },
+                "keycol2": {
+                    "id": "7404510",
+                    "name": "keycol2",
+                    "value": "",
+                    "object_class": "textField"
+                },
+                "valuetype": {
+                    "id": "7404512",
+                    "name": "valuetype",
+                    "value": "1"
+                },
+                "exec_hierarch": {
+                    "id": "7404506",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404507",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "eval_type": {
+                    "id": "7404513",
+                    "name": "eval_type",
+                    "value": "auto"
+                },
+                "value_dbcolumntype": {
+                    "id": "7404514",
+                    "name": "value_dbcolumntype",
+                    "value": ""
+                },
+                "lutype1": {
+                    "id": "7404515",
+                    "name": "lutype1",
+                    "value": "2"
+                },
+                "lutype2": {
+                    "id": "7404516",
+                    "name": "lutype2",
+                    "value": "0"
+                },
+                "autosetvars": {
+                    "id": "7404517",
+                    "name": "autosetvars",
+                    "value": "0"
+                },
+                "mx_type": 1
+            },
+            "Listen to Children": {
+                "id": "7404525",
+                "name": "Listen to Children",
+                "object_class": "ModelBroadcast",
+                "value": null,
+                "broadcast_params": {
+                    "name": "broadcast_params",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "Qtrib",
+                            "Qout"
+                        ],
+                        [
+                            "child_wd_mgd",
+                            "wd_mgd"
+                        ],
+                        [
+                            "child_ps_mgd",
+                            "ps_mgd"
+                        ],
+                        [
+                            "ps_nextdown_mgd",
+                            "ps_nextdown_mgd"
+                        ],
+                        [
+                            "trib_area_sqmi",
+                            "trib_area_sqmi"
+                        ],
+                        [
+                            "wd_upstream_mgd",
+                            "wd_upstream_mgd"
+                        ],
+                        [
+                            "ps_upstream_mgd",
+                            "ps_upstream_mgd"
+                        ]
+                    ]
+                },
+                "exec_hierarch": {
+                    "id": "7404527",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404528",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "broadcast_class": {
+                    "id": "7404529",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                },
+                "broadcast_hub": {
+                    "id": "7404530",
+                    "name": "broadcast_hub",
+                    "value": "child"
+                },
+                "broadcast_mode": {
+                    "id": "7404531",
+                    "name": "broadcast_mode",
+                    "value": "read"
+                },
+                "broadcast_channel": {
+                    "id": "7404529",
+                    "name": "broadcast_class",
+                    "value": "hydroObject"
+                }
+            },
+            "imp_off": {
+                "id": "7404518",
+                "name": "imp_off",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "0"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404520",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404521",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "nonnegative": {
+                    "id": "7404522",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404523",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404524",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "Qlocal": {
+                "id": "7404532",
+                "name": "Qlocal",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "(local_channel_area - trib_area_sqmi) * Runit_mode  + 1.547 * child_ps_mgd"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404534",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404535",
+                    "name": "defaultval",
+                    "value": "-79.914034"
+                },
+                "nonnegative": {
+                    "id": "7404536",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404537",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404538",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "wd_imp_mgd": {
+                "id": "7404539",
+                "name": "wd_imp_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "(1.0 - imp_off) * child_wd_mgd"
+                },
+                "engine": {
+                    "id": "7404545",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404541",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404542",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404543",
+                    "name": "nonnegative",
+                    "value": "1"
+                },
+                "minvalue": {
+                    "id": "7404544",
+                    "name": "minvalue",
+                    "value": "0"
+                }
+            },
+            "wd_channel_cfs": {
+                "id": "7404546",
+                "name": "wd_channel_cfs",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "imp_off * child_wd_mgd * 1.547"
+                },
+                "exec_hierarch": {
+                    "id": "7404548",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404549",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404550",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404551",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "object_class": "Equation",
+                "engine": {
+                    "id": "7404552",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "refill_allowed_mgd": {
+                "id": "7404553",
+                "name": "refill_allowed_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "0.0"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404555",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404556",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404557",
+                    "name": "nonnegative",
+                    "value": "1"
+                },
+                "minvalue": {
+                    "id": "7404558",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404559",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "refill_plus_demand": {
+                "id": "7404560",
+                "name": "refill_plus_demand",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "impoundment_refill_full_mgd + child_wd_mgd"
+                },
+                "minvalue": {
+                    "id": "7404565",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404566",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404562",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404563",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404564",
+                    "name": "nonnegative",
+                    "value": "0"
+                }
+            },
+            "flowby": {
+                "id": "7404580",
+                "name": "flowby",
+                "object_class": "wsp_flowby",
+                "value": null,
+                "description": null,
+                "flowby_eqn": {
+                    "id": "7404582",
+                    "name": "flowby_eqn",
+                    "value": "0"
+                },
+                "enable_cfb": {
+                    "id": "7404583",
+                    "name": "enable_cfb",
+                    "value": "0"
+                },
+                "cfb_var": {
+                    "id": "7404584",
+                    "name": "cfb_var",
+                    "value": "",
+                    "object_class": "textField"
+                },
+                "cfb_condition": {
+                    "id": "7404586",
+                    "name": "cfb_condition",
+                    "value": "lt"
+                },
+                "exec_hierarch": {
+                    "id": "7404587",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404588",
+                    "name": "defaultval",
+                    "value": "0"
+                }
+            },
+            "ps_refill_pump_mgd": {
+                "id": "7404567",
+                "name": "ps_refill_pump_mgd",
+                "object_class": "Statistic",
+                "value": null,
+                "description": null,
+                "defaultval": {
+                    "id": "7404570",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "operands": {
+                    "id": "7404571",
+                    "name": "operands",
+                    "value": "refill_allowed_mgd,available_mgd,max_mgd,refill_plus_demand"
+                },
+                "statname": {
+                    "id": "7404572",
+                    "name": "statname",
+                    "value": "min"
+                },
+                "exec_hierarch": {
+                    "id": "7404569",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                }
+            },
+            "max_mgd": {
+                "id": "7404573",
+                "name": "max_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "0.0"
+                },
+                "exec_hierarch": {
+                    "id": "7404575",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404576",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404577",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404578",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404579",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation"
+            },
+            "available_mgd": {
+                "id": "7404589",
+                "name": "available_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "(Qreach - flowby) / 1.547"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404591",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404592",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404593",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404594",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404595",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "Local Runoff": {
+                "id": "7404610",
+                "name": "Local Runoff",
+                "object_class": "ModelBroadcast",
+                "value": null,
+                "broadcast_params": {
+                    "name": "broadcast_params",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "Runit_local",
+                            "Runit"
+                        ]
+                    ]
+                },
+                "exec_hierarch": {
+                    "id": "7404612",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404613",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "broadcast_class": {
+                    "id": "7404614",
+                    "name": "broadcast_class",
+                    "value": "runoffObject"
+                },
+                "broadcast_hub": {
+                    "id": "7404615",
+                    "name": "broadcast_hub",
+                    "value": "child"
+                },
+                "broadcast_mode": {
+                    "id": "7404616",
+                    "name": "broadcast_mode",
+                    "value": "read"
+                },
+                "broadcast_channel": {
+                    "id": "7404614",
+                    "name": "broadcast_class",
+                    "value": "runoffObject"
+                }
+            },
+            "wd_cumulative_mgd": {
+                "id": "7404596",
+                "name": "wd_cumulative_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "wd_net_mgd + wd_upstream_mgd"
+                },
+                "exec_hierarch": {
+                    "id": "7404598",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404599",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "nonnegative": {
+                    "id": "7404600",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404601",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404602",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation"
+            },
+            "wd_mgd": {
+                "id": "7404603",
+                "name": "wd_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "child_wd_mgd"
+                },
+                "exec_hierarch": {
+                    "id": "7404605",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404606",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404607",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404608",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404609",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation"
+            },
+            "use_local_runit": {
+                "id": "7404617",
+                "name": "use_local_runit",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404620",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404621",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404622",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404623",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404619",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                }
+            },
+            "Runit_mode": {
+                "id": "7404624",
+                "name": "Runit_mode",
+                "object_class": "dataMatrix",
+                "value": null,
+                "matrix": {
+                    "name": "matrix",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "xLocalRunoff",
+                            "xRvar"
+                        ],
+                        [
+                            "0",
+                            "Runit"
+                        ],
+                        [
+                            "1",
+                            "Runit_local"
+                        ]
+                    ]
+                },
+                "valuetype": {
+                    "id": "7404632",
+                    "name": "valuetype",
+                    "value": "1"
+                },
+                "eval_type": {
+                    "id": "7404633",
+                    "name": "eval_type",
+                    "value": "auto"
+                },
+                "value_dbcolumntype": {
+                    "id": "7404634",
+                    "name": "value_dbcolumntype",
+                    "value": ""
+                },
+                "lutype1": {
+                    "id": "7404635",
+                    "name": "lutype1",
+                    "value": "0"
+                },
+                "lutype2": {
+                    "id": "7404636",
+                    "name": "lutype2",
+                    "value": null
+                },
+                "autosetvars": {
+                    "id": "7404637",
+                    "name": "autosetvars",
+                    "value": "0"
+                },
+                "exec_hierarch": {
+                    "id": "7404626",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404627",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "keycol1": {
+                    "id": "7404628",
+                    "name": "keycol1",
+                    "value": "use_local_runit",
+                    "object_class": "textField"
+                },
+                "keycol2": {
+                    "id": "7404630",
+                    "name": "keycol2",
+                    "value": "",
+                    "object_class": "textField"
+                },
+                "mx_type": 1
+            },
+            "ps_mgd": {
+                "id": "7404652",
+                "name": "ps_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "child_ps_mgd"
+                },
+                "minvalue": {
+                    "id": "7404657",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404658",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404654",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404655",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404656",
+                    "name": "nonnegative",
+                    "value": "0"
+                }
+            },
+            "pct_full": {
+                "id": "7404638",
+                "name": "pct_full",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "(impoundment_use_remain_mg * 3.07) / impoundment_max_usable"
+                },
+                "minvalue": {
+                    "id": "7404643",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404644",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404640",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404641",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404642",
+                    "name": "nonnegative",
+                    "value": "0"
+                }
+            },
+            "ps_cumulative_mgd": {
+                "id": "7404645",
+                "name": "ps_cumulative_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "child_ps_mgd + ps_upstream_mgd"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404647",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404648",
+                    "name": "defaultval",
+                    "value": "0"
+                },
+                "nonnegative": {
+                    "id": "7404649",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404650",
+                    "name": "minvalue",
+                    "value": "0"
+                },
+                "engine": {
+                    "id": "7404651",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "Runit_mask": {
+                "id": "7404659",
+                "name": "Runit_mask",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "(1.0 - use_local_runit) * Runit_mode"
+                },
+                "exec_hierarch": {
+                    "id": "7404661",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404662",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "nonnegative": {
+                    "id": "7404663",
+                    "name": "nonnegative",
+                    "value": "1"
+                },
+                "object_class": "Equation",
+                "engine": {
+                    "id": "7404665",
+                    "name": "engine",
+                    "value": "mathExpression2"
+                },
+                "minvalue": {
+                    "id": "7404664",
+                    "name": "minvalue",
+                    "value": "0"
+                }
+            },
+            "refill_max_mgd": {
+                "id": "7404666",
+                "name": "refill_max_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "0.0"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404668",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404669",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "nonnegative": {
+                    "id": "7404670",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404671",
+                    "name": "minvalue",
+                    "value": null
+                },
+                "engine": {
+                    "id": "7404672",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            },
+            "wd_net_mgd": {
+                "id": "7404673",
+                "name": "wd_net_mgd",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "wd_mgd - ps_refill_pump_mgd"
+                },
+                "nonnegative": {
+                    "id": "7404677",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7404678",
+                    "name": "minvalue",
+                    "value": null
+                },
+                "engine": {
+                    "id": "7404679",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7404675",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7404676",
+                    "name": "defaultval",
+                    "value": ""
+                }
+            },
+            "runid_201": {
+                "id": "7405216",
+                "name": "runid_201",
+                "startdate": null,
+                "enddate": null,
+                "modified": "1706187672",
+                "value": "",
+                "logfile": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405217",
+                    "name": "logfile",
+                    "value": null,
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/runlog201.353103.log.zip"
+                },
+                "net_consumption_mgd": {
+                    "id": "7405218",
+                    "name": "net_consumption_mgd",
+                    "value": "0"
+                },
+                "wd_mgd": {
+                    "id": "7405219",
+                    "name": "wd_mgd",
+                    "value": "0"
+                },
+                "wd_cumulative_mgd": {
+                    "id": "7405220",
+                    "name": "wd_cumulative_mgd",
+                    "value": "0"
+                },
+                "ps_mgd": {
+                    "id": "7405221",
+                    "name": "ps_mgd",
+                    "value": "0"
+                },
+                "ps_cumulative_mgd": {
+                    "id": "7405222",
+                    "name": "ps_cumulative_mgd",
+                    "value": "0"
+                },
+                "Qbaseline": {
+                    "id": "7405224",
+                    "name": "Qbaseline",
+                    "value": "7.9786504165069"
+                },
+                "ps_nextdown_mgd": {
+                    "id": "7405225",
+                    "name": "ps_nextdown_mgd",
+                    "value": "0"
+                },
+                "consumptive_use_frac": {
+                    "id": "7405226",
+                    "name": "consumptive_use_frac",
+                    "value": "0.054360157679762"
+                },
+                "daily_consumptive_use_frac": {
+                    "id": "7405227",
+                    "name": "daily_consumptive_use_frac",
+                    "value": "0.10213489728535"
+                },
+                "l90_Qout": {
+                    "id": "7405228",
+                    "name": "l90_Qout",
+                    "value": "0.336775"
+                },
+                "l90_year": {
+                    "id": "7405229",
+                    "name": "l90_year",
+                    "value": "1999"
+                },
+                "l30_Qout": {
+                    "id": "7405230",
+                    "name": "l30_Qout",
+                    "value": "0"
+                },
+                "l30_year": {
+                    "id": "7405231",
+                    "name": "l30_year",
+                    "value": "1999"
+                },
+                "7q10": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405232",
+                    "name": "7q10",
+                    "value": "0.015389405413713",
+                    "code": ""
+                },
+                "ml8": {
+                    "id": "7405233",
+                    "name": "ml8",
+                    "value": "0.9262549"
+                },
+                "mne9_10": {
+                    "id": "7405234",
+                    "name": "mne9_10",
+                    "value": null
+                },
+                "unmet_demand_mgd": {
+                    "id": "7405235",
+                    "name": "unmet_demand_mgd",
+                    "value": "0"
+                },
+                "fig.l90_flows.2yr": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405236",
+                    "name": "fig.l90_flows.2yr",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/l90_flows.2yr.353103.201.png"
+                },
+                "fig.flows.all": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405237",
+                    "name": "fig.flows.all",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/flows.all.353103.201.png"
+                },
+                "Smin_L30_mg": {
+                    "id": "7405238",
+                    "name": "Smin_L30_mg",
+                    "value": "1421.171"
+                },
+                "Smin_L90_mg": {
+                    "id": "7405239",
+                    "name": "Smin_L90_mg",
+                    "value": "1421.171"
+                },
+                "usable_pct_p0": {
+                    "id": "7405332",
+                    "name": "usable_pct_p0",
+                    "value": "0.99827226186684"
+                },
+                "usable_pct_p10": {
+                    "id": "7405333",
+                    "name": "usable_pct_p10",
+                    "value": "1.0000004205161"
+                },
+                "usable_pct_p50": {
+                    "id": "7405334",
+                    "name": "usable_pct_p50",
+                    "value": "1.0000004205161"
+                },
+                "remaining_days_p0": {
+                    "id": "7405335",
+                    "name": "remaining_days_p0",
+                    "value": "0"
+                },
+                "remaining_days_p10": {
+                    "id": "7405336",
+                    "name": "remaining_days_p10",
+                    "value": "0"
+                },
+                "fig.l90_imp_storage.2yr": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405340",
+                    "name": "fig.l90_imp_storage.2yr",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/l90_imp_storage.2yr.353103.201.png"
+                },
+                "remaining_days_p50": {
+                    "id": "7405337",
+                    "name": "remaining_days_p50",
+                    "value": "0"
+                },
+                "fig.l90_imp_storage": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405339",
+                    "name": "fig.l90_imp_storage",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/l90_imp_storage.353103.201.png"
+                },
+                "fig.fdc.all.": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405403",
+                    "name": "fig.fdc.all.",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/fig.fdc.all.353103.201.png"
+                },
+                "fig.imp_storage.all": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405404",
+                    "name": "fig.imp_storage.all",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/fig.imp_storage.all.353103.201.png"
+                },
+                "elev90_imp_storage.all": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405405",
+                    "name": "elev90_imp_storage.all",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/elev90_imp_storage.all.353103.201.png"
+                },
+                "fig.fdc": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405406",
+                    "name": "fig.fdc",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/fdc.353103.201.png"
+                },
+                "fig.hydrograph_dry": {
+                    "host": "deq1.bse.vt.edu:81",
+                    "id": "7405407",
+                    "name": "fig.hydrograph_dry",
+                    "value": "0",
+                    "code": "http://deq1.bse.vt.edu:81/data/proj3/out/hydrograph_dry.353103.201.png"
+                },
+                "elfgen_EDAS_huc8": {
+                    "id": "7405408",
+                    "name": "elfgen_EDAS_huc8",
+                    "value": null,
+                    "richness_change_abs": {
+                        "id": "7405409",
+                        "name": "richness_change_abs",
+                        "value": "-0.15",
+                        "upper_confidence": {
+                            "id": "7405411",
+                            "name": "upper_confidence",
+                            "value": "0.06"
+                        },
+                        "lower_confidence": {
+                            "id": "7405412",
+                            "name": "lower_confidence",
+                            "value": "-0.06"
+                        }
+                    },
+                    "dataset": {
+                        "id": "7405410",
+                        "name": "dataset",
+                        "value": null
+                    },
+                    "richness_change_pct": {
+                        "id": "7405413",
+                        "name": "richness_change_pct",
+                        "value": "-0.78",
+                        "upper_confidence": {
+                            "id": "7405414",
+                            "name": "upper_confidence",
+                            "value": "0.31"
+                        },
+                        "lower_confidence": {
+                            "id": "7405415",
+                            "name": "lower_confidence",
+                            "value": "-0.31"
+                        }
+                    },
+                    "quantile": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405417",
+                        "name": "quantile",
+                        "value": "0.8",
+                        "code": ""
+                    },
+                    "breakpt": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405416",
+                        "name": "breakpt",
+                        "value": "530",
+                        "code": ""
+                    },
+                    "m": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405418",
+                        "name": "m",
+                        "value": "2.633",
+                        "code": ""
+                    },
+                    "b": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405419",
+                        "name": "b",
+                        "value": "10.198",
+                        "code": ""
+                    },
+                    "rsquared": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405420",
+                        "name": "rsquared",
+                        "value": "0.711",
+                        "code": ""
+                    },
+                    "rsquared_adj": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405421",
+                        "name": "rsquared_adj",
+                        "value": "0.693",
+                        "code": ""
+                    },
+                    "p": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405422",
+                        "name": "p",
+                        "value": "0",
+                        "code": ""
+                    },
+                    "n_total": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405423",
+                        "name": "n_total",
+                        "value": "112",
+                        "code": ""
+                    },
+                    "n_subset": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405424",
+                        "name": "n_subset",
+                        "value": "93",
+                        "code": ""
+                    },
+                    "n_subset_upper": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405425",
+                        "name": "n_subset_upper",
+                        "value": "18",
+                        "code": ""
+                    },
+                    "erom_q0001e_mean": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405426",
+                        "name": "erom_q0001e_mean",
+                        "value": "27.413",
+                        "code": "5907477"
+                    },
+                    "dNT_10pct": {
+                        "id": "7405427",
+                        "name": "dNT_10pct",
+                        "value": "-0.27741423772706"
+                    },
+                    "dNT_20pct": {
+                        "id": "7405428",
+                        "name": "dNT_20pct",
+                        "value": "-0.58753697061031"
+                    },
+                    "fig.elfgen": {
+                        "host": "deq1.bse.vt.edu:81",
+                        "id": "7405429",
+                        "name": "fig.elfgen",
+                        "value": "0",
+                        "code": "http://deq1.bse.vt.edu:81/data/proj3/out/fig.elfgen.7405408.png"
+                    }
+                },
+                "Qout": {
+                    "id": "7405223",
+                    "name": "Qout",
+                    "value": "7.5449297217938"
+                }
+            },
+            "outflow_elev_cfs": {
+                "id": "7405389",
+                "name": "outflow_elev_cfs",
+                "object_class": "dataMatrix",
+                "value": null,
+                "matrix": {
+                    "name": "matrix",
+                    "object_class": "array",
+                    "value": [
+                        [
+                            "2170.0",
+                            "0.0"
+                        ],
+                        [
+                            "2230.0",
+                            "0.0"
+                        ],
+                        [
+                            "2234.0",
+                            "0.5"
+                        ],
+                        [
+                            "2239.0",
+                            "1.5"
+                        ],
+                        [
+                            "2243.5",
+                            "2.3"
+                        ],
+                        [
+                            "2245.5",
+                            "3.1"
+                        ],
+                        [
+                            "2247.5",
+                            "3.9"
+                        ],
+                        [
+                            "2249.5",
+                            "4.6"
+                        ],
+                        [
+                            "2251.5",
+                            "6.2"
+                        ],
+                        [
+                            "2255.5",
+                            "7.7"
+                        ],
+                        [
+                            "2259.0",
+                            "8.5"
+                        ],
+                        [
+                            "2262.0",
+                            "9.3"
+                        ],
+                        [
+                            "2265.0",
+                            "10.1"
+                        ],
+                        [
+                            "2268.0",
+                            "10.8"
+                        ],
+                        [
+                            "2271.0",
+                            "11.6"
+                        ],
+                        [
+                            "2272.5",
+                            "12.4"
+                        ]
+                    ]
+                },
+                "valuetype": {
+                    "id": "7405397",
+                    "name": "valuetype",
+                    "value": "1"
+                },
+                "eval_type": {
+                    "id": "7405398",
+                    "name": "eval_type",
+                    "value": "numeric"
+                },
+                "value_dbcolumntype": {
+                    "id": "7405399",
+                    "name": "value_dbcolumntype",
+                    "value": "float8"
+                },
+                "exec_hierarch": {
+                    "id": "7405391",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7405392",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "keycol1": {
+                    "id": "7405393",
+                    "name": "keycol1",
+                    "value": "lake_elev",
+                    "object_class": "textField"
+                },
+                "keycol2": {
+                    "id": "7405395",
+                    "name": "keycol2",
+                    "value": "",
+                    "object_class": "textField"
+                },
+                "lutype1": {
+                    "id": "7405400",
+                    "name": "lutype1",
+                    "value": "1"
+                },
+                "lutype2": {
+                    "id": "7405401",
+                    "name": "lutype2",
+                    "value": null
+                },
+                "autosetvars": {
+                    "id": "7405402",
+                    "name": "autosetvars",
+                    "value": "0"
+                },
+                "mx_type": 1
+            },
+            "reports": {
+                "id": "7405437",
+                "name": "reports",
+                "object_class": "textField",
+                "value": "Custom information for automated assembly of CIA reports.",
+                "model_overview": {
+                    "id": "7405438",
+                    "name": "model_overview",
+                    "object_class": "textField",
+                    "value": "This reservoir serves the water supply needs of Harrisonburg.  There are no intakes in the reservoir, rather, flows that leave the reservoir are picked up downstream in the Dry River. Outflows are a function of storage level in the reservoir and are not currently governed by any permitted minimum release, but rather, by natural variations in head at different water levels."
+                }
+            },
+            "lake_elev": {
+                "id": "7405430",
+                "name": "lake_elev",
+                "default": null,
+                "equation": {
+                    "name": "equation",
+                    "value": "impoundment_lake_elev"
+                },
+                "object_class": "Equation",
+                "exec_hierarch": {
+                    "id": "7405432",
+                    "name": "exec_hierarch",
+                    "value": "0"
+                },
+                "defaultval": {
+                    "id": "7405433",
+                    "name": "defaultval",
+                    "value": ""
+                },
+                "nonnegative": {
+                    "id": "7405434",
+                    "name": "nonnegative",
+                    "value": "0"
+                },
+                "minvalue": {
+                    "id": "7405435",
+                    "name": "minvalue",
+                    "value": null
+                },
+                "engine": {
+                    "id": "7405436",
+                    "name": "engine",
+                    "value": "mathProcessor2"
+                }
+            }
+        },
+        "run_mode": {
+            "object_class": "ModelConstant"
+        },
+        "flow_mode": {
+            "object_class": "ModelConstant"
+        }
+    }
+}

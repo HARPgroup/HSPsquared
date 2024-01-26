@@ -39,25 +39,29 @@ class Impoundment(ModelObject):
     
     def set_local_props(self):
         # this sets up local variables.  These are with a parent path, or self path 
+        # these vars may come in as inputs, or be intermediate outputs.
+        # regardless, the purpose of this is to create a variable on the parent
+        # that appends the variable to the name of this object
+        # example name = impoundment
+        #   Qout: create:
+        #     impoundment/Qout + link to [parent]/impoundment_Qout
+        #   and the parent variable is just a copy
+        #   Qin:
+        #     impoundment/Qin + [parent]/impoundment_Qin
+        #   and the parent variable is just a copy
         # [channel name]_Qout - the outflow from this channel 
         for i in self.wvars:
-            if (self.autosetvars == True):
             if i in self.inputs:
-                default_value = self.get_state(i)
+                right_path = self.inputs[i]
             else:
                 # Create a numeric slot by passing 0.0 (or any numeric value) to constant_or_path()
                 default_value = 0.0
                 var_register = ModelRegister(i, self, default_value)
+                right_path = var_register.state_path
             # store iix somewhere for tokenizing
-            self.w_var_ix[i] = iix
-                # create a local slot to store it underneath this object
-            var_name = self.name + "_" + str(i)
-
-            
-            # this make a copy of this value on the parent object with form [name]_[var]
-            pusher = ModelLinkage(self.name + "_" + i, self.container, {'right_path':var_register.state_path, 'link_type':2} )
-            # adding input insure this will be found in a local path search
-            self.container.add_object_input(var_name, pusher, 1) 
+            if (self.autosetvars == True):
+                parent_var_name = str(self.name) + "_" + str(i)
+                self.create_parent_var(parent_var_name, right_path)
     
     def find_paths(self):
         super().find_paths()

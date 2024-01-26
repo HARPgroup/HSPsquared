@@ -269,14 +269,18 @@ class ModelObject:
         self.inputs_ix[var_name] = var_object.ix
         return self.inputs_ix[var_name]
     
-    def create_parent_var(self, parent_var_name, source_object):
+    def create_parent_var(self, parent_var_name, source):
         # see decision points: https://github.com/HARPgroup/HSPsquared/issues/78
         # This is used when an object sets an additional property on its parent
         # Like in simple_channel sets [channel prop name]_Qout on its parent 
         # Generally, this should have 2 components.  
         # 1 - a state variable on the child (this could be an implicit sub-comp, or a constant sub-comp, the child handles the setup of this) see constant_or_path()
         # 2 - an input link 
-        self.container.add_object_input(parent_var_name, source_object, 1)
+        # the beauty of this is that the parent object and any of it's children will find the variable "[source_object]_varname"
+        if type(source) == str:
+            self.container.add_input(parent_var_name, source, 1, False)
+        elif isinstance(source, ModelObject):
+            self.container.add_object_input(parent_var_name, source, 1)
     
     def insure_path(self, var_path):
         # if this path can be found in the hdf5 make sure that it is registered in state

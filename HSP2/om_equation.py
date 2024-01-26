@@ -49,7 +49,22 @@ class Equation(ModelObject):
                self.equation = self.equation + " + 0.0"
             else:
                 raise Exception("Error: Cannot parse equation: " + self.equation + " on object " + self.name + " Halting.") 
-        #print(exprStack)
+        if (len(self.ps) == 1):
+            # this is a single set of operands, but we need to check for a solo negative number
+            # which will also get returned as one op set, with the first slot a number, then 0, 0
+            # the first token *should* be an operator, followed by 2 operands
+            if is_float_digit(self.ps[0][0]):
+                # if it is longer than 1 character
+                if (self.ps[0][1] == 0) and (self.ps[0][2] == 0):
+                    tps = deconstruct_equation(" 0.0 " + self.equation)
+                    if len(tps) == 1:
+                        # seemed to have succeeded, try to use this now
+                        self.ps = tps
+                        self.equation = " 0.0 " + self.equation
+                    else:
+                        raise Exception("Error: Cannot parse equation: " + self.equation + " on object " + self.name + " Halting.") 
+
+            #print(exprStack)
     
     def find_paths(self):
         super().find_paths()
