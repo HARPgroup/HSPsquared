@@ -18,7 +18,7 @@ class ModelObject:
     model_object_cache = {} # Shared with actual objects, keyed by their path 
     model_exec_list = {} # Shared with actual objects, keyed by their path 
     max_token_length = 64 # limit on complexity of tokenized objects since op_tokens must be fixed dimensions for numba
-    runnables = [1,2,5,6,8,9,10,11,12,13,14,15] # runnable components important for optimization
+    runnables = [1,2,5,6,8,9,10,11,12,13,14,15,100] # runnable components important for optimization
     
     def __init__(self, name, container = False, model_props = {}):
         self.name = name
@@ -63,7 +63,7 @@ class ModelObject:
         # only return those objects that do something at runtime
         rmeo = []
         run_ops = {}
-        for ops in ModelObject.op_tokens:
+        for ops in ModelObject.op_tokens.values():
             if ops[0] in ModelObject.runnables:
                 run_ops[ops[1]] = ops
                 print("Found runnable", ops[1], "type", ops[0])
