@@ -1,0 +1,49 @@
+{
+    "RCHRES_R001": {
+        "name": "RCHRES_R001",
+        "object_class": "ModelObject",
+        "drainage_area_sqmi": {
+            "name": "drainage_area_sqmi",
+            "object_class": "Constant",
+            "value": 6.155817237
+        },
+        "Qout": {
+            "name": "Qout",
+            "object_class": "Equation",
+            "equation": "Qtrib + Runit * drainage_area_sqmi"
+        },
+        "IVOLin": {
+            "name": "IVOLin",
+            "object_class": "ModelLinkage",
+            "right_path": "/STATE/RCHRES_R001/IVOL",
+            "link_type": 2
+        },
+        "Runit": {
+            "name": "Runit",
+            "object_class": "Equation",
+            "value": "IVOLin / drainage_area_sqmi"
+        }
+        "read_from_children": {
+            "name": "read_from_children",
+            "object_class": "ModelBroadcast",
+            "broadcast_type": "read",
+            "broadcast_channel": "hydroObject",
+            "broadcast_hub": "self",
+            "broadcast_params": [
+                [
+                    "Qtrib",
+                    "Qtrib"
+                ],
+                [
+                    "trib_area_sqmi",
+                    "trib_area_sqmi"
+                ],
+                [
+                    "child_wd_mgd",
+                    "wd_mgd"
+                ]
+            ]
+        },
+    }
+}
+

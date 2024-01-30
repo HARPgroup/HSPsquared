@@ -13,7 +13,7 @@ class ModelLinkage(ModelObject):
         # ModelLinkage copies a values from right to left
         # right_path: is the data source for the link 
         # left_path: is the destination of the link 
-        # left_path: is implicit in types 1-3, i.e., the ModelLinkage object path itself is the left_path 
+        #   - is implicit in types 1-3, i.e., the ModelLinkage object path itself is the left_path 
         #   - left_path parameter is only needed for pushes (type 4 and 5)
         #   - the push is functionally equivalent to a pull whose path resolves to the specified left_path  
         #   - but the push allows the potential for multiple objects to set a single state 
