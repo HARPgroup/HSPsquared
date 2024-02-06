@@ -53,10 +53,9 @@ container = False
 model_root_object = ModelObject("")
 # set up the timer as the first element 
 timer = SimTimer('timer', model_root_object, siminfo)
-model_touch_list = []
 
 # manually populate or load a file of json 
-lfile = True
+lfile = False
 if lfile == True:
     #jfile = open('/WorkSpace/modeling/projects/james_river/rivanna/beaver_hsp2/JL1_6562_6560.json')
     jfile = open('/WorkSpace/modeling/projects/james_river/rivanna/beaver_hsp2/JL1_6560_6440.json')
@@ -68,14 +67,6 @@ if lfile == True:
     # a test of complex versus simple equation
 else:
     facility = ModelObject('facility', model_root_object)
-    model_data['RCHRES_R001']['run_mode']['object_class'] = 'ModelConstant'
-    model_data['RCHRES_R001']['flow_mode']['object_class'] = 'ModelConstant'
-    model_data['RCHRES_R001']['IVOL']= {
-        'object_class' : 'ModelLinkage',
-        'right_path' : '/STATE/RCHRES_R001/HYDR/IVOL',
-        'name' : 'IVOL',
-        'link_type' : 2
-    }
     c=["flowby", "wd_mgd", "Qintake"]
     flowby = Equation('flowby', facility, {'equation':'10.0'} )
     wd_mgd = Equation('wd_mgd', facility, {'equation':'2.5'} )
@@ -85,11 +76,6 @@ else:
         newq = Equation('eq' + str(k), facility, {'equation':eqn} )
         eqn = 50.0*random.random()
         newq = ModelConstant('con' + str(k), facility, eqn)
-
-# add a handful of helpful objects
-model_loader_recursive(state['model_data'], model_root_object)
-Qmulti = Equation("Qmulti", model_object_cache['/STATE/RCHRES_R001'], {'equation':'1.0 * Qin * (1.0 + 0.0 * 11.5) / 1.0'} )
-Qout = model_object_cache[Qmulti.find_var_path('Qout')]
 
 # now instantiate and link objects
 # state['model_data'] has alread been prepopulated from json, .py files, hdf5, etc.
@@ -103,6 +89,7 @@ print("Loaded objects & paths: insures all paths are valid, connects models as i
 model_path_loader(model_object_cache)
 # len() will be 1 if we only have a simtimer, but > 1 if we have a river being added
 model_exec_list = []
+model_touch_list = []
 # put all objects in token form for fast runtime execution and sort according to dependency order
 print("Tokenizing models")
 model_tokenizer_recursive(model_root_object, model_object_cache, model_exec_list, model_touch_list )
@@ -117,14 +104,6 @@ state['state_step_om'] = 'disabled'
 # if you tell it to report on the step that fails (which you have to do iteratively, proc of elim)
 # Test iterate over a single op
 select_ops = model_exec_list
-#select_ops = np.asarray([Qmulti.ix], dtype="i8") 
-#select_ops = np.asarray([Qout.ix], dtype="i8") 
-#select_ops = np.asarray([Qmulti.ix, Qout.ix], dtype="i8") 
-# does it go faster if we know which ones are runnable and dont try those that are static?
-rmeo = ModelObject.runnable_op_list(ModelObject.op_tokens, model_exec_list)
-# using onlye these runnables cuts runtime by over 40%
-select_ops = rmeo
-#siminfo['steps'] = 100000
 
 # Test and time the run
 # this is a testing mode for running, the last arg is the step to report exec for each component
@@ -135,7 +114,6 @@ iterate_perf(select_ops, op_tokens, state_ix, dict_ix, ts_ix, siminfo['steps'], 
 #iterate_perf(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, 3, -1)
 end = time.time()
 print(len(select_ops), "components iterated over", siminfo['steps'], "time steps took" , end - start, "seconds")
-
 
 
 # if a model fails on a given ix, search for it, for example, (if last ix reported is 234 then:
