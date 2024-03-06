@@ -25,6 +25,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install hsp2
+      run: |
         # install the hsp2 executable
         pip install .
     - name: Lint with flake8
@@ -38,3 +40,8 @@ jobs:
         pytest tests/ptest/test_sysexit.py
         # add additional test, ex:
         # pytest tests/testcbp/HSP2results/benchmark.py
+    - name: Run hsp2 test10
+      run: |
+        cd tests/test10/HSP2results
+        hsp2 import_uci test10.uci test10.h5
+        hsp2 run test10.h5
