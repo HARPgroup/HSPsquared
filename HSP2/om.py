@@ -13,7 +13,7 @@ import numpy as np
 import time
 from numba.typed import Dict
 from numpy import zeros, int32
-from numba import int8, float32, njit, types, typed # import the types
+from numba import int8, float64, njit, types, typed # import the types
 import random # this is only used for a demo so may be deprecated
 from HSP2.state import *
 
@@ -178,7 +178,7 @@ def state_om_model_run_prep(state, io_manager, siminfo):
     state['model_object_cache'] = model_object_cache
     state['model_exec_list'] = np.asarray(model_exec_list, dtype="i8") 
     if ModelObject.ops_data_type == 'ndarray':
-        state_keyvals = np.asarray(zeros(max(ModelObject.state_ix.keys()) + 1), dtype="float32")
+        state_keyvals = np.asarray(zeros(max(ModelObject.state_ix.keys()) + 1), dtype="float64")
         for ix, val in ModelObject.state_ix.items():
             state_keyvals[ix] = val
         state['state_ix'] = state_keyvals
