@@ -29,11 +29,10 @@ model_root_object = state['model_root_object']
 
 facility = ModelObject('facility', model_root_object)
 for k in range(1000):
-    #eqn = str(25*random.random()) + " * " + c[round((2*random.random()))]
-    #newq = Equation('eq' + str(k), facility, {'equation':eqn} )
+    eqn = str(25*random.random()) + " * " + c[round((2*random.random()))]
+    newq = Equation('eq' + str(k), facility, {'equation':eqn} )
     conval = 50.0*random.random()
-    newq = ModelConstant('con' + str(k), facility, conval)
-    speca = SpecialAction('specl' + str(k), facility, {'OPTYP': 'RCHRES', 'RANGE1': 1, 'RANGE2':'', 'AC':'+=', 'VARI':'IVOL', 'VALUE':10.0, 'YR':'2000', 'DA':'1', 'MO':'1', 'HR':'1','MN':''})
+    newc = ModelConstant('con' + str(k), facility, conval)
 
 # create a register to test TS
 ts1 = facility.insure_register('/TIMESERIES/facility/con1', 0.0, facility)
