@@ -6,6 +6,9 @@
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Large transient files
+*.h5
+
 # Distribution / packaging
 build
 build/*

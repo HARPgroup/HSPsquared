@@ -7,6 +7,11 @@ from HSP2.state import *
 from HSP2.om import *
 from HSP2.om_model_object import ModelObject
 from numba import njit
+from HSP2.utilities import * # need this to access transform, tho maybe more pointed imports would suffice
+import HSP2IO
+from HSP2IO.hdf import HDF5
+from HSP2IO.io import IOManager, SupportsReadTS, Category
+
 class ModelLinkage(ModelObject):
     def __init__(self, name, container = False, model_props = {}):
         super(ModelLinkage, self).__init__(name, container, model_props)
@@ -78,10 +83,13 @@ class ModelLinkage(ModelObject):
             self.insure_path(self.left_path)
         # Now, make sure that all time series paths can be found and loaded
         if (self.link_type == 3):
-            ts = self.io_manager.read_ts(Category.INPUTS, None, self.ts_name)
+            ts = self.read_ts(self, self.ts_name)
         self.paths_found = True
         return 
         
+    def read_ts(self,ts_name):
+        ts = self.io_manager.read_ts(Category.INPUTS, None, ts_name)
+
     def tokenize(self):
         super().tokenize()
         # - if this is a data property link then we add op codes to do a copy of data from one state address to another 
