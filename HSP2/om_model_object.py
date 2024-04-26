@@ -15,7 +15,6 @@ class ModelObject:
     dict_ix = {} # Shared Dict with the hdf5 path of each object 
     ts_ix = {} # Shared Dict with the hdf5 path of each object 
     op_tokens = {} # Shared Dict with the tokenized representation of each object, will be turned into array of ints
-    io_manager = {} # Placeholder for hsp2 hdf5 object wrapper and accessor
     model_object_cache = {} # Shared with actual objects, keyed by their path 
     model_exec_list = {} # Shared with actual objects, keyed by their path 
     max_token_length = 64 # limit on complexity of tokenized objects since op_tokens must be fixed dimensions for numba
