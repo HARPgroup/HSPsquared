@@ -7,6 +7,11 @@ from HSP2.state import *
 from HSP2.om import *
 from HSP2.om_model_object import ModelObject
 from numba import njit
+from HSP2.utilities import * # need this to access transform, tho maybe more pointed imports would suffice
+import HSP2IO
+from HSP2IO.hdf import HDF5
+from HSP2IO.io import IOManager, SupportsReadTS, Category
+
 class ModelLinkage(ModelObject):
     def __init__(self, name, container = False, model_props = {}):
         super(ModelLinkage, self).__init__(name, container, model_props)
@@ -14,7 +19,7 @@ class ModelLinkage(ModelObject):
         # right_path: is the data source for the link 
         # left_path: is the destination of the link 
         #   - is implicit in types 1-3, i.e., the ModelLinkage object path itself is the left_path 
-        #   - left_path parameter is only needed for pushes (type 4 and 5)
+        #     - left_path parameter is only needed for pushes (type 4 and 5)
         #   - the push is functionally equivalent to a pull whose path resolves to the specified left_path  
         #   - but the push allows the potential for multiple objects to set a single state 
         #     This can be dangerous or difficult to debug, but essential to replicate old HSPF behaviour
@@ -52,6 +57,10 @@ class ModelLinkage(ModelObject):
             pre_val = prop_val
             prop_val.replace("[parent]", self.container.state_path)
             #print("Changed ", pre_val, " to ", prop_val)
+            if ( prop_val.find('TIMESERIES') >= 0 ):
+                self.ts_name = prop_val[(prop_val.find('TIMESERIES') + 11):len(prop_val)]
+            else:
+                raise Exception("Type of link is timeseries, but right_path does not begin with (/)TIMESERIES. Path to object with error is " + self.state_path)
         return prop_val
     
     @staticmethod
@@ -72,9 +81,15 @@ class ModelLinkage(ModelObject):
         # the left path, if this is type 4 or 5, is a push, so we must require it 
         if ( (self.link_type == 4) or (self.link_type == 5) or (self.link_type == 6) ):
             self.insure_path(self.left_path)
+        # Now, make sure that all time series paths can be found and loaded
+        if (self.link_type == 3):
+            ts = self.read_ts(self, self.ts_name)
         self.paths_found = True
         return 
         
+    def read_ts(self,ts_name):
+        ts = self.io_manager.read_ts(Category.INPUTS, None, ts_name)
+
     def tokenize(self):
         super().tokenize()
         # - if this is a data property link then we add op codes to do a copy of data from one state address to another 
@@ -110,7 +125,7 @@ def step_model_link(op_token, state_ix, ts_ix, step):
         return True
     elif op_token[3] == 3:
         # read from ts variable TBD
-        # state_ix[op_token[1]] = ts_ix[op_token[2]][step]
+        state_ix[op_token[1]] = ts_ix[op_token[2]][step]
         return True
     elif op_token[3] == 4:
         # add value in local state to the remote broadcast hub+register state 
