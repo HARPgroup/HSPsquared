@@ -18,6 +18,8 @@ io_manager = IOManager(hdf5_instance)
 uci_obj = io_manager.read_uci()
 siminfo = uci_obj.siminfo
 opseq = uci_obj.opseq
+# Note: now that the UCI is read in and hdf5 loaded, you can see things like:
+# - hdf5_instance._store.keys() - all the paths in the UCI/hdf5
 # - finally stash specactions in state, not domain (segment) dependent so do it once
 # now load state and the special actions
 state = init_state_dicts()
@@ -35,6 +37,12 @@ state_load_dynamics_specl(state, io_manager, siminfo) # traditional special acti
 state_load_dynamics_om(state, io_manager, siminfo) # operational model for custom python
 state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects from the UCI and previous loads
 # state['model_root_object'].find_var_path('RCHRES_R001')
+# Get the timeseries naked, without an object
+rchres1 = state['model_object_cache']['/STATE/RCHRES_R001']
+precip_ts = ModelLinkage('precip_in', rchres1, {'right_path':'/TIMESERIES/TS039', 'link_type':3})
+ts1 = precip_ts.read_ts(precip_ts.ts_path) 
+# should yield equivalent of:
+# ts1 = hdf5_instance._store[precip_ts.ts_path]
 
 # Aggregate the list of all SEDTRN end point dependencies
 domain = '/STATE/RCHRES_R005'

@@ -34,18 +34,21 @@ class ModelLinkage(ModelObject):
         self.right_path = self.handle_prop(model_props, 'right_path')
         self.link_type = self.handle_prop(model_props, 'link_type', False, 0)
         self.left_path = self.handle_prop(model_props, 'left_path')
-        
+        self.trust_link = False # should this always be true?  On initialization we may not know, but these should be caught when we 
+        if (self.link_type == 3):
+            self.trust_link = True # we must trust but later we will insue that they exist when loading from the hdf5
         if self.left_path == False:
             # self.state_path gets set when creating at the parent level
             self.left_path = self.state_path 
         if (self.link_type == 0):
             # if this is a simple input  we remove the object from the model_object_cache, and pass back to parent as an input 
+            # in other words, the linkage object was just a meta to instruct the parent to get an input var
             del self.model_object_cache[self.state_path]
             del self.state_ix[self.ix]
             container.add_input(self.name, self.right_path)
         # this breaks for some reason, doesn't like the input name being different than the variable path ending? 
         # maybe because we should be adding the input to the container, not the self?       
-        self.add_input(self.right_path, self.right_path)
+        self.add_input(self.right_path, self.right_path, self.link_type, self.trust_link)
     
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
         # parent method handles most cases, but subclass handles special situations.
@@ -58,7 +61,9 @@ class ModelLinkage(ModelObject):
             prop_val.replace("[parent]", self.container.state_path)
             #print("Changed ", pre_val, " to ", prop_val)
             if ( prop_val.find('TIMESERIES') >= 0 ):
+                self.ts_path = prop_val
                 self.ts_name = prop_val[(prop_val.find('TIMESERIES') + 11):len(prop_val)]
+                self.trust_link = True # we must trust but later we will insue that they exist when loading from the hdf5
             else:
                 raise Exception("Type of link is timeseries, but right_path does not begin with (/)TIMESERIES. Path to object with error is " + self.state_path)
         return prop_val
@@ -83,12 +88,26 @@ class ModelLinkage(ModelObject):
             self.insure_path(self.left_path)
         # Now, make sure that all time series paths can be found and loaded
         if (self.link_type == 3):
-            ts = self.read_ts(self, self.ts_name)
+            ts = self.read_ts(self, self.ts_path)
         self.paths_found = True
         return 
         
-    def read_ts(self,ts_name):
+    def read_ts(self,ts_name = None, set_ts_ix = True):
+        if ts_name == None:
+            ts_name = self.ts_name
+        # Note: this read_ts routine does *not* expect the full hdf5 path with leading TIMESERIES
         ts = self.io_manager.read_ts(Category.INPUTS, None, ts_name)
+        ts = transform(ts, ts_name, 'SAME', self.siminfo)
+        if set_ts_ix == True:
+            self.set_ts_ix(ts, self.ix)
+        return(ts)
+        
+    def set_ts_ix(self,ts, ix = False):
+        if ix == False:
+            ix = self.ix
+        # Note: this read_ts routine does *not* expect the full hdf5 path with leading TIMESERIES
+        self.ts_ix[ix] = ts
+        return(ts)
 
     def tokenize(self):
         super().tokenize()

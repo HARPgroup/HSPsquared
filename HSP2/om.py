@@ -168,6 +168,9 @@ def state_om_model_root_object(state, siminfo):
 
 
 def state_om_model_run_prep(state, io_manager, siminfo):
+    # set io_manager as shared preopty on base class
+    ModelObject.io_manager = io_manager
+    ModelObject.siminfo = siminfo
     # insure model base is set
     state_om_model_root_object(state, siminfo)
     # now instantiate and link objects

@@ -20,6 +20,8 @@ class ModelObject:
     max_token_length = 64 # limit on complexity of tokenized objects since op_tokens must be fixed dimensions for numba
     runnables = [1,2,5,6,8,9,10,11,12,13,14,15, 100] # runnable components important for optimization
     ops_data_type = 'ndarray' # options are ndarray or Dict - Dict appears slower, but unsure of the cause, so keep as option.
+    io_manager = False # placeholder for object
+    siminfo = False # placeholder for array with timestep info etc
     
     def __init__(self, name, container = False, model_props = {}):
         self.name = name
