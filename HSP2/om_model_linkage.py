@@ -3,6 +3,7 @@ The class ModelLinkage is used to translate copy data from one state location to
 It is also used to make an implicit parent child link to insure that an object is loaded
 during a model simulation.
 """
+import pandas as pd
 from HSP2.state import *
 from HSP2.om import *
 from HSP2.om_model_object import ModelObject
@@ -27,6 +28,7 @@ class ModelLinkage(ModelObject):
         #     it is also useful for the broadcast objects, see om_model_broadcast for those 
         # link_type: 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
         self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - 
+        self.complevel = 9 # compression level for writing
         if container == False:
             # this is required
             print("Error: a link must have a container object to serve as the destination")
@@ -98,10 +100,33 @@ class ModelLinkage(ModelObject):
         # Note: this read_ts routine does *not* expect the full hdf5 path with leading TIMESERIES
         ts = self.io_manager.read_ts(Category.INPUTS, None, ts_name)
         ts = transform(ts, ts_name, 'SAME', self.siminfo)
+        # are we adding this ts to the ts_ix Dict or just retrieving
         if set_ts_ix == True:
             self.set_ts_ix(ts, self.ix)
         return(ts)
         
+    def write_ts(self, ts, ts_cols = None, write_path = None, tindex = None):
+        if write_path == None:
+            write_path = self.ts_path
+        if tindex == None:
+            tindex = self.siminfo['tindex']
+        self.format_ts(tsdf, ts_cols, tindex)
+        tsdf.to_hdf(self.io_manager._output._store, write_path, format='t', data_columns=True, complevel=self.complevel)
+        
+    def format_ts(ts, ts_cols, tindex):
+        tsdf = pd.DataFrame(data=ts, index=tindex, columns=ts_cols)
+        ts_cols = []
+        for col in tsdf.columns:
+            if (type(col) is int):
+                col_name = 'tsvalue_' + str(col)
+            else :
+                col_name = str(col)
+            ts_cols.append(col_name)
+        # re-do with acceptable column names
+        tsdf = pd.DataFrame(data=ts, index=tindex, columns=ts_cols)
+        return(tsdf)
+
+
     def set_ts_ix(self,ts, ix = False):
         if ix == False:
             ix = self.ix

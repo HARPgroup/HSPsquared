@@ -40,9 +40,15 @@ state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects f
 # Get the timeseries naked, without an object
 rchres1 = state['model_object_cache']['/STATE/RCHRES_R001']
 precip_ts = ModelLinkage('precip_in', rchres1, {'right_path':'/TIMESERIES/TS039', 'link_type':3})
-ts1 = precip_ts.read_ts(precip_ts.ts_path) 
+ts1 = precip_ts.read_ts() 
+tsdf = pd.DataFrame(data=ts1, index=siminfo['tindex'],columns=None)
 # should yield equivalent of:
 # ts1 = hdf5_instance._store[precip_ts.ts_path]
+# data_frame.to_hdf(self._store, path, format='t', data_columns=True, complevel=complevel)
+# tsdf = pd.DataFrame(data=ts1, index=siminfo['tindex'], columns=['tsvalue'])
+# tsdf.to_hdf(io_manager._output._store, '/RESULTS/test039', format='t', data_columns=True, complevel=precip_ts.complevel)
+# precip_ts.write_ts(ts1, '/RESULTS/test039')
+# precip_ts.write_ts(ts = ts1, ts_cols =  None, write_path = '/RESULTS/test039', tindex = None):
 
 # Aggregate the list of all SEDTRN end point dependencies
 domain = '/STATE/RCHRES_R005'
