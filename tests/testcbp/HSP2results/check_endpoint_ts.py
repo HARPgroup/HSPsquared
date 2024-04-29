@@ -40,46 +40,20 @@ state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects f
 # Get the timeseries naked, without an object
 rchres1 = state['model_object_cache']['/STATE/RCHRES_R001']
 precip_ts = ModelLinkage('precip_in', rchres1, {'right_path':'/TIMESERIES/TS039', 'link_type':3})
-ts1 = precip_ts.read_ts() 
+# write it back.  We can give an arbitrary name or it will default to write back to the source path in right_path variable
+precip_ts.write_path = '/RESULTS/test_TS039'
+ts1 = precip_ts.read_ts() # same as precip_ts.ts_ix[precip_ts.ix], same as state['ts_ix'][precip_ts.ix]
+precip_ts.write_ts()
+# precip_ts.write_ts is same as:
+#     ts4 = precip_ts.format_ts(ts1, ['tsvalue'], siminfo['tindex'])
+#     ts4.to_hdf(precip_ts.io_manager._output._store, precip_ts.write_path, format='t', data_columns=True, complevel=precip_ts.complevel)
+
 tsdf = pd.DataFrame(data=ts1, index=siminfo['tindex'],columns=None)
+# verify 
+ts1 = precip_ts.read_ts() # same as precip_ts.ts_ix[precip_ts.ix], same as state['ts_ix'][precip_ts.ix]
 # should yield equivalent of:
-# ts1 = hdf5_instance._store[precip_ts.ts_path]
+ts2 = hdf5_instance._store[precip_ts.ts_path]
 # data_frame.to_hdf(self._store, path, format='t', data_columns=True, complevel=complevel)
-# tsdf = pd.DataFrame(data=ts1, index=siminfo['tindex'], columns=['tsvalue'])
-# tsdf.to_hdf(io_manager._output._store, '/RESULTS/test039', format='t', data_columns=True, complevel=precip_ts.complevel)
-# precip_ts.write_ts(ts1, '/RESULTS/test039')
-# precip_ts.write_ts(ts = ts1, ts_cols =  None, write_path = '/RESULTS/test039', tindex = None):
-
-# Aggregate the list of all SEDTRN end point dependencies
-domain = '/STATE/RCHRES_R005'
-ep_list = ['RSED4', 'RSED5', 'RSED6']
-mello = model_domain_dependencies(state, domain, ep_list)
-print("Dependency ordered execution for RSED constants and runnables influencing", domain, "=", mello)
-mel_runnable = ModelObject.runnable_op_list(state['op_tokens'], mello)
-print("Dependency ordered execution of RSED depemndencies (all)", domain, "=", 
-model_element_paths(mello, state))
-print("Dependency ordered execution of RSED runnables only for", domain, "=", 
-model_element_paths(mel_runnable, state))
-
-
-# Show order of ops based on dependencies
-endpoint = state['model_object_cache']['/STATE/RCHRES_R005/RSED5']
-mel = []
-mtl = []
-model_order_recursive(endpoint, state['model_object_cache'], mel, mtl)
-print("Dependency ordered execution for constants and runnables influencing", endpoint.name)
-model_element_paths(mel, state)
-mel_runnable = ModelObject.runnable_op_list(state['op_tokens'], mel)
-print("Dependency ordered execution of runnables only for", endpoint.name)
-model_element_paths(mel_runnable, state)
-
-
-# Just for grins, we can show the dependency using the special action as an end point
-specl2 = state['model_object_cache']['/STATE/SPECACTION2']
-mel = []
-mtl = []
-print("Dependency ordered execution for constants and runnables influencing ", rsed4.name)
-model_order_recursive(specl2, state['model_object_cache'], mel, mtl)
-model_element_paths(mel, state)
-mel_runnable = ModelObject.runnable_op_list(state['op_tokens'], mel)
-model_element_paths(mel_runnable, state)
+ts3 = hdf5_instance._store[precip_ts.write_path]
+# and is same as
+ts4 = precip_ts.io_manager._output._store[precip_ts.write_path]

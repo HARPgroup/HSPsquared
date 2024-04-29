@@ -36,6 +36,7 @@ class ModelLinkage(ModelObject):
         self.right_path = self.handle_prop(model_props, 'right_path')
         self.link_type = self.handle_prop(model_props, 'link_type', False, 0)
         self.left_path = self.handle_prop(model_props, 'left_path')
+        self.write_path = self.handle_prop(model_props, 'write_path')
         self.trust_link = False # should this always be true?  On initialization we may not know, but these should be caught when we 
         if (self.link_type == 3):
             self.trust_link = True # we must trust but later we will insue that they exist when loading from the hdf5
@@ -100,20 +101,26 @@ class ModelLinkage(ModelObject):
         # Note: this read_ts routine does *not* expect the full hdf5 path with leading TIMESERIES
         ts = self.io_manager.read_ts(Category.INPUTS, None, ts_name)
         ts = transform(ts, ts_name, 'SAME', self.siminfo)
+        ts = np.transpose(ts)[0] # extract this single column from the double array that is returned.
         # are we adding this ts to the ts_ix Dict or just retrieving
         if set_ts_ix == True:
             self.set_ts_ix(ts, self.ix)
         return(ts)
         
-    def write_ts(self, ts, ts_cols = None, write_path = None, tindex = None):
+    def write_ts(self, ts = None, ts_cols = None, write_path = None, tindex = None):
+        if ts == None:
+            ts = self.ts_ix[self.ix]
         if write_path == None:
-            write_path = self.ts_path
+            if self.write_path != None:
+                write_path = self.ts_path
+            else:
+                write_path = self.ts_path
         if tindex == None:
             tindex = self.siminfo['tindex']
-        self.format_ts(tsdf, ts_cols, tindex)
+        tsdf = self.format_ts(ts, ts_cols, tindex)
         tsdf.to_hdf(self.io_manager._output._store, write_path, format='t', data_columns=True, complevel=self.complevel)
         
-    def format_ts(ts, ts_cols, tindex):
+    def format_ts(self, ts, ts_cols, tindex):
         tsdf = pd.DataFrame(data=ts, index=tindex, columns=ts_cols)
         ts_cols = []
         for col in tsdf.columns:
@@ -132,7 +139,6 @@ class ModelLinkage(ModelObject):
             ix = self.ix
         # Note: this read_ts routine does *not* expect the full hdf5 path with leading TIMESERIES
         self.ts_ix[ix] = ts
-        return(ts)
 
     def tokenize(self):
         super().tokenize()
