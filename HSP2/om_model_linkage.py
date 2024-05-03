@@ -94,15 +94,15 @@ class ModelLinkage(ModelObject):
             ts = self.read_ts(self, self.ts_path)
         self.paths_found = True
         return 
-        
-    def read_ts(self,ts_name = None, set_ts_ix = True):
-        if ts_name == None:
-            ts_name = self.ts_name
+    
+    def read_ts(self, set_ts_ix = True):
         # Note: this read_ts routine does *not* expect the full hdf5 path with leading TIMESERIES
-        ts = self.io_manager.read_ts(Category.INPUTS, None, ts_name)
-        ts = transform(ts, ts_name, 'SAME', self.siminfo)
+        ts = self.io_manager.read_ts(Category.INPUTS, None, self.ts_name)
+        ts = transform(ts, self.ts_name, 'SAME', self.siminfo)
         ts = np.transpose(ts)[0] # extract this single column from the double array that is returned.
         # are we adding this ts to the ts_ix Dict or just retrieving
+        # this option is in case we wish to reload the original ts from hdf to compare to a post-run
+        # version stored inside of ts_ix
         if set_ts_ix == True:
             self.set_ts_ix(ts, self.ix)
         return(ts)

@@ -41,8 +41,9 @@ state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects f
 rchres1 = state['model_object_cache']['/STATE/RCHRES_R001']
 precip_ts = ModelLinkage('precip_in', rchres1, {'right_path':'/TIMESERIES/TS039', 'link_type':3})
 # write it back.  We can give an arbitrary name or it will default to write back to the source path in right_path variable
-precip_ts.write_path = '/RESULTS/test_TS039'
 ts1 = precip_ts.read_ts() # same as precip_ts.ts_ix[precip_ts.ix], same as state['ts_ix'][precip_ts.ix]
+# we can specify a custom path to write this TS to
+precip_ts.write_path = '/RESULTS/test_TS039'
 precip_ts.write_ts()
 # precip_ts.write_ts is same as:
 #     ts4 = precip_ts.format_ts(ts1, ['tsvalue'], siminfo['tindex'])
