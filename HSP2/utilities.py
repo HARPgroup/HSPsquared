@@ -3,11 +3,6 @@ Author: Robert Heaphy, Ph.D.
 License: LGPL2
 General routines for HSP2 '''
 
-import sys
-import platform
-import importlib
-import datetime
-
 import pandas as pd
 import numpy as np
 from pandas import Series, date_range
@@ -95,7 +90,7 @@ def transform(ts, name, how, siminfo):
 
     # append duplicate of last point to force processing last full interval
     if ts.index[-1] < stop:
-        ts[stop] = ts.iloc[-1]
+        ts[stop] = ts[-1]
 
     if freq == tsfreq:
         pass
@@ -249,27 +244,23 @@ def versions(import_list=[]):
         Libary verson strings.
     '''
 
-    data = [{"name": "Python", "version": sys.version}]
+    import sys
+    import platform
+    import pandas
+    import importlib
+    import datetime
 
-    import_list = ["HSP2", "numpy", "numba", "pandas"] + list(import_list)
-    for name in import_list:
-        try:
-            version = importlib.import_module(name).__version__
-        except (ImportError, AttributeError):
-            version = "n/a"
-        data.append({"name": name, "version": version})
-
-    for name, version in zip(
-        ["os", "processor", "Date/Time"],
-        [
-            platform.platform(),
-            platform.processor(),
-            datetime.datetime.now().isoformat(),
-        ],
-    ):
-        data.append({"name": name, "version": version})
-    return pd.DataFrame(data).set_index("name")
-
+    names = ['Python']
+    data  = [sys.version]
+    import_list = ['HSP2', 'numpy', 'numba', 'pandas'] + list(import_list)
+    for import_ in import_list:
+        imodule = importlib.import_module(import_)
+        names.append(import_)
+        data.append(imodule.__version__)
+    names.extend(['os', 'processor', 'Date/Time'])
+    data.extend([platform.platform(), platform.processor(),
+      str(datetime.datetime.now())[0:19]])
+    return pandas.DataFrame(data, index=names, columns=['version'])
 
 def get_timeseries(timeseries_inputs:SupportsReadTS, ext_sourcesdd, siminfo):
     ''' makes timeseries for the current timestep and trucated to the sim interval'''

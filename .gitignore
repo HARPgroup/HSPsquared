@@ -1,6 +1,3 @@
-# Manual
-_no_git*
-
 # Editors & IDEs
 .vscode
 .vs
@@ -45,7 +42,6 @@ htmlcov
 *.log
 *.hbnhead
 *.units.dbf
-*_temp*.h5
 
 # Translations
 *.mo
@@ -60,6 +56,7 @@ tests/_LargeFileStash
 # Temporary files
 _TutorialData/
 
+
 # Specific files
 run.py
 tests/GLWACSO/HSP2results/hspp007.hdf
@@ -68,6 +65,7 @@ tests/GLWACSO/HSP2results/hspp007.uci
 tests/test_report_conversion.html
 
 # Omit big files
+*.h5
 tests/land_spec/hwmA51800.h5
 tests/testcbp/HSP2results/PL3_5250_0001.h5
 tests/testcbp/HSP2results/*.csv
