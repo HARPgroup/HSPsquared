@@ -39,9 +39,15 @@ state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects f
 # state['model_root_object'].find_var_path('RCHRES_R001')
 # Get the timeseries naked, without an object
 rchres1 = state['model_object_cache']['/STATE/RCHRES_R001']
-precip_ts = ModelLinkage('precip_in', rchres1, {'right_path':'/TIMESERIES/TS039', 'link_type':3})
-# write it back.  We can give an arbitrary name or it will default to write back to the source path in right_path variable
+precip_ts = ModelLinkage('PRCP', rchres1, {'right_path':'/TIMESERIES/TS039', 'SVOLNO':'TS039', 'link_type':3})
 ts1 = precip_ts.read_ts() # same as precip_ts.ts_ix[precip_ts.ix], same as state['ts_ix'][precip_ts.ix]
+# is the same as:
+# - ts = precip_ts.io_manager.read_ts(Category.INPUTS, None, precip_ts.ts_name)
+# - ts = transform(ts, precip_ts.ts_name, 'SAME', precip_ts.siminfo)
+# - ts = precip_ts.io_manager.read_ts(Category.INPUTS, None, precip_ts.ts_name).columns
+# - ts = np.transpose(ts)[0]
+# precip_ts.io_manager._input._store
+# write it back.  We can give an arbitrary name or it will default to write back to the source path in right_path variable
 # we can specify a custom path to write this TS to
 precip_ts.write_path = '/RESULTS/test_TS039'
 precip_ts.write_ts()
@@ -52,9 +58,55 @@ precip_ts.write_ts()
 tsdf = pd.DataFrame(data=ts1, index=siminfo['tindex'],columns=None)
 # verify 
 ts1 = precip_ts.read_ts() # same as precip_ts.ts_ix[precip_ts.ix], same as state['ts_ix'][precip_ts.ix]
+# Calls:
+# - ts = precip_ts.io_manager.read_ts(Category.INPUTS, None, precip_ts.ts_name)
+# - ts = transform(ts, self.ts_name, 'SAME', self.siminfo)
+# - ts = np.transpose(ts)[0]
 # should yield equivalent of:
 ts2 = hdf5_instance._store[precip_ts.ts_path]
 # data_frame.to_hdf(self._store, path, format='t', data_columns=True, complevel=complevel)
 ts3 = hdf5_instance._store[precip_ts.write_path]
 # and is same as
 ts4 = precip_ts.io_manager._output._store[precip_ts.write_path]
+
+exdd = defaultdict(list)
+exdd[(precip_ts.SVOL, precip_ts.SVOLNO)].append(pd.DataFrame({'SVOL':precip_ts.SVOLNO, 'SVOLNO':precip_ts.SVOLNO, 'MFACTOR':precip_ts.MFACTOR, 'TMEMN':precip_ts.TMEMN, 'TMEMSB':precip_ts.TMEMSB}))
+exdd[(precip_ts.SVOL, precip_ts.SVOLNO)].append({'SVOL':precip_ts.SVOLNO, 'SVOLNO':precip_ts.SVOLNO, 'MFACTOR':precip_ts.MFACTOR, 'TMEMN':precip_ts.TMEMN, 'TMEMSB':precip_ts.TMEMSB})
+
+exdd = defaultdict(list)
+df = pd.DataFrame({'SVOL':[precip_ts.SVOLNO], 'SVOLNO':[precip_ts.SVOLNO], 'MFACTOR':[precip_ts.MFACTOR], 'TMEMN':[precip_ts.TMEMN], 'TMEMSB':[precip_ts.TMEMSB]})
+for row in df.itertuples():
+    exdd[(precip_ts.SVOL, precip_ts.SVOLNO)].append(row)
+for row in exdd:
+    data_frame = precip_ts.io_manager.read_ts(category=Category.INPUTS,segment=row.SVOLNO)
+
+xdr = list(df.itertuples())
+xdr = precip_ts.ext_sourcesdd
+for row in xdr:
+    data_frame = precip_ts.io_manager.read_ts(category=Category.INPUTS,segment=row.SVOLNO)
+    clean_name(row.TMEMN,row.TMEMSB)
+
+ext_sourcesdd = XDR
+ts = Dict.empty(key_type=types.unicode_type, value_type=types.float64[:])
+for row in ext_sourcesdd:
+    data_frame = precip_ts.io_manager.read_ts(category=Category.INPUTS,segment=row.SVOLNO)
+
+    if row.MFACTOR != 1.0:
+        data_frame *= row.MFACTOR
+    t = transform(data_frame, row.TMEMN, row.TRAN, siminfo)
+
+    tname = clean_name(row.TMEMN,row.TMEMSB)
+    if tname in ts:
+        ts[tname] += t
+    else:
+        ts[tname]  = t
+
+
+# Debug: def read_ts(self, category:Category, operation:Union[str,None]=None,  segment:Union[str,None]=None,  activity:Union[str,None]=None, ...)
+ts = get_timeseries(precip_ts.io_manager, precip_ts.ext_sourcesdd, precip_ts.siminfo)
+for row in precip_ts.ext_sourcesdd[(precip_ts.SVOL, precip_ts.SVOLNO)]:
+    print(str(row.SVOLNO))
+precip_ts.io_manager.read_ts(Category.INPUTS, None, precip_ts.ts_name)
+precip_ts.io_manager.read_ts(category=Category.INPUTS,segment=row.SVOLNO)
+precip_ts.io_manager.read_ts(category=Category.INPUTS,segment=str(row.SVOLNO))
+precip_ts.io_manager.read_ts(category=Category.INPUTS, operation=None,segment=row.SVOLNO)

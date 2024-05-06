@@ -1,0 +1,44 @@
+{
+    "RCHRES_R001": {
+        "name": "RCHRES_R001",
+        "object_class": "ModelObject",
+        "drainage_area_sqmi": {
+            "name": "drainage_area_sqmi",
+            "object_class": "Constant",
+            "value": 99.95
+        },
+        "IVOLin": {
+            "name": "IVOLin",
+            "object_class": "ModelLinkage",
+            "right_path": "/STATE/RCHRES_R001/IVOL",
+            "link_type": 2
+        },
+        "Rlocal": {
+            "name": "Rlocal",
+            "object_class": "ModelLinkage",
+            "right_path": "/TIMESERIES/TS010",
+            "link_type": 3,
+            "SVOLNO": "10",
+            "description": "This object, link_type = 3, is a timeseries reader, which loads the specified dataset into ts_ix for use by STATE system."
+        },
+        "Qlocal": {
+            "name": "Qlocal",
+            "object_class": "Equation",
+            "value": "Rlocal / drainage_area_sqmi"
+        },
+        "log": {
+            "name": "log",
+            "object_class": "ModelObject",
+            "description": "A collection of timeseries writer elements for logging purposes.",
+            "Qlocal": {
+                "name": "Qlocal",
+                "object_class": "ModelLinkage",
+                "left_path": "/RESULTS/RCHRES_R001/Qlocal",
+                "right_path": "Qlocal",
+                "link_type": 6,
+                "description": "Write data from the simulation into STATE ts_ix."
+            }
+        }
+    }
+}
+

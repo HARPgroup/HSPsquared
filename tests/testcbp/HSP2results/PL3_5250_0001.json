@@ -12,6 +12,31 @@
             "object_class": "ModelLinkage",
             "right_path": "/STATE/RCHRES_R001/IVOL",
             "link_type": 2
+        },
+        "Runit": {
+            "name": "Runit",
+            "object_class": "ModelLinkage",
+            "right_path": "/TIMESERIES/TS10",
+            "link_type": 3,
+            "description": "This object, link_type = 3, is a timeseries reader, which loads the specified dataset into ts_ix for use by STATE system."
+        },
+        "Qlocal": {
+            "name": "Qlocal",
+            "object_class": "Equation",
+            "value": "Runit * drainage_area_sqmi"
+        },
+        "log": {
+            "name": "log",
+            "object_class": "ModelObject",
+            "description": "A collection of timeseries writer elements for logging purposes.",
+            "Qlocal": {
+                "name": "Qlocal",
+                "object_class": "ModelLinkage",
+                "left_path": "/RESULTS/RCHRES_R001/Qlocal",
+                "right_path": "Qlocal",
+                "link_type": 6,
+                "description": "Write data from the simulation into STATE ts_ix."
+            }
         }
     }
 }

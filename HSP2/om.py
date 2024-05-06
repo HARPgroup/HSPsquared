@@ -68,7 +68,7 @@ def model_element_paths(mel, state):
 # Import Code Classes
 from HSP2.om_model_object import *
 from HSP2.om_sim_timer import *
-#from HSP2.om_equation import *
+from HSP2.om_equation import *
 from HSP2.om_model_linkage import *
 from HSP2.om_special_action import *
 #from HSP2.om_data_matrix import *
@@ -537,7 +537,7 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     if debug == 1:
         print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
     if ops[0] == 1:
-        pass #step_equation(ops, state_ix)
+        step_equation(ops, state_ix)
     elif ops[0] == 2:
         # todo: this should be moved into a single function, 
         # with the conforming name step_matrix(op_tokens, ops, state_ix, dict_ix)

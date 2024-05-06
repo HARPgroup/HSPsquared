@@ -4,6 +4,7 @@ It is also used to make an implicit parent child link to insure that an object i
 during a model simulation.
 """
 import pandas as pd
+from collections import defaultdict
 from HSP2.state import *
 from HSP2.om import *
 from HSP2.om_model_object import ModelObject
@@ -26,20 +27,34 @@ class ModelLinkage(ModelObject):
         #     This can be dangerous or difficult to debug, but essential to replicate old HSPF behaviour
         #     especially in the case of If/Then type structures.
         #     it is also useful for the broadcast objects, see om_model_broadcast for those 
-        # link_type: 1 - local parent-child, 2 - local property link (state data), 3 - remote linkage (ts data only), 4 - push to accumulator (like a hub), 5 - overwrite remote value 
+        # link_type: 
+        #   1 - local parent-child, 2 - local property link (state data), 
+        #   3 - read ts data, 4 - push to accumulator (like a hub), 
+        #   5 - write remote state value, 6 - write ts data
         self.optype = 3 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - ModelLinkage, 4 - 
         self.complevel = 9 # compression level for writing
         if container == False:
             # this is required
             print("Error: a link must have a container object to serve as the destination")
             return False
-        self.right_path = self.handle_prop(model_props, 'right_path')
         self.link_type = self.handle_prop(model_props, 'link_type', False, 0)
+        self.right_path = self.handle_prop(model_props, 'right_path')
         self.left_path = self.handle_prop(model_props, 'left_path')
         self.write_path = self.handle_prop(model_props, 'write_path')
         self.trust_link = False # should this always be true?  On initialization we may not know, but these should be caught when we 
         if (self.link_type == 3):
             self.trust_link = True # we must trust but later we will insue that they exist when loading from the hdf5
+            # handle EXT SOURCE type transformations
+            self.SVOL = self.handle_prop(model_props, 'SVOL', False, name)
+            self.SVOLNO = self.handle_prop(model_props, 'SVOLNO', False, 0)
+            self.MFACTOR = self.handle_prop(model_props, 'MFACTOR', False, 1.0)
+            self.TMEMN = self.handle_prop(model_props, 'TMEMN', False, name)
+            self.TRAN = self.handle_prop(model_props, 'TRAN', False, 'SAME') 
+            self.TMEMSB = self.handle_prop(model_props, 'TMEMSB', False, '')
+            # populate a version of ext_sourcesdd as this insures the proper hsp2 plumbing, tho this may be too inflexible, we shall see
+            self.ext_sourcesdd = defaultdict(list)
+            df = pd.DataFrame({'SVOL':[self.SVOLNO], 'SVOLNO':[self.SVOLNO], 'MFACTOR':[self.MFACTOR], 'TMEMN':[self.TMEMN], 'TMEMSB':[self.TMEMSB], 'TRAN':self.TRAN})
+            self.ext_sourcesdd = list(df.itertuples()) # this is hacky maybe, but creates something that utilities::get_timeseries() can understand... it likes the tuples
         if self.left_path == False:
             # self.state_path gets set when creating at the parent level
             self.left_path = self.state_path 
@@ -56,19 +71,20 @@ class ModelLinkage(ModelObject):
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
         # parent method handles most cases, but subclass handles special situations.
         prop_val = super().handle_prop(model_props, prop_name, strict, default_value)
-        if ( (prop_name == 'right_path') and (prop_val == None) or (prop_val == '')):
+        if ( prop_name == 'right_path') and ((prop_val == None) or (prop_val == '')):
             raise Exception("right_path cannot be empty.  Object creation halted. Path to object with error is " + self.state_path)
         if ( (prop_name == 'right_path')):
             # check for special keyword [parent]
             pre_val = prop_val
             prop_val.replace("[parent]", self.container.state_path)
             #print("Changed ", pre_val, " to ", prop_val)
-            if ( prop_val.find('TIMESERIES') >= 0 ):
-                self.ts_path = prop_val
-                self.ts_name = prop_val[(prop_val.find('TIMESERIES') + 11):len(prop_val)]
-                self.trust_link = True # we must trust but later we will insue that they exist when loading from the hdf5
-            else:
-                raise Exception("Type of link is timeseries, but right_path does not begin with (/)TIMESERIES. Path to object with error is " + self.state_path)
+            if self.link_type == 3:
+                if ( prop_val.find('TIMESERIES') >= 0 ):
+                    self.ts_path = prop_val
+                    self.ts_name = prop_val[(prop_val.find('TIMESERIES') + 11):len(prop_val)]
+                    self.trust_link = True # we must trust but later we will insure that they exist when loading from the hdf5
+                else:
+                    raise Exception("Type of link is timeseries, but right_path does not begin with (/)TIMESERIES. Path to object with error is " + self.state_path)
         return prop_val
     
     @staticmethod
@@ -91,20 +107,29 @@ class ModelLinkage(ModelObject):
             self.insure_path(self.left_path)
         # Now, make sure that all time series paths can be found and loaded
         if (self.link_type == 3):
-            ts = self.read_ts(self, self.ts_path)
+            ts = self.read_ts(self.ts_path)
         self.paths_found = True
         return 
     
     def read_ts(self, set_ts_ix = True):
         # Note: this read_ts routine does *not* expect the full hdf5 path with leading TIMESERIES
-        ts = self.io_manager.read_ts(Category.INPUTS, None, self.ts_name)
+        ts = get_timeseries(self.io_manager, self.ext_sourcesdd, self.siminfo)
+        '''
+        self.io_manager.read_ts(Category.INPUTS, None, self.ts_name)
+        # type(precip_ts.io_manager._input._store['/TIMESERIES/TS1004']) == Series
         ts = transform(ts, self.ts_name, 'SAME', self.siminfo)
         ts = np.transpose(ts)[0] # extract this single column from the double array that is returned.
+        try:
+            if data in data_frame.columns: t = data_frame[data].astype(float64).to_numpy()[0:steps]
+            else: t = data_frame[smemn].astype(float64).to_numpy()[0:steps]
+        except KeyError:
+            print('ERROR in TS, cant resolve ', self.ts_name, ' ', self.ts_path)
         # are we adding this ts to the ts_ix Dict or just retrieving
         # this option is in case we wish to reload the original ts from hdf to compare to a post-run
         # version stored inside of ts_ix
         if set_ts_ix == True:
             self.set_ts_ix(ts, self.ix)
+        '''
         return(ts)
         
     def write_ts(self, ts = None, ts_cols = None, write_path = None, tindex = None):
