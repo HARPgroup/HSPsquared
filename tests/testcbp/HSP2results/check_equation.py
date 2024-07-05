@@ -1,5 +1,7 @@
 # Must be run from the HSPsquared source directory, the h5 file has already been setup with hsp import_uci test10.uci
 # bare bones tester - must be run from the HSPsquared source directory
+# Note: First time you clone git, or after a major refactor, you must reinstall (in a venv) using:
+#   pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 -e . 
 import os
 from hsp2.hsp2.main import *
 from hsp2.hsp2.om import *
@@ -9,10 +11,13 @@ from hsp2.hsp2io.io import IOManager
 fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
 # try also:
 # fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
-# sometimes when testing you may need to close the file, so try:
+# sometimes when testing you may need to close the file, so try openg and closing with h5py:
+#    note: h5py: may need to pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 h5py
+#  
 # f = h5py.File(fpath,'a') # use mode 'a' which allows read, write, modify
 # # f.close()
 hdf5_instance = HDF5(fpath)
+
 io_manager = IOManager(hdf5_instance)
 uci_obj = io_manager.read_uci()
 siminfo = uci_obj.siminfo
@@ -22,7 +27,7 @@ opseq = uci_obj.opseq
 # - finally stash specactions in state, not domain (segment) dependent so do it once
 # now load state and the special actions
 state = init_state_dicts()
-state_initialize_om(state)
+om_init_state(state)
 state['specactions'] = uci_obj.specactions # stash the specaction dict in state
 
 state_siminfo_hsp2(uci_obj, siminfo)
@@ -32,7 +37,7 @@ state_load_dynamics_hsp2(state, io_manager, siminfo)
 # Iterate through all segments and add crucial paths to state
 # before loading dynamic components that may reference them
 state_init_hsp2(state, opseq, activities)
-state_load_dynamics_specl(state, io_manager, siminfo) # traditional special actions
+specl_load_state(state, io_manager, siminfo) # traditional special actions
 state_load_dynamics_om(state, io_manager, siminfo) # operational model for custom python
 state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects from the UCI and previous loads
 # state['model_root_object'].find_var_path('RCHRES_R001')

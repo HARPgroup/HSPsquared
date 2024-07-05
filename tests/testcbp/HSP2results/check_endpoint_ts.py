@@ -23,7 +23,7 @@ opseq = uci_obj.opseq
 # - finally stash specactions in state, not domain (segment) dependent so do it once
 # now load state and the special actions
 state = init_state_dicts()
-state_initialize_om(state)
+om_init_state(state)
 state['specactions'] = uci_obj.specactions # stash the specaction dict in state
 
 state_siminfo_hsp2(uci_obj, siminfo)
@@ -33,7 +33,7 @@ state_load_dynamics_hsp2(state, io_manager, siminfo)
 # Iterate through all segments and add crucial paths to state
 # before loading dynamic components that may reference them
 state_init_hsp2(state, opseq, activities)
-state_load_dynamics_specl(state, io_manager, siminfo) # traditional special actions
+specl_load_state(state, io_manager, siminfo) # traditional special actions
 state_load_dynamics_om(state, io_manager, siminfo) # operational model for custom python
 state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects from the UCI and previous loads
 # state['model_root_object'].find_var_path('RCHRES_R001')
