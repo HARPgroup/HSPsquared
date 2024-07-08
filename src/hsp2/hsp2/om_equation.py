@@ -5,10 +5,21 @@ and will then search the local object inputs and the containing object inputs (i
 the variable name in question.  Ultimately, everyting becomes either an operator or a reference to a variable
 in the state_ix Dict for runtime execution.
 """
-from HSP2.om import *
-from HSP2.state import *
-from HSP2.om_model_object import *
-from numba import njit
+from hsp2.hsp2.om import get_exec_order, is_float_digit
+from hsp2.hsp2.state import set_state, get_state_ix
+from hsp2.hsp2.om_model_object import ModelObject, ModelConstant
+from numba import njit, types
+from numpy import array, append
+
+# from hsp2.hsp2.state import set_state, get_state_ix
+# from numba.typed import Dict
+# from hsp2.hsp2.om import get_exec_order, is_float_digit
+# from pandas import Series, DataFrame, concat, HDFStore, set_option, to_numeric
+# from pandas import Timestamp, Timedelta, read_hdf, read_csv
+# from numpy import pad, asarray, zeros, int32
+# from numba import njit, types
+
+
 class Equation(ModelObject):
     # the following are supplied by the parent class: name, log_path, attribute_path, state_path, inputs
     
@@ -398,10 +409,8 @@ def evaluate_eq_ops(op, val1, val2):
 
 @njit
 def step_equation(op_token, state_ix):
-    op_class = op_token[0] # we actually use this in the calling function, which will decide what 
-                      # next level function to use 
     result = 0
-    s = np.array([0.0])
+    s = array([0.0])
     s_ix = -1 # pointer to the top of the stack
     s_len = 1
     # handle special equation settings like "non-negative", etc.
@@ -437,7 +446,7 @@ def step_equation(op_token, state_ix):
             result = evaluate_eq_ops(op, val1, val2)
             s_ix += 1
             if s_ix >= s_len: 
-                s = np.append(s, 0)
+                s = append(s, 0)
                 s_len += 1
             s[s_ix] = result
         result = s[s_ix]
