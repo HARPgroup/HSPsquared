@@ -8,8 +8,8 @@
             "object_class": "Constant",
             "value": 10.0
         },
-        "IVOLwrite": {
-            "name": "IVOLwrite",
+        "WDwrite": {
+            "name": "WDwrite",
             "object_class": "ModelLinkage",
             "left_path": "/STATE/RCHRES_R001/O2",
             "right_path": "/STATE/RCHRES_R001/wd_cfs",

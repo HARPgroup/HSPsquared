@@ -43,12 +43,7 @@ class ModelBroadcast(ModelObject):
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
         # parent method handles most cases, but subclass handles special situations.
         if ( prop_name == 'broadcast_params'):
-            prop_val = model_props.get(prop_name)
-            #print("broadcast params from model_props = ", prop_val)
-            if type(prop_val) == list: # this doesn't work, but nothing gets passed in like this? Except broadcast params, but they are handled in the sub-class
-                prop_val = prop_val
-            elif type(prop_val) == dict:
-                prop_val = prop_val.get('value')
+            prop_val = model_props['broadcast_params'] # check that this is OK
         else:
             prop_val = super().handle_prop(model_props, prop_name, strict, default_value)
         return prop_val
@@ -79,7 +74,6 @@ class ModelBroadcast(ModelObject):
         channel = self.insure_channel(broadcast_channel, hub_container)
         # now iterate through pairs of source/destination broadcast lines
         i = 0
-        #print("broadcast params", broadcast_params)
         for b_pair in broadcast_params:
             # create an object for each element in the array 
             if (broadcast_type == 'read'):
@@ -175,9 +169,12 @@ class ModelBroadcast(ModelObject):
         super().add_op_tokens()
 
 
-@njit
+
+# njit functions for runtime
+
+@njit(cache=True)
 def pre_step_broadcast(op, state_ix, dict_ix):
     ix = op[1]
     dix = op[2]
-    # broadcasts do not need to act, as they are now handled as ModelLinkage
+    # broadcasts do not need to act, as they are now handled as MdelLinkage
     # with type = accumulate

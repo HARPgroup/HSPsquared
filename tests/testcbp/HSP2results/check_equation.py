@@ -9,6 +9,8 @@ import numpy
 from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager
 fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
+# fpath = '/c/WorkSpace/modeling/projects/james_river/rivanna/beaver_hsp2/JL1_6562_6560.h5'
+
 # try also:
 # fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
 # sometimes when testing you may need to close the file, so try openg and closing with h5py:
@@ -64,3 +66,13 @@ iterate_models(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, siminfo['st
 end = time.time()
 print(len(model_exec_list), "components iterated over state_ix", siminfo['steps'], "time steps took" , end - start, "seconds")
 
+# want to run the actual hsp2 simulation?
+from hsp2.hsp2tools.commands import import_uci, run
+from pandas import read_hdf
+run(fpath, saveall=True, compress=False)
+# Now, load the timeseries from hdf5 and check the values from the simulation.
+hydr_path = '/RESULTS/RCHRES_R001/HYDR'
+HYDR_ts = read_hdf(io_manager._output._store, hydr_path)
+Qout = HYDR_ts['OVOL3']*12.1 #Qout in units of cfs
+Qout.quantile([0,0.1,0.5,0.75,0.9,1.0])
+Qout.mean()
