@@ -66,7 +66,7 @@ def model_element_paths(mel, state):
 # Import Code Classes
 from hsp2.hsp2.om_model_object import ModelObject, ModelVariable, ModelRegister, pre_step_register
 from hsp2.hsp2.om_sim_timer import SimTimer, step_sim_timer
-#from hsp2.hsp2.om_equation import *
+from hsp2.hsp2.om_equation import *
 from hsp2.hsp2.om_model_linkage import ModelLinkage, step_model_link
 from hsp2.hsp2.om_special_action import SpecialAction, step_special_action
 #from hsp2.hsp2.om_data_matrix import *
@@ -208,8 +208,8 @@ def state_om_model_run_prep(state, io_manager, siminfo):
     
     #print("Operational model status:", state['state_step_om'])
     if len(model_exec_list) > 0:
-        pass
-        #print("op_tokens has", len(op_tokens),"elements, with ", len(model_exec_list),"executable elements")
+        #pass
+        print("op_tokens has", len(op_tokens),"elements, with ", len(model_exec_list),"executable elements")
     return
 
 # model class reader
@@ -534,7 +534,7 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
     if debug > 0:
         print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
     if ops[0] == 1:
-        pass #step_equation(ops, state_ix)
+        step_equation(ops, state_ix)
     elif ops[0] == 2:
         # todo: this should be moved into a single function, 
         # with the conforming name step_matrix(op_tokens, ops, state_ix, dict_ix)

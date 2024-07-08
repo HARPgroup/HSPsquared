@@ -8,8 +8,8 @@ from hsp2.hsp2.om import *
 import numpy
 from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager
-fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
-# fpath = '/c/WorkSpace/modeling/projects/james_river/rivanna/beaver_hsp2/JL1_6562_6560.h5'
+# fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
+fpath = 'C:/WorkSpace/modeling/projects/james_river/rivanna/beaver_hsp2/JL1_6562_6560.h5'
 
 # try also:
 # fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
@@ -41,38 +41,21 @@ state_load_dynamics_hsp2(state, io_manager, siminfo)
 state_init_hsp2(state, opseq, activities)
 specl_load_state(state, io_manager, siminfo) # traditional special actions
 state_load_dynamics_om(state, io_manager, siminfo) # operational model for custom python
-state_om_model_run_prep(state, io_manager, siminfo) # this creates all objects from the UCI and previous loads
-# state['model_root_object'].find_var_path('RCHRES_R001')
-# Get the timeseries naked, without an object
-Rlocal = state['model_object_cache']['/STATE/RCHRES_R001/Rlocal']
-Rlocal_ts = Rlocal.read_ts()
-rchres1 = state['model_object_cache']['/STATE/RCHRES_R001']
-Rlocal_check = ModelLinkage('Rlocal1', rchres1, {'right_path':'/TIMESERIES/TS010', 'link_type':3})
-# Calls:
-# - ts = Rlocal.io_manager.read_ts(Category.INPUTS, None, Rlocal.ts_name)
-# - ts = transform(ts, Rlocal.ts_name, 'SAME', Rlocal.siminfo)
-Rlocal.io_manager._output._store.keys()
-# write it back.  We can give an arbitrary name or it will default to write back to the source path in right_path variable
-ts1 = precip_ts.read_ts() # same as precip_ts.ts_ix[precip_ts.ix], same as state['ts_ix'][precip_ts.ix]
-# we can specify a custom path to write this TS to
-precip_ts.write_path = '/RESULTS/test_TS039'
-precip_ts.write_ts()
-# precip_ts.write_ts is same as:
-#     ts4 = precip_ts.format_ts(ts1, ['tsvalue'], siminfo['tindex'])
-#     ts4.to_hdf(precip_ts.io_manager._output._store, precip_ts.write_path, format='t', data_columns=True, complevel=precip_ts.complevel)
+state_om_model_run_prep(state, io_manager, siminfo)
 
-start = time.time()
-iterate_models(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, siminfo['steps'], -1)
-end = time.time()
-print(len(model_exec_list), "components iterated over state_ix", siminfo['steps'], "time steps took" , end - start, "seconds")
-
-# want to run the actual hsp2 simulation?
+# run the simulation
 from hsp2.hsp2tools.commands import import_uci, run
-from pandas import read_hdf
 run(fpath, saveall=True, compress=False)
 # Now, load the timeseries from hdf5 and check the values from the simulation.
+from pandas import read_hdf
 hydr_path = '/RESULTS/RCHRES_R001/HYDR'
 HYDR_ts = read_hdf(io_manager._output._store, hydr_path)
+# Note, in order to run from cmd prompt in another window, may need to close the h5:
+#    io_manager._output._store.close()
+#    io_manager._input._store.close()
 Qout = HYDR_ts['OVOL3']*12.1 #Qout in units of cfs
+wd = HYDR_ts['O1'] + HYDR_ts['O2']
 Qout.quantile([0,0.1,0.5,0.75,0.9,1.0])
 Qout.mean()
+wd.quantile([0,0.1,0.5,0.75,0.9,1.0])
+wd.mean()

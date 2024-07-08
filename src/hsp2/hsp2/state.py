@@ -146,7 +146,7 @@ def state_load_dynamics_hsp2(state, io_manager, siminfo):
 
 def hydr_init_ix(state, domain):
     # get a list of keys for all hydr state variables
-    hydr_state = ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
+    hydr_state = ["DEP","IVOL","O1","O2","O3", "O4", "O5","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
     hydr_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
     for i in hydr_state:
         #var_path = f'{domain}/{i}'
