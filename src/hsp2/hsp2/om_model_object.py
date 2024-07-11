@@ -128,7 +128,10 @@ class ModelObject:
         return True
     
     def handle_path_aliases(self, object_path):
-        return object_path.replace("[parent]", self.container.state_path)
+        if not (self.container == False):
+            object_path = object_path.replace("[parent]", self.container.state_path)
+        object_path = object_path.replace("[self]", self.state_path)
+        return object_path
     
     def handle_inputs(self, model_props):
         if 'inputs' in model_props.keys():
@@ -226,7 +229,8 @@ class ModelObject:
         
     def find_var_path(self, var_name, local_only = False):
         # check local inputs for name
-        if type(var_name) == 'str':
+        if type(var_name) == str:
+            #print("Expanding aliases for", var_name)
             var_name = self.handle_path_aliases(var_name) # sub out any wildcards
         #print(self.name, "called", "find_var_path(self, ", var_name, ", local_only = False)")
         if var_name in self.inputs.keys():
@@ -240,7 +244,7 @@ class ModelObject:
         if ("/STATE/" + var_name) in self.state['state_paths'].keys():
             #return self.state['state_paths'][("/STATE/" + var_name)]
             return ("/STATE/" + var_name)
-        # check for root state vars
+        # check for full paths
         if var_name in self.state['state_paths'].keys():
             #return self.state['state_paths'][var_name]
             return var_name
