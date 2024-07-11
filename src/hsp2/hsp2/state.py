@@ -105,7 +105,7 @@ def state_context_hsp2(state, operation, segment, activity):
     # give shortcut to state path for the upcoming function 
     # insure that there is a model object container
     seg_name = operation + "_" + segment 
-    seg_path =  '/STATE/' + seg_name
+    seg_path = '/STATE/' + state['model_root_name'] + "/" + seg_name
     if 'hsp_segments' not in state.keys():
         state['hsp_segments'] = {} # for later use by things that need to know hsp entities and their paths
     if seg_name not in state['hsp_segments'].keys():
@@ -113,12 +113,15 @@ def state_context_hsp2(state, operation, segment, activity):
 
     state['domain'] = seg_path # + "/" + activity   # may want to comment out activity?
 
-def state_siminfo_hsp2(uci_obj, siminfo):
+def state_siminfo_hsp2(uci_obj, siminfo, io_manager, state):
     # Add crucial simulation info for dynamic operation support
     delt = uci_obj.opseq.INDELT_minutes[0] # get initial value for STATE objects
     siminfo['delt'] = delt
     siminfo['tindex'] = date_range(siminfo['start'], siminfo['stop'], freq=Minute(delt))[1:]
     siminfo['steps'] = len(siminfo['tindex'])
+    hdf5_path = io_manager._input.file_path
+    (fbase, fext) = os.path.splitext(hdf5_path)
+    state['model_root_name'] = os.path.split(fbase)[1] # takes the text before .h5
 
 def state_init_hsp2(state, opseq, activities):
     # This sets up the state entries for all state compatible HSP2 model variables

@@ -23,7 +23,7 @@ from numpy import array, append
 class Equation(ModelObject):
     # the following are supplied by the parent class: name, log_path, attribute_path, state_path, inputs
     
-    def __init__(self, name, container = False, model_props = {}):
+    def __init__(self, name, container = False, model_props = {}, state = None):
         super(Equation, self).__init__(name, container, model_props)
         self.equation = self.handle_prop(model_props, 'equation') 
         self.ps = False 
@@ -32,7 +32,7 @@ class Equation(ModelObject):
         self.optype = 1 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - ?
         self.non_neg = self.handle_prop(model_props, 'nonnegative', False, 0)
         min_value = self.handle_prop(model_props, 'minvalue', False, 0.0)
-        self.min_value_ix = ModelConstant('min_value', self, min_value).ix
+        self.min_value_ix = ModelConstant('min_value', self, {'name':'min_value', 'value':min_value}).ix
         self.deconstruct_eqn()
     
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
@@ -122,15 +122,15 @@ class Equation(ModelObject):
           elif is_float_digit(self.var_ops[j]):
               # must add this to the state array as a constant
               constant_path = self.state_path + '/_ops/_op' + str(j) 
-              s_ix = set_state(self.state_ix, self.state_paths, constant_path, float(self.var_ops[j]) )
+              s_ix = set_state(self.state['state_ix'], self.state['state_paths'], constant_path, float(self.var_ops[j]) )
               self.var_ops[j] = s_ix
           else:
               # this is a variable, must find it's data path index
               var_path = self.find_var_path(self.var_ops[j])
-              s_ix = get_state_ix(self.state_ix, self.state_paths, var_path)
+              s_ix = get_state_ix(self.state['state_ix'], self.state['state_paths'], var_path)
               if s_ix == False:
                   print("Error: unknown variable ", self.var_ops[j], "path", var_path, "index", s_ix)
-                  print("searched: ", self.state_paths, self.state_ix)
+                  print("searched: ", self.state['state_paths'], self.state['state_ix'])
                   return
               else:
                   self.var_ops[j] = s_ix

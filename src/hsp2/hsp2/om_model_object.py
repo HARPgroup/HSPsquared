@@ -18,13 +18,16 @@ class ModelObject:
     
     def __init__(self, name, container = False, model_props = None, state = None):
         self.name = name
+        self.handle_deprecated_args(name, container, model_props, state)
+        # END - handle deprecated
         if model_props is None:
             model_props = {}
         self.container = container # will be a link to another object
-        if (state == None):
+        self.state_path = self.handle_prop(model_props, 'state_path', False, False)
+        if type(state) != dict:
             # we must verify that we have a properly formatted state Dictionary, or that our parent does.
             if self.container == False:
-                raise Exception("Error: State dictionary must be passed to root object. " + name + " cannot be created.  See state::init_state_dicts()")
+                raise Exception("Error: State dictionary must be passed to root object. ", type(state), "passed instead." + name + " cannot be created.  See state::init_state_dicts()")
             else:
                 state = self.container.state
         self.state = state # make a copy here. is this efficient?  
@@ -51,7 +54,21 @@ class ModelObject:
         #                 100 - SpecialAction, 101 - UVNAME, 102 - UVQUAN, 103 - DISTRB
         self.register_path() # note this registers the path AND stores the object in model_object_cache 
         self.parse_model_props(model_props)
-    
+    def handle_deprecated_args(self, name, container, model_props, state):
+        # Handle old deprecated format for Register, Constant and Variable
+        state_path = False
+        if type(model_props) != dict:
+            value = model_props
+            model_props =  {'name':name, 'value':value}
+            print("WARNING: deprecated 3rd argument for ModelObject. Use: [Model class](name, container, model_props, state)")
+        if type(state) == str:
+            model_props['state_path'] = state
+            state = None
+            if container != None:
+                state = container.state
+            print("WARNING: deprecated 4th argument for ModelObject. Use: [Model class](name, container, model_props, state)")
+
+
     @staticmethod
     def required_properties():
         # returns a list or minimum properties to create.
@@ -110,12 +127,15 @@ class ModelObject:
             return False 
         return True
     
+    def handle_path_aliases(self, object_path):
+        return object_path.replace("[parent]", self.container.state_path)
+    
     def handle_inputs(self, model_props):
         if 'inputs' in model_props.keys():
             for i_pair in model_props['inputs']:
                 i_name = i_pair[0]
                 i_target = i_pair[1]
-                i_target.replace("[parent]", self.container.state_path)
+                i_target = handle_path_aliases(i_target)
                 self.add_input(i_name, i_target)
     
     def handle_prop(self, model_props, prop_name, strict = False, default_value = None ):
@@ -160,6 +180,7 @@ class ModelObject:
             dummy_var = True
     
     def make_paths(self, base_path = False):
+        #print("calling make_paths from", self.name, "with base path", base_path)
         if base_path == False: # we are NOT forcing paths
             if not (self.container == False):
                 self.state_path = self.container.state_path + "/" + str(self.name)
@@ -205,6 +226,9 @@ class ModelObject:
         
     def find_var_path(self, var_name, local_only = False):
         # check local inputs for name
+        if type(var_name) == 'str':
+            var_name = self.handle_path_aliases(var_name) # sub out any wildcards
+        #print(self.name, "called", "find_var_path(self, ", var_name, ", local_only = False)")
         if var_name in self.inputs.keys():
             return self.inputs[var_name]
         if local_only:
@@ -225,7 +249,8 @@ class ModelObject:
     def constant_or_path(self, keyname, keyval, trust = False):
         if is_float_digit(keyval):
             # we are given a constant value, not a variable reference 
-            k = ModelVariable(keyname, self, float(keyval))
+            #print("Creating ModelVariable", keyname, "on", self.name, "with default", keyval)
+            k = ModelVariable(keyname, self, {'name':keyname, 'value':float(keyval)}, self.state)
             kix = k.ix
         else:
             kix = self.add_input(keyname, keyval, 2, trust)
@@ -233,7 +258,8 @@ class ModelObject:
     
     def register_path(self):
         # initialize the path variable if not already set
-        if self.state_path == '':
+        #print("register_path called for", self.name, "with state_path", self.state_path)
+        if self.state_path == '' or self.state_path == False:
             self.make_paths()
         self.ix = set_state(self.state['state_ix'], self.state['state_paths'], self.state_path, self.default_value)
         # store object in model_object_cache
@@ -344,7 +370,8 @@ class ModelObject:
                 var_register = ModelRegister(var_name, register_container, default_value, register_path)
             else:
                 # this is just a standard numerical data holder so set up a constant
-                var_register = ModelVariable(var_name, register_container, default_value, register_path)
+                reg_props =  {'name':var_name, 'value':default_value, 'state_path':register_path}
+                var_register = ModelVariable(var_name, register_container, reg_props, self.state)
         else:
             var_register = self.state['model_object_cache'][register_path]
         return var_register
@@ -375,11 +402,10 @@ class ModelObject:
 The class ModelVariable is a base cass for storing numerical values.  Used for UVQUAN and misc numerical constants...
 """
 class ModelVariable(ModelObject):
-    def __init__(self, name, container = False, value = 0.0, state_path = False):
-        if (state_path != False):
-            # this allows us to mandate the location. useful for placeholders, broadcasts, etc.
-            self.state_path = state_path
-        super(ModelVariable, self).__init__(name, container)
+    def __init__(self, name, container = False, model_props = None, state = None):
+        super(ModelVariable, self).__init__(name, container, model_props, state)
+        #print("ModelVariable named", name, "with path", self.state_path,"beginning")
+        value = self.handle_prop(model_props, 'value')
         self.default_value = float(value) 
         self.optype = 7 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelVariable (numeric)
         #print("ModelVariable named",self.name, "with path", self.state_path,"and ix", self.ix, "value", value)
@@ -396,8 +422,8 @@ class ModelVariable(ModelObject):
 The class ModelConstant is for storing non-changing values.
 """
 class ModelConstant(ModelVariable):
-    def __init__(self, name, container = False, value = 0.0, state_path = False):
-        super(ModelConstant, self).__init__(name, container, value, state_path)
+    def __init__(self, name, container = False, model_props = None, state = None):
+        super(ModelConstant, self).__init__(name, container, model_props, state)
         self.optype = 16 # 0 - shell object, 1 - equation, 2 - datamatrix, 3 - input, 4 - broadcastChannel, 5 - SimTimer, 6 - Conditional, 7 - ModelVariable (numeric)
         #print("ModelVariable named",self.name, "with path", self.state_path,"and ix", self.ix, "value", value)
 
@@ -408,8 +434,8 @@ Behavior is to zero each timestep.  This could be amended later.
 Maybe combined with stack behavior?  Or accumulator?
 """
 class ModelRegister(ModelVariable):
-    def __init__(self, name, container = False, value = 0.0, state_path = False):
-        super(ModelRegister, self).__init__(name, container, value, state_path)
+    def __init__(self, name, container = None, model_props = False, state = False):
+        super(ModelRegister, self).__init__(name, container, model_props, state)
         self.optype = 12 # 
         # self.state['state_ix'][self.ix] = self.default_value
     

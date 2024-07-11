@@ -8,10 +8,10 @@ from hsp2.hsp2.om import *
 from hsp2.hsp2.om_model_object import ModelObject
 from numba import njit
 class ModelLinkage(ModelObject):
-    def __init__(self, name, container = False, model_props = None):
+    def __init__(self, name, container = False, model_props = None, state = None):
         if model_props is None:
             model_props = {}
-        super(ModelLinkage, self).__init__(name, container, model_props)
+        super(ModelLinkage, self).__init__(name, container, model_props, state = False)
         # ModelLinkage copies a values from right to left
         # right_path: is the data source for the link 
         # left_path: is the destination of the link 
@@ -49,11 +49,11 @@ class ModelLinkage(ModelObject):
         prop_val = super().handle_prop(model_props, prop_name, strict, default_value)
         if ( (prop_name == 'right_path') and (prop_val == None) or (prop_val == '')):
             raise Exception("right_path cannot be empty.  Object creation halted. Path to object with error is " + self.state_path)
-        if ( (prop_name == 'right_path')):
+        if ( (prop_name == 'right_path') or (prop_name == 'left_path')):
             # check for special keyword [parent]
             pre_val = prop_val
-            prop_val.replace("[parent]", self.container.state_path)
-            #print("Changed ", pre_val, " to ", prop_val)
+            prop_val = self.handle_path_aliases(prop_val)
+            print("Changed ", pre_val, " to ", prop_val)
         return prop_val
     
     @staticmethod
@@ -74,6 +74,12 @@ class ModelLinkage(ModelObject):
         # the left path, if this is type 4 or 5, is a push, so we must require it 
         if ( (self.link_type == 4) or (self.link_type == 5) or (self.link_type == 6) ):
             self.insure_path(self.left_path)
+            push_pieces = self.left_path.split('/')
+            push_name = push_pieces[len(push_pieces) - 1]
+            var_register = self.insure_register(push_name, 0.0, False, self.left_path, False)
+            #print("Created register", var_register.name, "with path", var_register.state_path)
+            # add already created objects as inputs
+            var_register.add_object_input(self.name, self, 1)
         self.paths_found = True
         return 
         
@@ -103,8 +109,9 @@ class ModelLinkage(ModelObject):
 # Function for use during model simulations of tokenized objects
 @njit
 def step_model_link(op_token, state_ix, ts_ix, step):
-    if step == 2:
-        print("step_model_link() called at step 2 with op_token=", op_token)
+    #if step == 2:
+    #    print("step_model_link() called at step 2 with op_token=", op_token)
+    #print("step_model_link() called at step 2 with op_token=", op_token)
     if op_token[3] == 1:
         return True
     elif op_token[3] == 2:

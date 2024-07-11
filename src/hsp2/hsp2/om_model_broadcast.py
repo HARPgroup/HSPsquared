@@ -10,8 +10,8 @@ from numba import njit
 import warnings
 
 class ModelBroadcast(ModelObject):
-    def __init__(self, name, container = False, model_props = {}):
-        super(ModelBroadcast, self).__init__(name, container, model_props)
+    def __init__(self, name, container = False, model_props = None, state = None):
+        super(ModelBroadcast, self).__init__(name, container, model_props, state)
         self.model_props_parsed = model_props
         # broadcast_params = [ [local_name1, remote_name1], [local_name2, remote_name2], ...]
         # broadcast_channel = state_path/[broadcast_channel]
@@ -68,7 +68,7 @@ class ModelBroadcast(ModelObject):
             if hub_exists == False:
                 hub_container = False
             else:
-                hub_container = self.model_object_cache[hub_path]
+                hub_container = self.state['model_object_cache'][hub_path]
         # add the channel to the hub path
         channel_path = hub_path + "/" + broadcast_channel
         channel = self.insure_channel(broadcast_channel, hub_container)
@@ -134,7 +134,7 @@ class ModelBroadcast(ModelObject):
             #print(self.state_path, "is Creating broadcast hub ", broadcast_channel, " on ", hub_name)
             hub_object = ModelObject(broadcast_channel, hub_container)
         else:
-            hub_object = self.model_object_cache[channel_path]
+            hub_object = self.state['model_object_cache'][channel_path]
         return hub_object
     
     def tokenize(self):

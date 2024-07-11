@@ -146,8 +146,10 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     # must split dicts out of state Dict since numba cannot handle mixed-type nested Dicts
     state_ix, dict_ix, ts_ix = state['state_ix'], state['dict_ix'], state['ts_ix']
     state_paths = state['state_paths']
-    ep_list = ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
-    model_exec_list = model_domain_dependencies(state, state_info['domain'], ep_list)
+    ep_list = hydr_state_vars()
+    # note: calling dependencies with 4th arg = True grabs only "runnable" types, which can save time
+    #       in long simulations, as iterating through non-runnables like Constants consumes time.
+    model_exec_list = model_domain_dependencies(state, state_info['domain'], ep_list, True)
     model_exec_list = asarray(model_exec_list, dtype="i8") # format for use in numba
     op_tokens = state['op_tokens']
     #######################################################################################
@@ -699,3 +701,9 @@ def expand_HYDR_masslinks(flags, uci, dat, recs):
         recs.append(rec)
     return recs
     
+def hydr_state_vars():
+    return ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
+
+def hydr_load_om(state, io_manager, siminfo):
+    for i in hydr_state_vars():
+        state['model_data'][seg_name][i] = {'object_class':'ModelVariable', 'name':i, 'value':0.0}

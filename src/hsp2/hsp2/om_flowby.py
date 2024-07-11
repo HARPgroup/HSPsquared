@@ -6,8 +6,8 @@ from HSP2.om import *
 from HSP2.om_model_object import ModelObject
 from numba import njit
 class FlowBy(ModelObject):
-    def __init__(self, name, container = False, model_props = {}):
-        super(FlowBy, self).__init__(name, container, model_props)
+    def __init__(self, name, container = False, model_props = None, state = None):
+        super(FlowBy, self).__init__(name, container, model_props, state = None)
         self.optype = 15 # Special Actions start indexing at 100 
     
     def parse_model_props(self, model_props, strict=False):
