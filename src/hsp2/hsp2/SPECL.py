@@ -9,7 +9,7 @@ Notes:
 from numba import njit
 from pandas import DataFrame, date_range
 
-def specl_load_actions(state, io_manager, siminfo):
+def specl_load_om(state, io_manager, siminfo):
     if 'ACTIONS' in state['specactions']:
         dc = state['specactions']['ACTIONS']
         for ix in dc.index:
@@ -32,7 +32,7 @@ def specl_load_actions(state, io_manager, siminfo):
     return
 
 def specl_load_state(state, io_manager, siminfo):
-    specl_load_actions(state, io_manager, siminfo)
+    specl_load_om(state, io_manager, siminfo)
     # others defined below, like:
     # specl_load_uvnames(state, io_manager, siminfo)
     # ...

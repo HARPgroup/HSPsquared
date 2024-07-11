@@ -15,10 +15,10 @@ from hsp2.hsp2.om import is_float_digit
 from hsp2.hsp2.om_model_object import ModelObject
 
 class SpecialAction(ModelObject):
-    def __init__(self, name, container = False, model_props = None):
+    def __init__(self, name, container = False, model_props = None, state = None):
         if model_props is None:
             model_props = {}
-        super(SpecialAction, self).__init__(name, container, model_props)
+        super(SpecialAction, self).__init__(name, container, model_props, state)
 
         self.optype = 100 # Special Actions start indexing at 100 
     
@@ -46,14 +46,6 @@ class SpecialAction(ModelObject):
         self.num = self.handle_prop(model_props, 'NUM', False, 1) # number of times to perform action
         self.timer_ix = self.handle_prop(model_props, 'when', False, 1) # when to begin the first attempt at action
         self.ctr_ix = self.constant_or_path('ctr', 0) # this initializes the counter for how many times an action has been performed
-        # NOTE: since the spec-action modifies the same quantity that is it's input, it does *not* set it as a proper "input" since that would create a circular dependency 
-        domain = self.state['model_object_cache'][('/STATE/' + self.op_type + '_' + self.op_type[0] + str(self.range1).zfill(3) )]
-        var_register = self.insure_register(self.vari, 0.0, domain, False, False)
-        #print("Created register", var_register.name, "with path", var_register.state_path)
-        # add already created objects as inputs
-        var_register.add_object_input(self.name, self, 1)
-        self.op1_ix = var_register.ix
-
         # @tbd: support time enable/disable
         #       - check if time ops have been set and add as inputs like "year", or "month", etc could give explicit path /STATE/year ...
         #       - add the time values to match as constants i.e. self.constant_or_path()
@@ -124,6 +116,18 @@ class SpecialAction(ModelObject):
         super().tokenize() # sets self.ops = op_type, op_ix
         self.ops = self.ops + [self.op1_ix, self.opid, self.op2_ix, self.timer_ix, self.ctr_ix, self.num]
         # @tbd: check if time ops have been set and tokenize accordingly
+    
+    def find_paths(self):
+        # this makes sure that the source prop (and destination prop) exists in the model.  
+        # NOTE: since the spec-action modifies the same quantity that is it's input, it does *not* set it as a proper "input" since that would create a circular dependency 
+        domain_path = self.container.state_path + "/" + self.op_type + '_' + self.op_type[0] + str(self.range1).zfill(3)
+        domain = self.state['model_object_cache'][domain_path]
+        var_register = self.insure_register(self.vari, 0.0, domain, False, False)
+        #print("Created register", var_register.name, "with path", var_register.state_path)
+        # add already created objects as inputs
+        var_register.add_object_input(self.name, self, 1)
+        self.op1_ix = var_register.ix
+        return super().find_paths()
     
     def add_op_tokens(self):
         # this puts the tokens into the global simulation queue 

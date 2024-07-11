@@ -11,7 +11,7 @@ from numba import njit
 from numpy import int64
 
 class SimTimer(ModelObject):
-    def __init__(self, name, container, model_props = None):
+    def __init__(self, name, container, model_props = None, state = None):
         if model_props is None:
             model_props = {}
         # Note: hsp2 siminfo will match model_props here

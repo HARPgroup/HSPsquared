@@ -69,7 +69,7 @@ def main(io_manager:Union[str, IOManager], saveall:bool=False, jupyterlab:bool=T
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
     state = init_state_dicts()
-    state_siminfo_hsp2(uci_obj, siminfo)
+    state_siminfo_hsp2(uci_obj, siminfo, io_manager, state)
     # Add support for dynamic functions to operate on STATE
     # - Load any dynamic components if present, and store variables on objects 
     state_load_dynamics_hsp2(state, io_manager, siminfo)
