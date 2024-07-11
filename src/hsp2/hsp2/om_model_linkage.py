@@ -30,9 +30,9 @@ class ModelLinkage(ModelObject):
             return False
         self.right_path = self.handle_prop(model_props, 'right_path')
         self.link_type = self.handle_prop(model_props, 'link_type', False, 0)
-        self.left_path = self.handle_prop(model_props, 'left_path')
+        self.left_path = self.handle_prop(model_props, 'left_path', False, None)
         
-        if self.left_path == False:
+        if self.left_path == None:
             # self.state_path gets set when creating at the parent level
             self.left_path = self.state_path 
         if (self.link_type == 0):
@@ -51,8 +51,13 @@ class ModelLinkage(ModelObject):
             raise Exception("right_path cannot be empty.  Object creation halted. Path to object with error is " + self.state_path)
         if ( (prop_name == 'right_path') or (prop_name == 'left_path')):
             # check for special keyword [parent]
-            pre_val = prop_val
-            prop_val = self.handle_path_aliases(prop_val)
+            pre_val = prop_val # stash this in case fin_var_path() returns False
+            #prop_val = self.handle_path_aliases(prop_val)
+            prop_val = self.find_var_path(prop_val)
+            if prop_val == False:
+                # discovery has returned false, meaning it could not find the property name
+                # so we need to retain the old path, with aliases fixed
+                prop_val = self.handle_path_aliases(pre_val)
             print("Changed ", pre_val, " to ", prop_val)
         return prop_val
     
@@ -77,7 +82,7 @@ class ModelLinkage(ModelObject):
             push_pieces = self.left_path.split('/')
             push_name = push_pieces[len(push_pieces) - 1]
             var_register = self.insure_register(push_name, 0.0, False, self.left_path, False)
-            #print("Created register", var_register.name, "with path", var_register.state_path)
+            print("Created register", var_register.name, "with path", var_register.state_path)
             # add already created objects as inputs
             var_register.add_object_input(self.name, self, 1)
         self.paths_found = True

@@ -56,14 +56,15 @@ river = state['model_root_object'].get_object('RCHRES_R001')
 
 wd_cfs = river.get_object('wd_cfs')
 WDwrite = river.get_object('WDwrite')
-specl1 = state['model_object_cache']['/STATE/SPECACTION1']
+specl1 = river.get_object('SPECACTION1')
 
 
 domain = river.state_path
 ep_list = ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
 model_exec_list = model_domain_dependencies(state, domain, ep_list)
 
-river.container.ix
+get_ix_path(state['state_paths'], river.container.ix)
+get_ix_path(state['state_paths'], WDwrite.ops[2]) # op 2 (the 3rd op) is for the left_path, which is where we write the value
 
 # run the simulation
 from hsp2.hsp2tools.commands import import_uci, run
@@ -82,3 +83,5 @@ Qout.quantile([0,0.1,0.5,0.75,0.9,1.0])
 Qout.mean()
 wd.quantile([0,0.1,0.5,0.75,0.9,1.0])
 wd.mean()
+
+# 
