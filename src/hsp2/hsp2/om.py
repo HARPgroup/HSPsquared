@@ -538,6 +538,14 @@ def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     return 
 
 
+@njit
+def finish_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix):
+    for i in model_exec_list:
+        if op_tokens[i][0] == 12:
+            # register type data (like broadcast accumulators) 
+            end_model_link(op_tokens[i], state_ix, ts_ix)
+    return
+
 
 @njit
 def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug = 0):
