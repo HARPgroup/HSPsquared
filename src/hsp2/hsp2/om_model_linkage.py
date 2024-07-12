@@ -138,3 +138,14 @@ def step_model_link(op_token, state_ix, ts_ix, step):
         # set value in a timerseries
         ts_ix[op_token[2]][step] = state_ix[op_token[4]] 
         return True
+
+
+@njit
+def end_model_link(op_token, state_ix, ts_ix, step):
+    #if step == 2:
+    #    print("step_model_link() called at step 2 with op_token=", op_token)
+    #print("step_model_link() called at step 2 with op_token=", op_token)
+    if op_token[3] == 6:
+        # save timerseries to the hdf5
+        
+        return True
