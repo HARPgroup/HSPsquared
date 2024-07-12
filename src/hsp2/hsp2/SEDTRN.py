@@ -95,8 +95,8 @@ def sedtrn(io_manager, siminfo, uci, ts, state):
 	state_paths = state['state_paths']
 	op_tokens = state['op_tokens']
 	# Aggregate the list of all SEDTRN end point dependencies
-	ep_list = ['RSED4', 'RSED5', 'RSED6']
-	model_exec_list = model_domain_dependencies(state, state_info['domain'], ep_list)
+	ep_list = sedtrn_state_vars()
+	model_exec_list = model_domain_dependencies(state, state_info['domain'], ep_list, True)
 	model_exec_list = asarray(model_exec_list, dtype="i8") # format for use in 
 	#######################################################################################
 
@@ -1016,3 +1016,7 @@ def expand_SEDTRN_masslinks(flags, uci, dat, recs):
 		rec['SVOL'] = dat.SVOL
 		recs.append(rec)
 	return recs
+
+def sedtrn_state_vars():
+	sedtrn_state = ["RSED4","RSED5","RSED6"]
+	return(sedtrn_state)

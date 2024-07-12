@@ -14,7 +14,7 @@
             "left_path": "[parent]/O2",
             "right_path": "[parent]/wd_cfs",
             "link_type": 5,
-            "comments": "The use of [parent] is useful in that it will insure that we create a variable if it doesn't exist.  If the system already created O2 (it should) we would not need this.  But it does not, so we do."
+            "comments": "The use of [parent] is necessary in that it will insure that we create a variable if it doesn't exist.  If the system already created O2 (it should) we would not need this.  But it does not, so we do."
         }
     }
 }
