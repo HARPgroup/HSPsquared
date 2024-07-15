@@ -84,4 +84,3 @@ Qout.mean()
 wd.quantile([0,0.1,0.5,0.75,0.9,1.0])
 wd.mean()
 
-# 

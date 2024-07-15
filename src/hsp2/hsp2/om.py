@@ -67,7 +67,7 @@ def model_element_paths(mel, state):
 from hsp2.hsp2.om_model_object import ModelObject, ModelVariable, ModelRegister, pre_step_register
 from hsp2.hsp2.om_sim_timer import SimTimer, step_sim_timer
 from hsp2.hsp2.om_equation import Equation, step_equation
-from hsp2.hsp2.om_model_linkage import ModelLinkage, step_model_link
+from hsp2.hsp2.om_model_linkage import ModelLinkage, step_model_link, end_model_link
 from hsp2.hsp2.om_special_action import SpecialAction, step_special_action
 #from hsp2.hsp2.om_data_matrix import *
 #from hsp2.hsp2.om_model_broadcast import *
@@ -218,8 +218,14 @@ def state_om_model_run_prep(state, io_manager, siminfo):
     if len(model_exec_list) > 0:
         #pass
         print("op_tokens has", len(op_tokens),"elements, with ", len(model_exec_list),"executable elements")
-        print("Exec list:", model_exec_list)
+        #print("Exec list:", model_exec_list)
     return
+
+def state_om_model_run_finish(state, io_manager, siminfo):
+    # write logs and other post-processing steps (if any)
+    finish_model(state['model_exec_list'], state['op_tokens'], state['state_ix'], state['dict_ix'], state['ts_ix'])
+    return(True)
+
 
 # model class reader
 # get model class  to guess object type in this lib 
@@ -538,11 +544,10 @@ def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     return 
 
 
-@njit
 def finish_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix):
     for i in model_exec_list:
-        if op_tokens[i][0] == 12:
-            # register type data (like broadcast accumulators) 
+        if op_tokens[i][0] == 3:
+            # output time series saves
             end_model_link(op_tokens[i], state_ix, ts_ix)
     return
 

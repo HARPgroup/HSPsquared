@@ -58,7 +58,7 @@ class ModelLinkage(ModelObject):
                 # discovery has returned false, meaning it could not find the property name
                 # so we need to retain the old path, with aliases fixed
                 prop_val = self.handle_path_aliases(pre_val)
-            print("Changed ", pre_val, " to ", prop_val)
+            #print("Changed ", pre_val, " to ", prop_val)
         return prop_val
     
     @staticmethod
@@ -141,11 +141,10 @@ def step_model_link(op_token, state_ix, ts_ix, step):
 
 
 @njit
-def end_model_link(op_token, state_ix, ts_ix, step):
+def end_model_link(op_token, state_ix, ts_ix):
     #if step == 2:
     #    print("step_model_link() called at step 2 with op_token=", op_token)
     #print("step_model_link() called at step 2 with op_token=", op_token)
     if op_token[3] == 6:
         # save timerseries to the hdf5
-        
         return True

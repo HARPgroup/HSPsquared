@@ -147,6 +147,10 @@ def state_load_dynamics_hsp2(state, io_manager, siminfo):
     state['state_step_hydr'] = siminfo['state_step_hydr'] # enabled or disabled 
     state['hsp2_local_py'] = hsp2_local_py # Stores the actual function in state
 
+
+def hydr_state_vars():
+    return ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
+
 def hydr_init_ix(state, domain):
     # get a list of keys for all hydr state variables
     hydr_state = hydr_state_vars()
@@ -157,9 +161,13 @@ def hydr_init_ix(state, domain):
         hydr_ix[i] = set_state(state['state_ix'], state['state_paths'], var_path, 0.0)
     return hydr_ix
 
+def sedtrn_state_vars():
+	sedtrn_state = ["RSED4","RSED5","RSED6"]
+	return(sedtrn_state)
+
 def sedtrn_init_ix(state, domain):
     # get a list of keys for all sedtrn state variables
-    sedtrn_state = ["RSED4","RSED5","RSED6"]
+    sedtrn_state = sedtrn_state_vars()
     sedtrn_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
     for i in sedtrn_state:
         #var_path = f'{domain}/{i}'
