@@ -10,7 +10,7 @@ from hsp2.hsp2.ADCALC import advect
 from hsp2.hsp2.utilities  import make_numba_dict
 
 # the following imports added to handle special actions
-from hsp2.hsp2.state import sedtrn_get_ix, sedtrn_init_ix
+from hsp2.hsp2.state import sedtrn_get_ix, sedtrn_init_ix, sedtrn_state_vars
 from hsp2.hsp2.om import pre_step_model, step_model, model_domain_dependencies
 from numba.typed import Dict
 
@@ -95,7 +95,7 @@ def sedtrn(io_manager, siminfo, uci, ts, state):
 	state_paths = state['state_paths']
 	op_tokens = state['op_tokens']
 	# Aggregate the list of all SEDTRN end point dependencies
-	ep_list = sedtrn_state_vars()
+	ep_list = sedtrn_state_vars() # define all eligibile for state integration in state.py
 	model_exec_list = model_domain_dependencies(state, state_info['domain'], ep_list, True)
 	model_exec_list = asarray(model_exec_list, dtype="i8") # format for use in 
 	#######################################################################################
@@ -1016,7 +1016,3 @@ def expand_SEDTRN_masslinks(flags, uci, dat, recs):
 		rec['SVOL'] = dat.SVOL
 		recs.append(rec)
 	return recs
-
-def sedtrn_state_vars():
-	sedtrn_state = ["RSED4","RSED5","RSED6"]
-	return(sedtrn_state)

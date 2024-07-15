@@ -20,7 +20,7 @@ from numba.typed import List
 from hsp2.hsp2.utilities import initm, make_numba_dict
 
 # the following imports added by rb to handle dynamic code and special actions
-from hsp2.hsp2.state import hydr_get_ix, hydr_init_ix
+from hsp2.hsp2.state import hydr_get_ix, hydr_init_ix, hydr_state_vars
 from hsp2.hsp2.om import pre_step_model, step_model, model_domain_dependencies
 from numba.typed import Dict
 
@@ -146,7 +146,7 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     # must split dicts out of state Dict since numba cannot handle mixed-type nested Dicts
     state_ix, dict_ix, ts_ix = state['state_ix'], state['dict_ix'], state['ts_ix']
     state_paths = state['state_paths']
-    ep_list = hydr_state_vars()
+    ep_list = hydr_state_vars() # define all eligibile for state integration in state.py
     # note: calling dependencies with 4th arg = True grabs only "runnable" types, which can save time
     #       in long simulations, as iterating through non-runnables like Constants consumes time.
     model_exec_list = model_domain_dependencies(state, state_info['domain'], ep_list, True)
@@ -165,7 +165,8 @@ def hydr(io_manager, siminfo, uci, ts, ftables, state):
     uci['PARAMETERS']['ROS'] = ui['ROS']
     for i in range(nexits):
         uci['PARAMETERS']['OS'+str(i+1)] = ui['OS'+str(i+1)]
-    
+    # copy back (modified) operational element data
+    state['state_ix'], state['dict_ix'], state['ts_ix'] = state_ix, dict_ix, ts_ix
     return errors, ERRMSGS
 
 
@@ -701,8 +702,6 @@ def expand_HYDR_masslinks(flags, uci, dat, recs):
         recs.append(rec)
     return recs
     
-def hydr_state_vars():
-    return ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
 
 def hydr_load_om(state, io_manager, siminfo):
     for i in hydr_state_vars():
