@@ -402,6 +402,11 @@ class ModelObject:
         step_one(self.state['op_tokens'], self.state['op_tokens'][self.ix], self.state['state_ix'], self.state['dict_ix'], self.state['ts_ix'], step)
         #step_model({self.state['op_tokens'][self.ix]}, self.state['state_ix'], self.state['dict_ix'], self.state['ts_ix'], step)
 
+    def finish(self):
+        # Do end of model activities here
+        # we do this in the object context if it involves IO and other complex actions
+        return(True)
+
 """
 The class ModelVariable is a base cass for storing numerical values.  Used for UVQUAN and misc numerical constants...
 """

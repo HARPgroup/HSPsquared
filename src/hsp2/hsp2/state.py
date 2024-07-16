@@ -48,7 +48,7 @@ def get_state_ix(state_ix, state_paths, var_path):
 
 def get_ix_path(state_paths, var_ix):
     """
-    Find the integer key of a variable name in state_ix 
+    Find the path of a variable with integer key in state_ix 
     """
     for spath, ix in state_paths.items():
         if var_ix == ix:
@@ -71,6 +71,21 @@ def set_state(state_ix, state_paths, var_path, default_value = 0.0, debug = Fals
     state_ix[var_ix] = default_value
     return var_ix
 
+def state_add_ts(state, var_path, default_value = 0.0, debug = False):
+    """
+    Given an hdf5 style path to a variable, set the value 
+    If the variable does not yet exist, create it.
+    Returns the integer key of the variable in the state_ix Dict
+    """
+    if not (var_path in state['state_paths'].keys()):
+        # we need to add this to the state 
+        state['state_paths'][var_path] = append_state(state['state_ix'], default_value)
+    var_ix = get_state_ix(state['state_ix'], state['state_paths'], var_path)
+    if (debug == True):
+        print("Setting state_ix[", var_ix, "], to", default_value)
+    # siminfo needs to be in the model_data array of state.  Can be populated by HSP2 or standalone by ops model
+    state['ts_ix'][var_ix] = np.full_like(zeros(state['model_data']['siminfo']['steps']), default_value)
+    return var_ix
 
 def set_dict_state(state_ix, dict_ix, state_paths, var_path, default_value = {}):
     """

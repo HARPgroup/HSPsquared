@@ -1,0 +1,30 @@
+{
+    "RCHRES_R001": {
+        "name": "RCHRES_R001",
+        "object_class": "ModelObject",
+        "value": "0",
+        "wd_cfs": {
+            "name": "wd_cfs",
+            "object_class": "Equation",
+            "equation": "2.0",
+            "store_ts": {
+                "name": "store_ts",
+                "object_class": "ModelLinkage",
+                "left_path": "/TIMESERIES/RCHRES_R001/wd_cfs",
+                "right_path": "[parent]",
+                "link_type": 6,
+                "complevel": 9,
+                "comments": "This will write to the ts data frame during runtime then save to the hdf file at run end."
+            }
+        },
+        "WDwrite": {
+            "name": "WDwrite",
+            "object_class": "ModelLinkage",
+            "left_path": "[parent]/O2",
+            "right_path": "[parent]/wd_cfs",
+            "link_type": 5,
+            "comments": "The use of [parent] is necessary in that it will insure that we create a variable if it doesn't exist.  If the system already created O2 (it should) we would not need this.  But it does not, so we do."
+        }
+    }
+}
+
