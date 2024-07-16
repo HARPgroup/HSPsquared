@@ -104,6 +104,8 @@ def state_load_om_json(state, io_manager, siminfo):
     # merge in the json siminfo data
     if 'siminfo' in state['model_data'].keys():
         siminfo.update(state['model_data']['siminfo'])
+    else:
+        state['model_data']['siminfo'] = siminfo
     return
 
 def state_load_om_python(state, io_manager, siminfo):
@@ -153,7 +155,9 @@ def state_om_model_root_object(state, siminfo):
         # set up the timer as the first element 
     model_root_object = state['model_root_object']
     if '/STATE/timer' not in state['state_paths'].keys():
-        timer = SimTimer('timer', model_root_object, siminfo)
+        timer_props = siminfo
+        timer_props['state_path'] = '/STATE/timer'
+        timer = SimTimer('timer', model_root_object, timer_props, state)
     # add base object for the HSP2 domains and other things already added to state so they can be influenced
     for (seg_name,seg_path) in state['hsp_segments'].items():
         if (seg_path not in state['model_object_cache'].keys()):
@@ -223,7 +227,7 @@ def state_om_model_run_prep(state, io_manager, siminfo):
 
 def state_om_model_run_finish(state, io_manager, siminfo):
     # write logs and other post-processing steps (if any)
-    finish_model(state['model_exec_list'], state['op_tokens'], state['state_ix'], state['dict_ix'], state['ts_ix'])
+    finish_model(state, io_manager, siminfo)
     return(True)
 
 
@@ -490,6 +494,20 @@ def model_order_recursive(model_object, model_object_cache, model_exec_list, mod
     # now after loading input dependencies, add this to list
     model_exec_list.append(model_object.ix)
 
+def model_input_dependencies(state, exec_list):
+    mello = exec_list
+    mtl = []
+    mel = []
+    for model_element in state['model_object_cache'].values():
+        for input_path in model_element.inputs:
+            input_ix = get_state_ix(state['state_ix'], state['state_paths'], input_path)
+            if input_ix in exec_list:
+                # do a recursive pull of factors affecting this element
+                model_order_recursive(model_element, state['model_object_cache'], mel, mtl)
+                mello = mello + mel
+    return mello
+
+
 def model_domain_dependencies(state, domain, ep_list, only_runnable = False):
     """
     Given an hdf5 style path to a domain, and a list of variable endpoints in that domain, 
@@ -544,11 +562,13 @@ def step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step):
     return 
 
 
-def finish_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix):
-    for i in model_exec_list:
-        if op_tokens[i][0] == 3:
-            # output time series saves
-            end_model_link(op_tokens[i], state_ix, ts_ix)
+def finish_model(state, io_manager, siminfo):
+    print("Model object cache list", state['model_object_cache'].keys())
+    for i in state['model_exec_list']:
+        model_object = state['model_object_cache'][get_ix_path(state['state_paths'], i)]
+        if 'io_manager' in dir(model_object):
+            model_object.io_manager = io_manager
+        model_object.finish()
     return
 
 
