@@ -494,7 +494,7 @@ def model_order_recursive(model_object, model_object_cache, model_exec_list, mod
     # now after loading input dependencies, add this to list
     model_exec_list.append(model_object.ix)
 
-def model_input_dependencies(state, exec_list):
+def model_input_dependencies(state, exec_list, only_runnable = False):
     mello = exec_list
     mtl = []
     mel = []
@@ -505,6 +505,9 @@ def model_input_dependencies(state, exec_list):
                 # do a recursive pull of factors affecting this element
                 model_order_recursive(model_element, state['model_object_cache'], mel, mtl)
                 mello = mello + mel
+    if (only_runnable == True):
+        mello = ModelObject.runnable_op_list(state['op_tokens'], mello)
+    mello = pd.Series(mello).drop_duplicates().tolist()
     return mello
 
 
