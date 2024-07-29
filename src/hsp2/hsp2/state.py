@@ -48,7 +48,7 @@ def get_state_ix(state_ix, state_paths, var_path):
 
 def get_ix_path(state_paths, var_ix):
     """
-    Find the integer key of a variable name in state_ix 
+    Find the path of a variable with integer key in state_ix 
     """
     for spath, ix in state_paths.items():
         if var_ix == ix:
@@ -71,6 +71,21 @@ def set_state(state_ix, state_paths, var_path, default_value = 0.0, debug = Fals
     state_ix[var_ix] = default_value
     return var_ix
 
+def state_add_ts(state, var_path, default_value = 0.0, debug = False):
+    """
+    Given an hdf5 style path to a variable, set the value 
+    If the variable does not yet exist, create it.
+    Returns the integer key of the variable in the state_ix Dict
+    """
+    if not (var_path in state['state_paths'].keys()):
+        # we need to add this to the state 
+        state['state_paths'][var_path] = append_state(state['state_ix'], default_value)
+    var_ix = get_state_ix(state['state_ix'], state['state_paths'], var_path)
+    if (debug == True):
+        print("Setting state_ix[", var_ix, "], to", default_value)
+    # siminfo needs to be in the model_data array of state.  Can be populated by HSP2 or standalone by ops model
+    state['ts_ix'][var_ix] = np.full_like(zeros(state['model_data']['siminfo']['steps']), default_value)
+    return var_ix
 
 def set_dict_state(state_ix, dict_ix, state_paths, var_path, default_value = {}):
     """
@@ -105,7 +120,7 @@ def state_context_hsp2(state, operation, segment, activity):
     # give shortcut to state path for the upcoming function 
     # insure that there is a model object container
     seg_name = operation + "_" + segment 
-    seg_path =  '/STATE/' + seg_name
+    seg_path = '/STATE/' + state['model_root_name'] + "/" + seg_name
     if 'hsp_segments' not in state.keys():
         state['hsp_segments'] = {} # for later use by things that need to know hsp entities and their paths
     if seg_name not in state['hsp_segments'].keys():
@@ -113,12 +128,15 @@ def state_context_hsp2(state, operation, segment, activity):
 
     state['domain'] = seg_path # + "/" + activity   # may want to comment out activity?
 
-def state_siminfo_hsp2(uci_obj, siminfo):
+def state_siminfo_hsp2(uci_obj, siminfo, io_manager, state):
     # Add crucial simulation info for dynamic operation support
     delt = uci_obj.opseq.INDELT_minutes[0] # get initial value for STATE objects
     siminfo['delt'] = delt
     siminfo['tindex'] = date_range(siminfo['start'], siminfo['stop'], freq=Minute(delt))[1:]
     siminfo['steps'] = len(siminfo['tindex'])
+    hdf5_path = io_manager._input.file_path
+    (fbase, fext) = os.path.splitext(hdf5_path)
+    state['model_root_name'] = os.path.split(fbase)[1] # takes the text before .h5
 
 def state_init_hsp2(state, opseq, activities):
     # This sets up the state entries for all state compatible HSP2 model variables
@@ -144,9 +162,13 @@ def state_load_dynamics_hsp2(state, io_manager, siminfo):
     state['state_step_hydr'] = siminfo['state_step_hydr'] # enabled or disabled 
     state['hsp2_local_py'] = hsp2_local_py # Stores the actual function in state
 
+
+def hydr_state_vars():
+    return ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
+
 def hydr_init_ix(state, domain):
     # get a list of keys for all hydr state variables
-    hydr_state = ["DEP","IVOL","O1","O2","O3","OVOL1","OVOL2","OVOL3","PRSUPY","RO","ROVOL","SAREA","TAU","USTAR","VOL","VOLEV"]
+    hydr_state = hydr_state_vars()
     hydr_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
     for i in hydr_state:
         #var_path = f'{domain}/{i}'
@@ -154,9 +176,13 @@ def hydr_init_ix(state, domain):
         hydr_ix[i] = set_state(state['state_ix'], state['state_paths'], var_path, 0.0)
     return hydr_ix
 
+def sedtrn_state_vars():
+	sedtrn_state = ["RSED4","RSED5","RSED6"]
+	return(sedtrn_state)
+
 def sedtrn_init_ix(state, domain):
     # get a list of keys for all sedtrn state variables
-    sedtrn_state = ["RSED4","RSED5","RSED6"]
+    sedtrn_state = sedtrn_state_vars()
     sedtrn_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
     for i in sedtrn_state:
         #var_path = f'{domain}/{i}'

@@ -14,7 +14,7 @@ from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 from hsp2.hsp2.configuration import activities, noop, expand_masslinks
 from hsp2.hsp2.state import init_state_dicts, state_siminfo_hsp2, state_load_dynamics_hsp2, state_init_hsp2, state_context_hsp2
-from hsp2.hsp2.om import om_init_state, state_om_model_run_prep, state_load_dynamics_om
+from hsp2.hsp2.om import om_init_state, state_om_model_run_prep, state_load_dynamics_om, state_om_model_run_finish
 from hsp2.hsp2.SPECL import specl_load_state
 
 from hsp2.hsp2io.io import IOManager, SupportsReadTS, Category
@@ -69,7 +69,7 @@ def main(io_manager:Union[str, IOManager], saveall:bool=False, jupyterlab:bool=T
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
     state = init_state_dicts()
-    state_siminfo_hsp2(uci_obj, siminfo)
+    state_siminfo_hsp2(uci_obj, siminfo, io_manager, state)
     # Add support for dynamic functions to operate on STATE
     # - Load any dynamic components if present, and store variables on objects 
     state_load_dynamics_hsp2(state, io_manager, siminfo)
@@ -281,6 +281,9 @@ def main(io_manager:Union[str, IOManager], saveall:bool=False, jupyterlab:bool=T
                     if 'SAVE' in ui_phcarb and flags['PHCARB'] == 1:   save_timeseries(io_manager,ts,ui_phcarb['SAVE'],siminfo,saveall,operation,segment,'PHCARB',jupyterlab,outstep_phcarb)
 
     msglist = msg(1, 'Done', final=True)
+
+    # Finish operational models
+    state_om_model_run_finish(state, io_manager, siminfo)
 
     df = DataFrame(msglist, columns=['logfile'])
     io_manager.write_log(df)

@@ -1,0 +1,1087 @@
+{
+    "RCHRES_R001": {
+        "name": "RCHRES_R001",
+        "object_class": "ModelObject",
+        "local_area_sqmi": {
+            "name": "local_area_sqmi",
+            "object_class": "Equation",
+            "value": 1.5317438544
+        },
+        "read_from_children": {
+            "name": "read_from_children",
+            "object_class": "ModelBroadcast",
+            "broadcast_type": "read",
+            "broadcast_channel": "hydroObject",
+            "broadcast_hub": "self",
+            "broadcast_params": [
+                [
+                    "Qtrib",
+                    "Qtrib"
+                ],
+                [
+                    "trib_area_sqmi",
+                    "trib_area_sqmi"
+                ],
+                [
+                    "child_wd_mgd",
+                    "wd_mgd"
+                ]
+            ]
+        },
+        "Qlocal": {
+            "name": "Qlocal",
+            "object_class": "Equation",
+            "value": "local_area_sqmi * Runit"
+        },
+        "Qin": {
+            "name": "Qin",
+            "object_class": "Equation",
+            "equation": "Qlocal + Qtrib"
+        },
+        "Qout": {
+            "name": "Qout",
+            "object_class": "Equation",
+            "equation": "Qin * 1.0"
+        },
+        "drainage_area_sqmi": {
+            "name": "drainage_area_sqmi",
+            "object_class": "Equation",
+            "equation": "local_area_sqmi + trib_area_sqmi"
+        },
+        "send_to_parent": {
+            "name": "send_to_parent",
+            "object_class": "ModelBroadcast",
+            "broadcast_type": "send",
+            "broadcast_channel": "hydroObject",
+            "broadcast_hub": "parent",
+            "broadcast_params": [
+                [
+                    "Qout",
+                    "Qtrib"
+                ],
+                [
+                    "drainage_area_sqmi",
+                    "trib_area_sqmi"
+                ]
+            ]
+        },
+        "nhd_8567221": {
+            "name": "nhd_8567221",
+            "object_class": "ModelObject",
+            "local_area_sqmi": {
+                "name": "local_area_sqmi",
+                "object_class": "Equation",
+                "value": 0.5636316996
+            },
+            "read_from_children": {
+                "name": "read_from_children",
+                "object_class": "ModelBroadcast",
+                "broadcast_type": "read",
+                "broadcast_channel": "hydroObject",
+                "broadcast_hub": "self",
+                "broadcast_params": [
+                    [
+                        "Qtrib",
+                        "Qtrib"
+                    ],
+                    [
+                        "trib_area_sqmi",
+                        "trib_area_sqmi"
+                    ],
+                    [
+                        "child_wd_mgd",
+                        "wd_mgd"
+                    ]
+                ]
+            },
+            "Qlocal": {
+                "name": "Qlocal",
+                "object_class": "Equation",
+                "value": "local_area_sqmi * Runit"
+            },
+            "Qin": {
+                "name": "Qin",
+                "object_class": "Equation",
+                "equation": "Qlocal + Qtrib"
+            },
+            "Qout": {
+                "name": "Qout",
+                "object_class": "Equation",
+                "equation": "Qin * 1.0"
+            },
+            "drainage_area_sqmi": {
+                "name": "drainage_area_sqmi",
+                "object_class": "Equation",
+                "equation": "local_area_sqmi + trib_area_sqmi"
+            },
+            "send_to_parent": {
+                "name": "send_to_parent",
+                "object_class": "ModelBroadcast",
+                "broadcast_type": "send",
+                "broadcast_channel": "hydroObject",
+                "broadcast_hub": "parent",
+                "broadcast_params": [
+                    [
+                        "Qout",
+                        "Qtrib"
+                    ],
+                    [
+                        "drainage_area_sqmi",
+                        "trib_area_sqmi"
+                    ]
+                ]
+            },
+            "nhd_8567217": {
+                "name": "nhd_8567217",
+                "object_class": "ModelObject",
+                "local_area_sqmi": {
+                    "name": "local_area_sqmi",
+                    "object_class": "Equation",
+                    "value": 0.2630512926
+                },
+                "read_from_children": {
+                    "name": "read_from_children",
+                    "object_class": "ModelBroadcast",
+                    "broadcast_type": "read",
+                    "broadcast_channel": "hydroObject",
+                    "broadcast_hub": "self",
+                    "broadcast_params": [
+                        [
+                            "Qtrib",
+                            "Qtrib"
+                        ],
+                        [
+                            "trib_area_sqmi",
+                            "trib_area_sqmi"
+                        ],
+                        [
+                            "child_wd_mgd",
+                            "wd_mgd"
+                        ]
+                    ]
+                },
+                "Qlocal": {
+                    "name": "Qlocal",
+                    "object_class": "Equation",
+                    "value": "local_area_sqmi * Runit"
+                },
+                "Qin": {
+                    "name": "Qin",
+                    "object_class": "Equation",
+                    "equation": "Qlocal + Qtrib"
+                },
+                "Qout": {
+                    "name": "Qout",
+                    "object_class": "Equation",
+                    "equation": "Qin * 1.0"
+                },
+                "drainage_area_sqmi": {
+                    "name": "drainage_area_sqmi",
+                    "object_class": "Equation",
+                    "equation": "local_area_sqmi + trib_area_sqmi"
+                },
+                "send_to_parent": {
+                    "name": "send_to_parent",
+                    "object_class": "ModelBroadcast",
+                    "broadcast_type": "send",
+                    "broadcast_channel": "hydroObject",
+                    "broadcast_hub": "parent",
+                    "broadcast_params": [
+                        [
+                            "Qout",
+                            "Qtrib"
+                        ],
+                        [
+                            "drainage_area_sqmi",
+                            "trib_area_sqmi"
+                        ]
+                    ]
+                },
+                "nhd_8566763": {
+                    "name": "nhd_8566763",
+                    "object_class": "ModelObject",
+                    "local_area_sqmi": {
+                        "name": "local_area_sqmi",
+                        "object_class": "Equation",
+                        "value": 1.1046764322
+                    },
+                    "read_from_children": {
+                        "name": "read_from_children",
+                        "object_class": "ModelBroadcast",
+                        "broadcast_type": "read",
+                        "broadcast_channel": "hydroObject",
+                        "broadcast_hub": "self",
+                        "broadcast_params": [
+                            [
+                                "Qtrib",
+                                "Qtrib"
+                            ],
+                            [
+                                "trib_area_sqmi",
+                                "trib_area_sqmi"
+                            ],
+                            [
+                                "child_wd_mgd",
+                                "wd_mgd"
+                            ]
+                        ]
+                    },
+                    "Qlocal": {
+                        "name": "Qlocal",
+                        "object_class": "Equation",
+                        "value": "local_area_sqmi * Runit"
+                    },
+                    "Qin": {
+                        "name": "Qin",
+                        "object_class": "Equation",
+                        "equation": "Qlocal + Qtrib"
+                    },
+                    "Qout": {
+                        "name": "Qout",
+                        "object_class": "Equation",
+                        "equation": "Qin * 1.0"
+                    },
+                    "drainage_area_sqmi": {
+                        "name": "drainage_area_sqmi",
+                        "object_class": "Equation",
+                        "equation": "local_area_sqmi + trib_area_sqmi"
+                    },
+                    "send_to_parent": {
+                        "name": "send_to_parent",
+                        "object_class": "ModelBroadcast",
+                        "broadcast_type": "send",
+                        "broadcast_channel": "hydroObject",
+                        "broadcast_hub": "parent",
+                        "broadcast_params": [
+                            [
+                                "Qout",
+                                "Qtrib"
+                            ],
+                            [
+                                "drainage_area_sqmi",
+                                "trib_area_sqmi"
+                            ]
+                        ]
+                    },
+                    "nhd_8566731": {
+                        "name": "nhd_8566731",
+                        "object_class": "ModelObject",
+                        "local_area_sqmi": {
+                            "name": "local_area_sqmi",
+                            "object_class": "Equation",
+                            "value": 0.7380725832
+                        },
+                        "read_from_children": {
+                            "name": "read_from_children",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "read",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "self",
+                            "broadcast_params": [
+                                [
+                                    "Qtrib",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "trib_area_sqmi",
+                                    "trib_area_sqmi"
+                                ],
+                                [
+                                    "child_wd_mgd",
+                                    "wd_mgd"
+                                ]
+                            ]
+                        },
+                        "Qlocal": {
+                            "name": "Qlocal",
+                            "object_class": "Equation",
+                            "value": "local_area_sqmi * Runit"
+                        },
+                        "Qin": {
+                            "name": "Qin",
+                            "object_class": "Equation",
+                            "equation": "Qlocal + Qtrib"
+                        },
+                        "Qout": {
+                            "name": "Qout",
+                            "object_class": "Equation",
+                            "equation": "Qin * 1.0"
+                        },
+                        "drainage_area_sqmi": {
+                            "name": "drainage_area_sqmi",
+                            "object_class": "Equation",
+                            "equation": "local_area_sqmi + trib_area_sqmi"
+                        },
+                        "send_to_parent": {
+                            "name": "send_to_parent",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "send",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "parent",
+                            "broadcast_params": [
+                                [
+                                    "Qout",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "drainage_area_sqmi",
+                                    "trib_area_sqmi"
+                                ]
+                            ]
+                        },
+                        "nhd_8566705": {
+                            "name": "nhd_8566705",
+                            "object_class": "ModelObject",
+                            "local_area_sqmi": {
+                                "name": "local_area_sqmi",
+                                "object_class": "Equation",
+                                "value": 0.3381095214
+                            },
+                            "read_from_children": {
+                                "name": "read_from_children",
+                                "object_class": "ModelBroadcast",
+                                "broadcast_type": "read",
+                                "broadcast_channel": "hydroObject",
+                                "broadcast_hub": "self",
+                                "broadcast_params": [
+                                    [
+                                        "Qtrib",
+                                        "Qtrib"
+                                    ],
+                                    [
+                                        "trib_area_sqmi",
+                                        "trib_area_sqmi"
+                                    ],
+                                    [
+                                        "child_wd_mgd",
+                                        "wd_mgd"
+                                    ]
+                                ]
+                            },
+                            "Qlocal": {
+                                "name": "Qlocal",
+                                "object_class": "Equation",
+                                "value": "local_area_sqmi * Runit"
+                            },
+                            "Qin": {
+                                "name": "Qin",
+                                "object_class": "Equation",
+                                "equation": "Qlocal + Qtrib"
+                            },
+                            "Qout": {
+                                "name": "Qout",
+                                "object_class": "Equation",
+                                "equation": "Qin * 1.0"
+                            },
+                            "drainage_area_sqmi": {
+                                "name": "drainage_area_sqmi",
+                                "object_class": "Equation",
+                                "equation": "local_area_sqmi + trib_area_sqmi"
+                            },
+                            "send_to_parent": {
+                                "name": "send_to_parent",
+                                "object_class": "ModelBroadcast",
+                                "broadcast_type": "send",
+                                "broadcast_channel": "hydroObject",
+                                "broadcast_hub": "parent",
+                                "broadcast_params": [
+                                    [
+                                        "Qout",
+                                        "Qtrib"
+                                    ],
+                                    [
+                                        "drainage_area_sqmi",
+                                        "trib_area_sqmi"
+                                    ]
+                                ]
+                            }
+                        }
+                    },
+                    "nhd_8566733": {
+                        "name": "nhd_8566733",
+                        "object_class": "ModelObject",
+                        "local_area_sqmi": {
+                            "name": "local_area_sqmi",
+                            "object_class": "Equation",
+                            "value": 1.4938672482
+                        },
+                        "read_from_children": {
+                            "name": "read_from_children",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "read",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "self",
+                            "broadcast_params": [
+                                [
+                                    "Qtrib",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "trib_area_sqmi",
+                                    "trib_area_sqmi"
+                                ],
+                                [
+                                    "child_wd_mgd",
+                                    "wd_mgd"
+                                ]
+                            ]
+                        },
+                        "Qlocal": {
+                            "name": "Qlocal",
+                            "object_class": "Equation",
+                            "value": "local_area_sqmi * Runit"
+                        },
+                        "Qin": {
+                            "name": "Qin",
+                            "object_class": "Equation",
+                            "equation": "Qlocal + Qtrib"
+                        },
+                        "Qout": {
+                            "name": "Qout",
+                            "object_class": "Equation",
+                            "equation": "Qin * 1.0"
+                        },
+                        "drainage_area_sqmi": {
+                            "name": "drainage_area_sqmi",
+                            "object_class": "Equation",
+                            "equation": "local_area_sqmi + trib_area_sqmi"
+                        },
+                        "send_to_parent": {
+                            "name": "send_to_parent",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "send",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "parent",
+                            "broadcast_params": [
+                                [
+                                    "Qout",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "drainage_area_sqmi",
+                                    "trib_area_sqmi"
+                                ]
+                            ]
+                        }
+                    }
+                }
+            },
+            "nhd_8567219": {
+                "name": "nhd_8567219",
+                "object_class": "ModelObject",
+                "local_area_sqmi": {
+                    "name": "local_area_sqmi",
+                    "object_class": "Equation",
+                    "value": 0.4503493728
+                },
+                "read_from_children": {
+                    "name": "read_from_children",
+                    "object_class": "ModelBroadcast",
+                    "broadcast_type": "read",
+                    "broadcast_channel": "hydroObject",
+                    "broadcast_hub": "self",
+                    "broadcast_params": [
+                        [
+                            "Qtrib",
+                            "Qtrib"
+                        ],
+                        [
+                            "trib_area_sqmi",
+                            "trib_area_sqmi"
+                        ],
+                        [
+                            "child_wd_mgd",
+                            "wd_mgd"
+                        ]
+                    ]
+                },
+                "Qlocal": {
+                    "name": "Qlocal",
+                    "object_class": "Equation",
+                    "value": "local_area_sqmi * Runit"
+                },
+                "Qin": {
+                    "name": "Qin",
+                    "object_class": "Equation",
+                    "equation": "Qlocal + Qtrib"
+                },
+                "Qout": {
+                    "name": "Qout",
+                    "object_class": "Equation",
+                    "equation": "Qin * 1.0"
+                },
+                "drainage_area_sqmi": {
+                    "name": "drainage_area_sqmi",
+                    "object_class": "Equation",
+                    "equation": "local_area_sqmi + trib_area_sqmi"
+                },
+                "send_to_parent": {
+                    "name": "send_to_parent",
+                    "object_class": "ModelBroadcast",
+                    "broadcast_type": "send",
+                    "broadcast_channel": "hydroObject",
+                    "broadcast_hub": "parent",
+                    "broadcast_params": [
+                        [
+                            "Qout",
+                            "Qtrib"
+                        ],
+                        [
+                            "drainage_area_sqmi",
+                            "trib_area_sqmi"
+                        ]
+                    ]
+                },
+                "nhd_8566779": {
+                    "name": "nhd_8566779",
+                    "object_class": "ModelObject",
+                    "local_area_sqmi": {
+                        "name": "local_area_sqmi",
+                        "object_class": "Equation",
+                        "value": 0.0198070326
+                    },
+                    "read_from_children": {
+                        "name": "read_from_children",
+                        "object_class": "ModelBroadcast",
+                        "broadcast_type": "read",
+                        "broadcast_channel": "hydroObject",
+                        "broadcast_hub": "self",
+                        "broadcast_params": [
+                            [
+                                "Qtrib",
+                                "Qtrib"
+                            ],
+                            [
+                                "trib_area_sqmi",
+                                "trib_area_sqmi"
+                            ],
+                            [
+                                "child_wd_mgd",
+                                "wd_mgd"
+                            ]
+                        ]
+                    },
+                    "Qlocal": {
+                        "name": "Qlocal",
+                        "object_class": "Equation",
+                        "value": "local_area_sqmi * Runit"
+                    },
+                    "Qin": {
+                        "name": "Qin",
+                        "object_class": "Equation",
+                        "equation": "Qlocal + Qtrib"
+                    },
+                    "Qout": {
+                        "name": "Qout",
+                        "object_class": "Equation",
+                        "equation": "Qin * 1.0"
+                    },
+                    "drainage_area_sqmi": {
+                        "name": "drainage_area_sqmi",
+                        "object_class": "Equation",
+                        "equation": "local_area_sqmi + trib_area_sqmi"
+                    },
+                    "send_to_parent": {
+                        "name": "send_to_parent",
+                        "object_class": "ModelBroadcast",
+                        "broadcast_type": "send",
+                        "broadcast_channel": "hydroObject",
+                        "broadcast_hub": "parent",
+                        "broadcast_params": [
+                            [
+                                "Qout",
+                                "Qtrib"
+                            ],
+                            [
+                                "drainage_area_sqmi",
+                                "trib_area_sqmi"
+                            ]
+                        ]
+                    },
+                    "nhd_8566781": {
+                        "name": "nhd_8566781",
+                        "object_class": "ModelObject",
+                        "local_area_sqmi": {
+                            "name": "local_area_sqmi",
+                            "object_class": "Equation",
+                            "value": 1.6425937386
+                        },
+                        "read_from_children": {
+                            "name": "read_from_children",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "read",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "self",
+                            "broadcast_params": [
+                                [
+                                    "Qtrib",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "trib_area_sqmi",
+                                    "trib_area_sqmi"
+                                ],
+                                [
+                                    "child_wd_mgd",
+                                    "wd_mgd"
+                                ]
+                            ]
+                        },
+                        "Qlocal": {
+                            "name": "Qlocal",
+                            "object_class": "Equation",
+                            "value": "local_area_sqmi * Runit"
+                        },
+                        "Qin": {
+                            "name": "Qin",
+                            "object_class": "Equation",
+                            "equation": "Qlocal + Qtrib"
+                        },
+                        "Qout": {
+                            "name": "Qout",
+                            "object_class": "Equation",
+                            "equation": "Qin * 1.0"
+                        },
+                        "drainage_area_sqmi": {
+                            "name": "drainage_area_sqmi",
+                            "object_class": "Equation",
+                            "equation": "local_area_sqmi + trib_area_sqmi"
+                        },
+                        "send_to_parent": {
+                            "name": "send_to_parent",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "send",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "parent",
+                            "broadcast_params": [
+                                [
+                                    "Qout",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "drainage_area_sqmi",
+                                    "trib_area_sqmi"
+                                ]
+                            ]
+                        },
+                        "nhd_8567213": {
+                            "name": "nhd_8567213",
+                            "object_class": "ModelObject",
+                            "local_area_sqmi": {
+                                "name": "local_area_sqmi",
+                                "object_class": "Equation",
+                                "value": 0.2001552768
+                            },
+                            "read_from_children": {
+                                "name": "read_from_children",
+                                "object_class": "ModelBroadcast",
+                                "broadcast_type": "read",
+                                "broadcast_channel": "hydroObject",
+                                "broadcast_hub": "self",
+                                "broadcast_params": [
+                                    [
+                                        "Qtrib",
+                                        "Qtrib"
+                                    ],
+                                    [
+                                        "trib_area_sqmi",
+                                        "trib_area_sqmi"
+                                    ],
+                                    [
+                                        "child_wd_mgd",
+                                        "wd_mgd"
+                                    ]
+                                ]
+                            },
+                            "Qlocal": {
+                                "name": "Qlocal",
+                                "object_class": "Equation",
+                                "value": "local_area_sqmi * Runit"
+                            },
+                            "Qin": {
+                                "name": "Qin",
+                                "object_class": "Equation",
+                                "equation": "Qlocal + Qtrib"
+                            },
+                            "Qout": {
+                                "name": "Qout",
+                                "object_class": "Equation",
+                                "equation": "Qin * 1.0"
+                            },
+                            "drainage_area_sqmi": {
+                                "name": "drainage_area_sqmi",
+                                "object_class": "Equation",
+                                "equation": "local_area_sqmi + trib_area_sqmi"
+                            },
+                            "send_to_parent": {
+                                "name": "send_to_parent",
+                                "object_class": "ModelBroadcast",
+                                "broadcast_type": "send",
+                                "broadcast_channel": "hydroObject",
+                                "broadcast_hub": "parent",
+                                "broadcast_params": [
+                                    [
+                                        "Qout",
+                                        "Qtrib"
+                                    ],
+                                    [
+                                        "drainage_area_sqmi",
+                                        "trib_area_sqmi"
+                                    ]
+                                ]
+                            },
+                            "nhd_8566751": {
+                                "name": "nhd_8566751",
+                                "object_class": "ModelObject",
+                                "local_area_sqmi": {
+                                    "name": "local_area_sqmi",
+                                    "object_class": "Equation",
+                                    "value": 0.8510074182
+                                },
+                                "read_from_children": {
+                                    "name": "read_from_children",
+                                    "object_class": "ModelBroadcast",
+                                    "broadcast_type": "read",
+                                    "broadcast_channel": "hydroObject",
+                                    "broadcast_hub": "self",
+                                    "broadcast_params": [
+                                        [
+                                            "Qtrib",
+                                            "Qtrib"
+                                        ],
+                                        [
+                                            "trib_area_sqmi",
+                                            "trib_area_sqmi"
+                                        ],
+                                        [
+                                            "child_wd_mgd",
+                                            "wd_mgd"
+                                        ]
+                                    ]
+                                },
+                                "Qlocal": {
+                                    "name": "Qlocal",
+                                    "object_class": "Equation",
+                                    "value": "local_area_sqmi * Runit"
+                                },
+                                "Qin": {
+                                    "name": "Qin",
+                                    "object_class": "Equation",
+                                    "equation": "Qlocal + Qtrib"
+                                },
+                                "Qout": {
+                                    "name": "Qout",
+                                    "object_class": "Equation",
+                                    "equation": "Qin * 1.0"
+                                },
+                                "drainage_area_sqmi": {
+                                    "name": "drainage_area_sqmi",
+                                    "object_class": "Equation",
+                                    "equation": "local_area_sqmi + trib_area_sqmi"
+                                },
+                                "send_to_parent": {
+                                    "name": "send_to_parent",
+                                    "object_class": "ModelBroadcast",
+                                    "broadcast_type": "send",
+                                    "broadcast_channel": "hydroObject",
+                                    "broadcast_hub": "parent",
+                                    "broadcast_params": [
+                                        [
+                                            "Qout",
+                                            "Qtrib"
+                                        ],
+                                        [
+                                            "drainage_area_sqmi",
+                                            "trib_area_sqmi"
+                                        ]
+                                    ]
+                                },
+                                "nhd_8566745": {
+                                    "name": "nhd_8566745",
+                                    "object_class": "ModelObject",
+                                    "local_area_sqmi": {
+                                        "name": "local_area_sqmi",
+                                        "object_class": "Equation",
+                                        "value": 1.0247533182
+                                    },
+                                    "read_from_children": {
+                                        "name": "read_from_children",
+                                        "object_class": "ModelBroadcast",
+                                        "broadcast_type": "read",
+                                        "broadcast_channel": "hydroObject",
+                                        "broadcast_hub": "self",
+                                        "broadcast_params": [
+                                            [
+                                                "Qtrib",
+                                                "Qtrib"
+                                            ],
+                                            [
+                                                "trib_area_sqmi",
+                                                "trib_area_sqmi"
+                                            ],
+                                            [
+                                                "child_wd_mgd",
+                                                "wd_mgd"
+                                            ]
+                                        ]
+                                    },
+                                    "Qlocal": {
+                                        "name": "Qlocal",
+                                        "object_class": "Equation",
+                                        "value": "local_area_sqmi * Runit"
+                                    },
+                                    "Qin": {
+                                        "name": "Qin",
+                                        "object_class": "Equation",
+                                        "equation": "Qlocal + Qtrib"
+                                    },
+                                    "Qout": {
+                                        "name": "Qout",
+                                        "object_class": "Equation",
+                                        "equation": "Qin * 1.0"
+                                    },
+                                    "drainage_area_sqmi": {
+                                        "name": "drainage_area_sqmi",
+                                        "object_class": "Equation",
+                                        "equation": "local_area_sqmi + trib_area_sqmi"
+                                    },
+                                    "send_to_parent": {
+                                        "name": "send_to_parent",
+                                        "object_class": "ModelBroadcast",
+                                        "broadcast_type": "send",
+                                        "broadcast_channel": "hydroObject",
+                                        "broadcast_hub": "parent",
+                                        "broadcast_params": [
+                                            [
+                                                "Qout",
+                                                "Qtrib"
+                                            ],
+                                            [
+                                                "drainage_area_sqmi",
+                                                "trib_area_sqmi"
+                                            ]
+                                        ]
+                                    },
+                                    "nhd_8567285": {
+                                        "name": "nhd_8567285",
+                                        "object_class": "ModelObject",
+                                        "local_area_sqmi": {
+                                            "name": "local_area_sqmi",
+                                            "object_class": "Equation",
+                                            "value": 0
+                                        },
+                                        "read_from_children": {
+                                            "name": "read_from_children",
+                                            "object_class": "ModelBroadcast",
+                                            "broadcast_type": "read",
+                                            "broadcast_channel": "hydroObject",
+                                            "broadcast_hub": "self",
+                                            "broadcast_params": [
+                                                [
+                                                    "Qtrib",
+                                                    "Qtrib"
+                                                ],
+                                                [
+                                                    "trib_area_sqmi",
+                                                    "trib_area_sqmi"
+                                                ],
+                                                [
+                                                    "child_wd_mgd",
+                                                    "wd_mgd"
+                                                ]
+                                            ]
+                                        },
+                                        "Qlocal": {
+                                            "name": "Qlocal",
+                                            "object_class": "Equation",
+                                            "value": "local_area_sqmi * Runit"
+                                        },
+                                        "Qin": {
+                                            "name": "Qin",
+                                            "object_class": "Equation",
+                                            "equation": "Qlocal + Qtrib"
+                                        },
+                                        "Qout": {
+                                            "name": "Qout",
+                                            "object_class": "Equation",
+                                            "equation": "Qin * 1.0"
+                                        },
+                                        "drainage_area_sqmi": {
+                                            "name": "drainage_area_sqmi",
+                                            "object_class": "Equation",
+                                            "equation": "local_area_sqmi + trib_area_sqmi"
+                                        },
+                                        "send_to_parent": {
+                                            "name": "send_to_parent",
+                                            "object_class": "ModelBroadcast",
+                                            "broadcast_type": "send",
+                                            "broadcast_channel": "hydroObject",
+                                            "broadcast_hub": "parent",
+                                            "broadcast_params": [
+                                                [
+                                                    "Qout",
+                                                    "Qtrib"
+                                                ],
+                                                [
+                                                    "drainage_area_sqmi",
+                                                    "trib_area_sqmi"
+                                                ]
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "nhd_8566793": {
+                        "name": "nhd_8566793",
+                        "object_class": "ModelObject",
+                        "local_area_sqmi": {
+                            "name": "local_area_sqmi",
+                            "object_class": "Equation",
+                            "value": 0.3367195542
+                        },
+                        "read_from_children": {
+                            "name": "read_from_children",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "read",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "self",
+                            "broadcast_params": [
+                                [
+                                    "Qtrib",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "trib_area_sqmi",
+                                    "trib_area_sqmi"
+                                ],
+                                [
+                                    "child_wd_mgd",
+                                    "wd_mgd"
+                                ]
+                            ]
+                        },
+                        "Qlocal": {
+                            "name": "Qlocal",
+                            "object_class": "Equation",
+                            "value": "local_area_sqmi * Runit"
+                        },
+                        "Qin": {
+                            "name": "Qin",
+                            "object_class": "Equation",
+                            "equation": "Qlocal + Qtrib"
+                        },
+                        "Qout": {
+                            "name": "Qout",
+                            "object_class": "Equation",
+                            "equation": "Qin * 1.0"
+                        },
+                        "drainage_area_sqmi": {
+                            "name": "drainage_area_sqmi",
+                            "object_class": "Equation",
+                            "equation": "local_area_sqmi + trib_area_sqmi"
+                        },
+                        "send_to_parent": {
+                            "name": "send_to_parent",
+                            "object_class": "ModelBroadcast",
+                            "broadcast_type": "send",
+                            "broadcast_channel": "hydroObject",
+                            "broadcast_hub": "parent",
+                            "broadcast_params": [
+                                [
+                                    "Qout",
+                                    "Qtrib"
+                                ],
+                                [
+                                    "drainage_area_sqmi",
+                                    "trib_area_sqmi"
+                                ]
+                            ]
+                        },
+                        "nhd_8566791": {
+                            "name": "nhd_8566791",
+                            "object_class": "ModelObject",
+                            "local_area_sqmi": {
+                                "name": "local_area_sqmi",
+                                "object_class": "Equation",
+                                "value": 0.4746737988
+                            },
+                            "read_from_children": {
+                                "name": "read_from_children",
+                                "object_class": "ModelBroadcast",
+                                "broadcast_type": "read",
+                                "broadcast_channel": "hydroObject",
+                                "broadcast_hub": "self",
+                                "broadcast_params": [
+                                    [
+                                        "Qtrib",
+                                        "Qtrib"
+                                    ],
+                                    [
+                                        "trib_area_sqmi",
+                                        "trib_area_sqmi"
+                                    ],
+                                    [
+                                        "child_wd_mgd",
+                                        "wd_mgd"
+                                    ]
+                                ]
+                            },
+                            "Qlocal": {
+                                "name": "Qlocal",
+                                "object_class": "Equation",
+                                "value": "local_area_sqmi * Runit"
+                            },
+                            "Qin": {
+                                "name": "Qin",
+                                "object_class": "Equation",
+                                "equation": "Qlocal + Qtrib"
+                            },
+                            "Qout": {
+                                "name": "Qout",
+                                "object_class": "Equation",
+                                "equation": "Qin * 1.0"
+                            },
+                            "drainage_area_sqmi": {
+                                "name": "drainage_area_sqmi",
+                                "object_class": "Equation",
+                                "equation": "local_area_sqmi + trib_area_sqmi"
+                            },
+                            "send_to_parent": {
+                                "name": "send_to_parent",
+                                "object_class": "ModelBroadcast",
+                                "broadcast_type": "send",
+                                "broadcast_channel": "hydroObject",
+                                "broadcast_hub": "parent",
+                                "broadcast_params": [
+                                    [
+                                        "Qout",
+                                        "Qtrib"
+                                    ],
+                                    [
+                                        "drainage_area_sqmi",
+                                        "trib_area_sqmi"
+                                    ]
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "value": "0",
+        "IVOLin": {
+            "name": "IVOLin",
+            "object_class": "ModelLinkage",
+            "right_path": "/STATE/RCHRES_R001/HYDR/IVOL",
+            "link_type": 2
+        },
+        "Runit": {
+            "name": "Runit",
+            "object_class": "Equation",
+            "value": "IVOLin / drainage_area_sqmi"
+        }
+    }
+}
+
