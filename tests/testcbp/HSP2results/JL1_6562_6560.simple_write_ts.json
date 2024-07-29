@@ -10,10 +10,11 @@
             "store_ts": {
                 "name": "store_ts",
                 "object_class": "ModelLinkage",
-                "left_path": "/TIMESERIES/RCHRES_R001/wd_cfs",
+                "left_path": "/RESULTS/RCHRES_R001/wd_cfs",
                 "right_path": "[parent]",
                 "link_type": 6,
                 "complevel": 9,
+                "hdf5_path": "TOO: We should allow this to specify a separate hdf5 file, otherwise, use the simulation default. ",
                 "comments": "This will write to the ts data frame during runtime then save to the hdf file at run end."
             }
         },
