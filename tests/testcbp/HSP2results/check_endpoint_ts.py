@@ -1,8 +1,6 @@
-import os
 from hsp2.hsp2.main import *
 from hsp2.hsp2.om import *
 from hsp2.hsp2.state import *
-import numpy
 from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager
 # fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'

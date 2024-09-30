@@ -1,5 +1,4 @@
-import sys
-from numba import int8, float32, njit, types, typed # import the types
+from numba import njit # import the types
 
 print("Loaded a set of  HSP2 code!")
 

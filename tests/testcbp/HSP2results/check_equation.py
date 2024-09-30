@@ -2,10 +2,8 @@
 # bare bones tester - must be run from the HSPsquared source directory
 # Note: First time you clone git, or after a major refactor, you must reinstall (in a venv) using:
 #   pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --default-timeout=100 -e . 
-import os
 from hsp2.hsp2.main import *
 from hsp2.hsp2.om import *
-import numpy
 from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager
 # fpath = './tests/testcbp/HSP2results/JL1_6562_6560.h5'
@@ -67,7 +65,7 @@ get_ix_path(state['state_paths'], river.container.ix)
 get_ix_path(state['state_paths'], WDwrite.ops[2]) # op 2 (the 3rd op) is for the left_path, which is where we write the value
 
 # run the simulation
-from hsp2.hsp2tools.commands import import_uci, run
+from hsp2.hsp2tools.commands import run
 run(fpath, saveall=True, compress=False)
 
 # Now, load the timeseries from hdf5 and check the values from the simulation.

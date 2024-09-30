@@ -5,7 +5,7 @@ License: LGPL2
 Conversion of HSPF HIMPQUA.FOR module into Python''' 
 
 from math import exp
-from numpy import zeros, where, full, float64, int64
+from numpy import zeros, full, float64, int64
 from numba import njit
 from hsp2.hsp2.utilities import initm, make_numba_dict, hourflag, initmdiv
 

@@ -1,13 +1,11 @@
 import numpy as np
-from numpy import zeros, array
+from numpy import zeros
 import numba as nb
-from numba.typed import Dict
 from numba.experimental import jitclass
 from math import exp
 
 from hsp2.hsp2.ADCALC import advect, oxrea
 from hsp2.hsp2.RQUTIL import sink
-from hsp2.hsp2.utilities	 import make_numba_dict
 
 spec = [
 	('AFACT', nb.float64),

@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 
 # print('in HSP2_Driver')
 command_line = ""

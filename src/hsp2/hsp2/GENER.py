@@ -46,7 +46,7 @@ class Gener():
                     self.ts_input_1 = tsin['ONE']
                 if 'TWO' in tsin:
                     self.ts_input_2 = tsin['TWO']
-                if not 'ONE' in tsin and not 'TWO' in tsin:
+                if 'ONE' not in tsin and 'TWO' not in tsin:
                     raise NotImplementedError(f"Invalid SVOL for '{link.SVOLNO}'")
 
             if link.SVOL == 'COPY' or link.SVOL == 'GENER':

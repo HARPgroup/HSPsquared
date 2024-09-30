@@ -3,9 +3,8 @@ Authors: Robert Heaphy, Ph.D. and Paul Duda
 License: LGPL2
 '''
 
-import logging
 import numpy as np
-from numpy import where, zeros, array, float64, full
+from numpy import zeros, full
 from numba import types, njit
 from numba.typed import Dict
 

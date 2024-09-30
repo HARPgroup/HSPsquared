@@ -98,14 +98,14 @@ class SpecialAction(ModelObject):
         # 12 LOG T= Log10(A)
         # 13 MOD T= Mod(T,A)
         if not (is_float_digit(ac)):
-            if not (ac in cop_codes.keys()):
+            if ac not in cop_codes.keys():
                raise Exception("Error: in "+ self.name + " AC (" + ac + ") not supported.  Object creation halted. Path to object with error is " + self.state_path)
             opid = cop_codes[ac]
             self.ac = ac
         else:
             # this will fail catastrophically if the requested function is not supported
             # which is a good thing
-            if not (ac in cop_codes.values()):
+            if ac not in cop_codes.values():
                raise Exception("Error: in "+ self.name + "numeric AC (" + ac + ") not supported.  Object creation halted. Path to object with error is " + self.state_path)
             opid = ac
             self.ac = list(cop_codes.keys())[list(cop_codes.values()).index(ac) ]

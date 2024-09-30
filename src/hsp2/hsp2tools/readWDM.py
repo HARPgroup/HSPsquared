@@ -7,7 +7,7 @@ License: LGPL2
 
 import numpy as np
 import pandas as pd
-from numba import jit, njit
+from numba import njit
 import datetime
 
 import warnings

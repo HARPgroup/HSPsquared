@@ -3,16 +3,13 @@
 # are hard-wiring a set of components for testing.
 # Note: these import calls must be done down here AFTER the helper functions
 #       defined aove that are called by the object classes
-import random # this is only used for a demo so may be deprecated
 import json
 import os
 import pandas as pd
 import numpy as np
 import time
-from numba.typed import Dict
-from numpy import zeros, int32
-from numba import int8, float32, njit, types, typed # import the types
-import random # this is only used for a demo so may be deprecated
+from numpy import zeros
+from numba import njit # import the types
 from hsp2.hsp2.state import append_state, get_ix_path
 
 
@@ -64,16 +61,15 @@ def model_element_paths(mel, state):
 
 
 # Import Code Classes
-from hsp2.hsp2.om_model_object import ModelObject, ModelVariable, ModelRegister, pre_step_register
+from hsp2.hsp2.om_model_object import ModelObject, ModelVariable, pre_step_register
 from hsp2.hsp2.om_sim_timer import SimTimer, step_sim_timer
 from hsp2.hsp2.om_equation import Equation, step_equation
-from hsp2.hsp2.om_model_linkage import ModelLinkage, step_model_link, end_model_link
+from hsp2.hsp2.om_model_linkage import ModelLinkage, step_model_link
 from hsp2.hsp2.om_special_action import SpecialAction, step_special_action
 #from hsp2.hsp2.om_data_matrix import *
 #from hsp2.hsp2.om_model_broadcast import *
 #from hsp2.hsp2.om_simple_channel import *
 #from hsp2.hsp2.om_impoundment import *
-from hsp2.hsp2.utilities import versions, get_timeseries, expand_timeseries_names, save_timeseries, get_gener_timeseries
 
 def init_om_dicts():
     """
@@ -356,7 +352,7 @@ def model_loader_recursive(model_data, container, state):
             # are formally declared as type Constant
             continue
         if type(model_props) is dict:
-            if not ('object_class' in model_props):
+            if 'object_class' not in model_props:
                 # this is either a class attribute or an un-handleable meta-data 
                 # if the class atttribute exists, we should pass it to container to load 
                 print("Skipping un-typed", object_name)

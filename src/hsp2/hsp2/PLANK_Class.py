@@ -1,7 +1,7 @@
 import os
 
 import numpy as np
-from numpy import zeros, array
+from numpy import zeros
 from math import log, exp
 import numba as nb
 from numba.experimental import jitclass
@@ -10,7 +10,6 @@ from hsp2.hsp2.ADCALC import advect
 from hsp2.hsp2.OXRX_Class import OXRX_Class
 from hsp2.hsp2.NUTRX_Class import NUTRX_Class
 from hsp2.hsp2.RQUTIL import sink, decbal
-from hsp2.hsp2.utilities  import make_numba_dict, initm
 
 if os.environ.get("NUMBA_DISABLE_JIT", 0): # jit should be on by default.
 	OXRX_Class_ = OXRX_Class

@@ -1,7 +1,6 @@
 import numpy as np
-from numpy import zeros, array
+from numpy import zeros
 import numba as nb
-from numba.typed import Dict
 from numba.experimental import jitclass
 from math import log10
 

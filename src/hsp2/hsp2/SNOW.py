@@ -16,9 +16,9 @@ pack, pakin, pakdif not saved since trival recalulation from saved data
 from numpy import zeros, ones, full, nan, int64
 from math import sqrt, floor
 from numba import njit
-from hsp2.hsp2.utilities import hourflag, monthval, hoursval, make_numba_dict, initm, SEASONS, SVP
+from hsp2.hsp2.utilities import monthval, hoursval, make_numba_dict, initm, SEASONS, SVP
 
-from hsp2.hsp2io.protocols import SupportsReadTS, Category
+from hsp2.hsp2io.protocols import SupportsReadTS
 
 ERRMSGS = ('Snow simulation cannot function properly with delt> 360',   #ERRMSG0
  )

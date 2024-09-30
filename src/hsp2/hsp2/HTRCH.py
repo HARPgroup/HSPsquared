@@ -213,7 +213,7 @@ def _htrch_(ui, ts):
 
 	TGRND = ts['TGRND']
 
-	if not 'IHEAT' in ts:
+	if 'IHEAT' not in ts:
 		ts['IHEAT'] = zeros(simlen)
 	IHEAT = ts['IHEAT']  # kcal.vol/l.ivl; heat is relative to 0 degreees c
 	if uunits == 1:

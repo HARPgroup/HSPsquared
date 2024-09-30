@@ -1,12 +1,11 @@
 ''' General routines for SPECL '''
 
 import numpy as np
-import time
-from pandas import DataFrame, date_range
+from pandas import date_range
 from pandas.tseries.offsets import Minute
 from numba.typed import Dict
 from numpy import zeros
-from numba import int8, float32, njit, types, typed # import the types
+from numba import njit, types # import the types
 import os
 import importlib.util
 import sys
@@ -39,7 +38,7 @@ def get_state_ix(state_ix, state_paths, var_path):
     """
     Find the integer key of a variable name in state_ix 
     """
-    if not (var_path in list(state_paths.keys())):
+    if var_path not in list(state_paths.keys()):
         # we need to add this to the state 
         return False # should throw an error 
     var_ix = state_paths[var_path]
@@ -62,7 +61,7 @@ def set_state(state_ix, state_paths, var_path, default_value = 0.0, debug = Fals
     If the variable does not yet exist, create it.
     Returns the integer key of the variable in the state_ix Dict
     """
-    if not (var_path in state_paths.keys()):
+    if var_path not in state_paths.keys():
         # we need to add this to the state 
         state_paths[var_path] = append_state(state_ix, default_value)
     var_ix = get_state_ix(state_ix, state_paths, var_path)
@@ -77,7 +76,7 @@ def state_add_ts(state, var_path, default_value = 0.0, debug = False):
     If the variable does not yet exist, create it.
     Returns the integer key of the variable in the state_ix Dict
     """
-    if not (var_path in state['state_paths'].keys()):
+    if var_path not in state['state_paths'].keys():
         # we need to add this to the state 
         state['state_paths'][var_path] = append_state(state['state_ix'], default_value)
     var_ix = get_state_ix(state['state_ix'], state['state_paths'], var_path)
@@ -93,7 +92,7 @@ def set_dict_state(state_ix, dict_ix, state_paths, var_path, default_value = {})
     If the variable does not yet exist, create it.
     Returns the integer key of the variable in the state_ix Dict
     """
-    if not (var_path in state_paths.keys()):
+    if var_path not in state_paths.keys():
         # we need to add this to the state 
         state_paths[var_path] = append_state(state_ix, default_value)
     var_ix = get_state_ix(state_ix, state_paths, var_path)
@@ -232,7 +231,7 @@ def dynamic_module_import(local_name, local_path, module_name):
             sys.modules[module_name] = module
             local_spec.loader.exec_module(module)
             print("Imported custom module {}".format(local_path))
-    except Exception as e:
+    except Exception:
         # print(e)  this isn't really an exception, it's legit to have no custom python code
         pass
     return module
