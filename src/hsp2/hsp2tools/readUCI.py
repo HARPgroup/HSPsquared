@@ -155,7 +155,7 @@ def readUCI(uciname, hdfname, overwrite=True):
 
         # store paths for checking defaults:
         hsp_path = f'/{row.OP}/{row.SAVE}/{row.CAT}'
-        if not hsp_path in hsp_paths:
+        if hsp_path not in hsp_paths:
             hsp_paths[hsp_path] = {}
 
         hsp_paths[hsp_path][row.NAME] = defaults[row.OP, row.SAVE, row.NAME]
@@ -378,7 +378,7 @@ def readUCI(uciname, hdfname, overwrite=True):
                 if path[-6:] == "STATES":
                     # need to add states if it doesn't already exist to save initial state variables
                     # such as the case where entire IWAT-STATE1 table is being defaulted
-                    if not 'df' in locals():
+                    if 'df' not in locals():
                         x = 1   # sometimes when debugging keys gets creamed, seems like an IDE bug
                     for column in df.columns:  # clear out existing data frame columns
                         df = df.drop([column], axis=1)
@@ -533,7 +533,7 @@ def specactions(info, llines):
             sa_actions.append(d.copy())
     if sa_actions:
         dfftable = pd.DataFrame(sa_actions, columns=head_actions).replace('na','')
-        dfftable.to_hdf(store, key=f'/SPEC_ACTIONS/ACTIONS', data_columns=True)
+        dfftable.to_hdf(store, key='/SPEC_ACTIONS/ACTIONS', data_columns=True)
 
 def ext(info, lines):
     store, parse, path, *_ = info

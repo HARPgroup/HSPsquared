@@ -6,8 +6,7 @@ All runtime exec is done by child classes.
 from hsp2.hsp2.state import set_state, get_state_ix
 from numba.typed import Dict
 from hsp2.hsp2.om import get_exec_order, is_float_digit
-from pandas import Series, DataFrame, concat, HDFStore, set_option, to_numeric
-from pandas import Timestamp, Timedelta, read_hdf, read_csv
+from pandas import HDFStore
 from numpy import pad, asarray, zeros, int32
 from numba import njit, types
 
@@ -267,7 +266,7 @@ class ModelObject:
             self.make_paths()
         self.ix = set_state(self.state['state_ix'], self.state['state_paths'], self.state_path, self.default_value)
         # store object in model_object_cache
-        if not (self.state_path in self.state['model_object_cache'].keys()):
+        if self.state_path not in self.state['model_object_cache'].keys():
             self.state['model_object_cache'][self.state_path] = self 
         # this should check to see if this object has a parent, and if so, register the name on the parent 
         # default is as a child object. 

@@ -7,7 +7,6 @@ Notes:
 '''
 
 from numba import njit
-from pandas import DataFrame, date_range
 
 def specl_load_om(state, io_manager, siminfo):
     if 'ACTIONS' in state['specactions']:

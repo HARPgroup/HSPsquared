@@ -3,8 +3,7 @@ Author: Robert Heaphy, Ph.D.
 License: LGPL2
 '''
 
-from re import S
-from numpy import float64, float32
+from numpy import float64
 from pandas import DataFrame, date_range
 from pandas.tseries.offsets import Minute
 from datetime import datetime as dt
@@ -145,7 +144,7 @@ def main(io_manager:Union[str, IOManager], saveall:bool=False, jupyterlab:bool=T
                     # special exception here to make CSNOFG available
                     ui['PARAMETERS']['CSNOFG'] = uci[(operation, 'PWATER', segment)]['PARAMETERS']['CSNOFG']
                 if operation == 'RCHRES':
-                    if not 'PARAMETERS' in ui:
+                    if 'PARAMETERS' not in ui:
                         ui['PARAMETERS'] = {}
                     ui['PARAMETERS']['NEXITS'] = uci[(operation, 'HYDR', segment)]['PARAMETERS']['NEXITS']
                     if activity == 'ADCALC':

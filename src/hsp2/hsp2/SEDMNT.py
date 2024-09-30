@@ -4,7 +4,7 @@ License: LGPL2
 
 Conversion of HSPF HPERSED.FOR module into Python''' 
 
-from numpy import zeros, where, int64, full, float64
+from numpy import zeros, int64, full, float64
 from numba import njit
 from hsp2.hsp2.utilities  import initm, make_numba_dict, hourflag
 

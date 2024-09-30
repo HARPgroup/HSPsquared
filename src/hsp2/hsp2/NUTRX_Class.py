@@ -5,9 +5,7 @@ import numba as nb
 from numba.experimental import jitclass
 
 from hsp2.hsp2.ADCALC import advect
-from hsp2.hsp2.RQUTIL import sink, decbal, benth
-from hsp2.hsp2.OXRX_Class import OXRX_Class
-from hsp2.hsp2.utilities  import make_numba_dict, initm
+from hsp2.hsp2.RQUTIL import decbal, benth
 
 spec = [
 	('adnh4', nb.float64[:]),
@@ -545,7 +543,7 @@ class NUTRX_Class:
 		if self.TAMFG == 1 and self.ADNHFG == 1:    # advect adsorbed ammonium
 
 			# zero the accumulators
-			self.isnh4[4]  = 0.0; 
+			self.isnh4[4]  = 0.0 
 			self.dsnh4[4]  = 0.0
 			self.rosnh4[4] = 0.0
 			if self.nexits > 1:

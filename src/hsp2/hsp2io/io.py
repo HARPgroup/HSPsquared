@@ -1,5 +1,4 @@
 import pandas as pd
-from pandas.core.frame import DataFrame
 from hsp2.hsp2io.protocols import Category, SupportsReadUCI, SupportsReadTS, SupportsWriteTS, SupportsWriteLogging
 from typing import Union, List
 

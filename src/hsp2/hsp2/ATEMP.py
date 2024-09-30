@@ -8,7 +8,7 @@ from numba import njit
 from numpy import empty, zeros, int64
 from hsp2.hsp2.utilities import hoursval, make_numba_dict, LAPSE
 
-from hsp2.hsp2io.protocols import SupportsReadTS, Category
+from hsp2.hsp2io.protocols import SupportsReadTS
 
 ERRMSGS = ()
 

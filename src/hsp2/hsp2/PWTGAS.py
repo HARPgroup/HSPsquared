@@ -4,7 +4,7 @@ License: LGPL2
 
 Conversion of HSPF HPERGAS.FOR module into Python''' 
 
-from numpy import zeros, where, full, int64, float64
+from numpy import zeros, full, int64, float64
 from numba import njit
 from hsp2.hsp2.utilities import initm, make_numba_dict, hourflag
 

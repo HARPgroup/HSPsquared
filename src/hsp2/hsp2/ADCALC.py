@@ -3,7 +3,7 @@ Authors: Robert Heaphy, Ph.D. and Paul Duda
 License: LGPL2
 '''
 
-from numpy import zeros, array
+from numpy import zeros
 from numba import njit
 from hsp2.hsp2.utilities import make_numba_dict
 

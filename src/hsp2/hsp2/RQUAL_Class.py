@@ -1,8 +1,6 @@
 import os
 
-import numpy as np
-from numpy import where, zeros, array
-from math import log
+from numpy import zeros
 import numba as nb
 from numba.experimental import jitclass
 
@@ -10,7 +8,6 @@ from hsp2.hsp2.OXRX_Class import OXRX_Class
 from hsp2.hsp2.NUTRX_Class import NUTRX_Class
 from hsp2.hsp2.PLANK_Class import PLANK_Class
 from hsp2.hsp2.PHCARB_Class import PHCARB_Class
-from hsp2.hsp2.utilities  import make_numba_dict, initm
 
 if os.environ.get("NUMBA_DISABLE_JIT", 0): # jit should be on by default.
 	OXRX_Class_ = OXRX_Class
@@ -755,7 +752,7 @@ class RQUAL_Class:
 						ts['PHIF2'] = zeros(simlen)
 					ts['ICO2'] = ts['PHIF2']
 
-					if not 'ALKCON' in ts:
+					if 'ALKCON' not in ts:
 						ts['ALKCON'] = zeros(simlen)
 					if 'CONS' + str(int(self.PHCARB.alkcon)) + '_CON' in ts:
 						self.ALK = ts['CONS' + str(int(self.PHCARB.alkcon)) + '_CON']

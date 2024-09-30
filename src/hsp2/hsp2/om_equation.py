@@ -5,10 +5,10 @@ and will then search the local object inputs and the containing object inputs (i
 the variable name in question.  Ultimately, everyting becomes either an operator or a reference to a variable
 in the state_ix Dict for runtime execution.
 """
-from hsp2.hsp2.om import get_exec_order, is_float_digit
+from hsp2.hsp2.om import is_float_digit
 from hsp2.hsp2.state import set_state, get_state_ix
 from hsp2.hsp2.om_model_object import ModelObject, ModelConstant
-from numba import njit, types
+from numba import njit
 from numpy import array, append
 
 # from hsp2.hsp2.state import set_state, get_state_ix
@@ -155,7 +155,6 @@ from pyparsing import (
     alphas,
     alphanums,
     Regex,
-    ParseException,
     CaselessKeyword,
     Suppress,
     delimitedList,

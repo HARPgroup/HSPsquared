@@ -82,7 +82,8 @@ def sedtrn(io_manager, siminfo, uci, ts, state):
     state_info['operation'], state_info['segment'], state_info['activity'] = state['operation'], state['segment'], state['activity']
     state_info['domain'], state_info['state_step_hydr'], state_info['state_step_om'] = state['domain'], state['state_step_hydr'], state['state_step_om']
     # hsp2_local_py = state['hsp2_local_py']
-    # # It appears necessary to load this here, instead of from main.py, for dynamic python
+    # # It appears necessary to load this here, instead of from main.py, otherwise,
+    # # _hydr_() does not recognize the function state_step_hydr()?
     # if (hsp2_local_py != False):
     #     from hsp2_local_py import state_step_hydr
     # else:
@@ -219,11 +220,11 @@ def _sedtrn_(ui, ts, state_info, state_paths, state_ix, dict_ix, ts_ix, op_token
     HRAD =  ts['HRAD']
     TWID =  ts['TWID']
 
-    if not 'ISED1' in ts:
+    if 'ISED1' not in ts:
         ts['ISED1'] = zeros(simlen)
-    if not 'ISED2' in ts:
+    if 'ISED2' not in ts:
         ts['ISED2'] = zeros(simlen)
-    if not 'ISED3' in ts:
+    if 'ISED3' not in ts:
         ts['ISED3'] = zeros(simlen)
 
     ISED1 = ts['ISED1']   # if present, else ISED is identically zero;  sand

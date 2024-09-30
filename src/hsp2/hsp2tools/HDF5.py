@@ -1,6 +1,4 @@
-from weakref import finalize
 
-from pandas.core.frame import DataFrame
 from hsp2 import hsp2tools
 import pandas as pd
 import os

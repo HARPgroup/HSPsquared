@@ -1,5 +1,4 @@
-from typing import Protocol, Dict, Any, List, Union, runtime_checkable
-from collections import defaultdict
+from typing import Protocol, Dict, Union, runtime_checkable
 import pandas as pd
 import numpy as np
 from enum import Enum
