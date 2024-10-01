@@ -3,6 +3,7 @@
 import os
 from HSP2.main import *
 from HSP2.om import *
+from HSP2.state import *
 import HSP2IO
 import numpy
 from HSP2IO.hdf import HDF5
