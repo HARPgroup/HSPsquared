@@ -185,9 +185,8 @@ def state_om_model_root_object(state, siminfo):
             #      later when adding from json?
             #      Can we simply check the model_object_cache during load step?
             # Create an object shell for this
-            # river_seg = ModelObject(seg_name, model_root_object, {}, state)
-            # state['model_object_cache'][river_seg.state_path] = river_seg
-            pass
+            segment = ModelObject(seg_name, model_root_object, {}, state)
+            state["model_object_cache"][segment.state_path] = segment
 
 
 def state_om_model_run_prep(state, io_manager, siminfo):

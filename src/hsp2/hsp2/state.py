@@ -135,7 +135,6 @@ def state_context_hsp2(state, operation, segment, activity):
         ] = {}  # for later use by things that need to know hsp entities and their paths
     if seg_name not in state["hsp_segments"].keys():
         state["hsp_segments"][seg_name] = seg_path
-
     state["domain"] = seg_path  # + "/" + activity   # may want to comment out activity?
 
 
@@ -186,6 +185,23 @@ def state_load_dynamics_hsp2(state, io_manager, siminfo):
     # if a local file with state_step_hydr() was found in load_dynamics(), we add it to state
     state["state_step_hydr"] = siminfo["state_step_hydr"]  # enabled or disabled
     state["hsp2_local_py"] = hsp2_local_py  # Stores the actual function in state
+    
+
+def get_domain_state(state_paths, state_ix, dict_ix, domain, varkeys=False):
+    # get values for a set of variables in a domain
+    # if varkeys = False, assume that we want all the variables 
+    # from the domain, that are predetermined ahead of time, and should save performance
+    ret_vals = []
+    if varkeys == False:
+        # todo: have a default full list for the given domain?
+        return ret_vals
+        #if (domain + "/" + "allvars") in state_paths.keys():
+    j = 0
+    for i in varkeys:
+        # var_path = f'{domain}/{i}'
+        var_path = domain + "/" + i
+        ret_vals[j] = state_ix[state_paths[var_path]]
+    return ret_vals
 
 
 def hydr_state_vars():
