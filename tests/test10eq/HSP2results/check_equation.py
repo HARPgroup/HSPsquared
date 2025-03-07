@@ -17,6 +17,8 @@ fpath = "./tests/test10eq/HSP2results/test10eq.h5"
 # f = h5py.File(fpath,'a') # use mode 'a' which allows read, write, modify
 # # f.close()
 hdf5_instance = HDF5(fpath)
+
+
 io_manager = IOManager(hdf5_instance)
 uci_obj = io_manager.read_uci()
 siminfo = uci_obj.siminfo
@@ -43,36 +45,24 @@ state_load_dynamics_om(
 # finalize all dynamically loaded components and prepare to run the model
 state_om_model_run_prep(state, io_manager, siminfo)
 
-domain ="/STATE/test10eq/RCHRES_R005"
+# check dependencies 
+# get context first (sets up domain in state) 
+# operation = RCHRES, segment = RCHRES_004, activity = SEDTRN
+state_context_hsp2(state, "RCHRES", "R005", "SEDTRN")
+ep_list = ["RSED4", "RSED5", "RSED6"]
+domain = state['domain']
+model_exec_list = model_domain_dependencies(state, state['domain'], ep_list)
+rsed4 = state['model_object_cache'][domain + "/" + 'RSED4']
 hydr_get_ix(state['state_ix'], state['state_paths'], domain)
-
-
-# Get the timeseries naked, without an object
-Rlocal = state["model_object_cache"]["/STATE/JL1_6562_6560/RCHRES_R001/Rlocal"]
-Rlocal_ts = Rlocal.read_ts()
-rchres1 = state["model_object_cache"]["/STATE/JL1_6562_6560/JL1_6562_6560RCHRES_R001"]
-Rlocal_check = ModelLinkage(
-    "Rlocal1", rchres1, {"right_path": "/TIMESERIES/TS010", "link_type": 3}
-)
-# Calls:
-# - ts = Rlocal.io_manager.read_ts(Category.INPUTS, None, Rlocal.ts_name)
-# - ts = transform(ts, Rlocal.ts_name, 'SAME', Rlocal.siminfo)
-Rlocal.io_manager._output._store.keys()
-# write it back.  We can give an arbitrary name or it will default to write back to the source path in right_path variable
-ts1 = (
-    precip_ts.read_ts()
-)  # same as precip_ts.ts_ix[precip_ts.ix], same as state['ts_ix'][precip_ts.ix]
-# we can specify a custom path to write this TS to
-precip_ts.write_path = "/RESULTS/test_TS039"
-precip_ts.write_ts()
-# precip_ts.write_ts is same as:
-#     ts4 = precip_ts.format_ts(ts1, ['tsvalue'], siminfo['tindex'])
-#     ts4.to_hdf(precip_ts.io_manager._output._store, precip_ts.write_path, format='t', data_columns=True, complevel=precip_ts.complevel)
-
+hvars = hydr_state_vars()
+get_domain_state(state['state_paths'], state['state_ix'], domain, hvars)
+dep,ivol,o1,o2,o3,ovol1,ovol2,ovol3,prsupy,ro,rovol,sarea,tau,ustar,vol,volev = get_domain_state(state['state_paths'], state['state_ix'], domain, hvars)
+sedvars = sedtrn_state_vars()
+rsed4,rsed5,rsed6 = get_domain_state(state['state_paths'], state['state_ix'], domain, sedvars)
 start = time.time()
+model_domain_dependencies(state, state["domain"], ep_list)
 iterate_models(
-    model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, siminfo["steps"], -1
-)
+    model_exec_list, state["op_tokens"], state["state_ix"], state["dict_ix"], state["ts_ix"], siminfo["steps"], -1)
 end = time.time()
 print(
     len(model_exec_list),

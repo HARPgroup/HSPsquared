@@ -42,12 +42,13 @@ specl_root_hsp2 = Path(specl_root) / "HSP2results"
 hsp2_specl_uci = specl_root_hsp2.resolve() / "test10specl.uci"
 hsp2_specl_uci.exists()
 temp_specl_h5file = specl_root_hsp2 / "test10specl.h5"
-if temp_specl_h5file.exists():
-    temp_specl_h5file.unlink()
 
-# load the UCI into the h5 then run it
-import_uci(str(hsp2_specl_uci), str(temp_specl_h5file))
-run(temp_specl_h5file, saveall=True, compress=False)
+# IF we want to run it from python, do this:
+    # if temp_specl_h5file.exists():
+    #    temp_specl_h5file.unlink()
+    # load the UCI into the h5 then run it
+    # import_uci(str(hsp2_specl_uci), str(temp_specl_h5file))
+    # run(temp_specl_h5file, saveall=True, compress=False)
 # Load Data from hdf5 & Analyze
 dstore_specl = pd.HDFStore(str(temp_specl_h5file), mode='r')
 hsp2_specl_hydr5 = read_hdf(dstore_specl, '/RESULTS/RCHRES_R005/HYDR')
@@ -65,12 +66,13 @@ nospecl_root_hspf = Path(nospecl_root) / "HSPFresults"
 hsp2_nospecl_uci = nospecl_root_hspf.resolve() / "test10.uci"
 hsp2_nospecl_uci.exists()
 temp_nospecl_h5file = nospecl_root_hspf / "nospecl_case.h5"
-if temp_nospecl_h5file.exists():
-    temp_nospecl_h5file.unlink()
 
-# load the UCI into the h5 then run it
-import_uci(str(hsp2_nospecl_uci), str(temp_nospecl_h5file))
-run(temp_nospecl_h5file, saveall=True, compress=False)
+# IF we want to run it from python, do this:
+    #if temp_nospecl_h5file.exists():
+    #    temp_nospecl_h5file.unlink()
+    # load the UCI into the h5 then run it
+    #import_uci(str(hsp2_nospecl_uci), str(temp_nospecl_h5file))
+    #run(temp_nospecl_h5file, saveall=True, compress=False)
 # Load Data from hdf5 & Analyze
 dstore_nospecl = pd.HDFStore(str(temp_nospecl_h5file), mode='r')
 hsp2_nospecl_hydr5 = read_hdf(dstore_nospecl, '/RESULTS/RCHRES_R005/HYDR')
@@ -89,12 +91,13 @@ eq_root_hsp2 = Path(eq_root) / "HSP2results"
 hsp2_eq_uci = eq_root_hsp2.resolve() / "test10eq.uci"
 hsp2_eq_uci.exists()
 temp_eq_h5file = eq_root_hsp2 / "test10eq.h5"
-if temp_eq_h5file.exists():
-    temp_eq_h5file.unlink()
+# IF we want to run it from python, do this:
+    #if temp_eq_h5file.exists():
+    #    temp_eq_h5file.unlink()
 
-# load the UCI into the h5 then run it
-import_uci(str(hsp2_eq_uci), str(temp_eq_h5file))
-run(temp_eq_h5file, saveall=True, compress=False)
+    # load the UCI into the h5 then run it
+    #import_uci(str(hsp2_eq_uci), str(temp_eq_h5file))
+    #run(temp_eq_h5file, saveall=True, compress=False)
 # Load Data from hdf5 & Analyze
 dstore_eq_specl = pd.HDFStore(str(temp_eq_h5file), mode='r')
 hsp2_eq_hydr5 = read_hdf(dstore_eq_specl, '/RESULTS/RCHRES_R005/HYDR')

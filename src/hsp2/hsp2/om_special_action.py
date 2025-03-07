@@ -233,10 +233,8 @@ def step_special_action(op, state_ix, dict_ix, step):
             result = state_ix[ix1] * state_ix[ix2]
         elif sop == 5:
             result = state_ix[ix1] / state_ix[ix2]
-
     # set value in target
     # tbd: handle this with a model linkage? cons: this makes a loop since the ix1 is source and destination
-
     state_ix[ix1] = result
     state_ix[op[1]] = result
     return result

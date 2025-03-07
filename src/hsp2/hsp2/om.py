@@ -687,6 +687,8 @@ def step_one(op_tokens, ops, state_ix, dict_ix, ts_ix, step, debug=0):
     if debug > 0:
         print("DEBUG: Operator ID", ops[1], "is op type", ops[0])
         print("DEBUG: ops: ", ops)
+    if (step < 10):
+        print("ops:", ops)
     if ops[0] == 1:
         step_equation(ops, state_ix)
     elif ops[0] == 2:

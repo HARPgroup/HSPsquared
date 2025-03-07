@@ -130,6 +130,7 @@ class Equation(ModelObject):
         self.var_ops = tokenize_ops(self.ps)
 
     def tokenize_vars(self):
+        print(self.name,"calling tokenize_vars()")
         # now stash the string vars as new state vars
         for j in range(2, len(self.var_ops)):
             if isinstance(self.var_ops[j], int):
@@ -468,6 +469,7 @@ def step_equation(op_token, state_ix):
     op_loc = 5  # where do the operators and operands start in op_token
     # print(num_ops, " operations")
     # is the below faster since it avoids a brief loop and a couple ifs for 2 op equations?
+    print("eq", op_token)
     if num_ops == 1:
         result = evaluate_eq_ops(
             op_token[op_loc],
