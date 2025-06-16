@@ -1,5 +1,11 @@
 # MUST RUN CODE FROM demo_specl_iniitialize.py before running this.
-from hsp2.hsp2.sedtrn_step import step_sedtrn
+from hsp2.hsp2.sedtrn_step import *
+state_str = Dict.empty(
+    key_type=types.unicode_type, value_type=types.float64
+)
+for spath, ix in state_paths.items():
+    state_str[spath] = state_ix[ix]
+
 ##########################################################################################
 # SAMPLE MAIN LOOP (does not include timestep changes)
 ##########################################################################################
@@ -10,7 +16,8 @@ for step in range(numsteps):
     #step_adcalc(domain, state_paths, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list)
     #step_cons(domain, state_paths, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list)
     #step_htrch(domain, state_paths, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list)
-    step_sedtrn(domain, state_paths, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list, step, ep_list)
+    #step_sedtrn(domain, state_paths, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list, step, ep_list)
+    step_sedtrn_str(domain, state_paths, state_str, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list, step, ep_list)
     #step_gqual(domain, state_paths, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list)
     #step_rqual(domain, state_paths, state_ix, dict_ix, ts_ix, op_tokens, model_exec_list)
 
