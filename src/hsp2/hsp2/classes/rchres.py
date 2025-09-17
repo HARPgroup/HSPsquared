@@ -19,27 +19,45 @@ class ModelRCHRES:
         return
     
     def step(self, step):
-        self.state_read()
+        self.state_read(step)
         self.step_HYDR(step)
-        self.step_RQUAL(step)
-        self.step_SEDTRN(step)
+        #self.step_RQUAL(step)
+        #self.step_SEDTRN(step)
     
     # state_read_vars: must declare class props that are mutable in state 
     # state_write_vars: all props to expose for reading
-    def state_read(self):
+    def state_read(self, step):
         # If a particular variable should be shared, but *not* mutable 
         #     it would NOT be in state_read_vars but would be in state_write_vars
-        self.IVOL = self.state[self.path,'/IVOL']
-        for i in range(nexits):
-            self.outdgt[i] = self.state[self.path,'/O',i]
+        self.potev = self.POTEV[step]
+        self.prec = self.PREC[step]
+        self.convf = self.CONVF[step]
+        # now, the state implementation calls for us to 
+        # 1. first set state to IVOL from ts
+        # 2. step_state() (for overwrites)
+        # 3. Read from state
+        self.ivol = self.state_paths[self.path + '/IVOL']
+        for i in range(self.nexits):
+            self.outdgt[i] = self.state_paths[self.path + '/O' + str(i + 1)]
+        #print("state_read outdgt", self.outdgt[i])
         return
     
-    def state_write(self):
-        state_write_vars = ['AUX1FG', 'AUX2FG', 'AUX3FG', 'AVDEP', 'AVVEL', 'DEP', 'HRAD', 'IRRDEM', 'LEN', 'LKFG', 'PRSUPY', 'RO', 'ROVOL', 'SAREA', 'STCOR', 'TAU', 'TWID', 'USTAR', 'VOL', 'VOLEV']
+    def state_write(self, step):
+        # this happens at the end of each time step after the step() routine is finished
+        # If we preload everytihng into its own linked property to ts, we can just write it like so:
+        self.PRSUPY[step] = self.prsupy
+        self.PRSUPY[step] = self.prsupy
+        # OR we go object props are all scalar array keyed items, and we can just copy like names to state
+        state_write_vars = ['AVDEP', 'AVVEL', 'DEP', 'HRAD', 'IRRDEM', 'LEN', 'LKFG', 'PRSUPY', 'RO', 'ROVOL', 'SAREA', 'STCOR', 'TAU', 'TWID', 'USTAR', 'VOL', 'VOLEV']
+        for i in state_write_vars:
+            # TODO: make this do something 
+            self.ts[i][step] = self.state[i]
+            pass
+        return 
     
     def step_HYDR(self, step):
         # options for modes right now (not selectable ATM)
-        self.step_HYDRix(self, step)
+        self.step_HYDRix(step)
         #self.step_HYDRstate(self, step)
         return
     
@@ -47,19 +65,11 @@ class ModelRCHRES:
         # options for modes right now (not selectable ATM)
         return
     
-    def step_HYDRix(self, step):
+    def step_HYDR(self, step):
         # self.state_paths[self.path,'/IVOL']
-        ix = 1
-        self.ovol[0] = self.IVOL * self.ROVOL / self.RO
+        self.ovol[0] = self.ivol + self.ROVOL
         # versus alternate call external jitted function
-        self.ovol[0] = self.IVOL * self.ROVOL / self.RO
-        return
-    
-    def step_HYDRstate(self, step):
-        ipath = self.path + '/IVOL'
-        if (step < 2):
-            print("ipath = ", ipath)
-        self.ovol[0] = self.state_paths[ipath] * self.ROVOL / self.RO
+        #self.ovol[0] = calc_ovol_blah_blah_blah(self, step)
         return
     
     def step_RQUAL(self, step):
@@ -74,48 +84,7 @@ def fn_hydr_step(rchres, step):
 # May be a method of the reach, but with many support functions to reduce size
 @njit(cache=True)
 def hydr_step(rchres, state, ts, step):
-    
-    stcor  = ui['STCOR']
-
-    # units conversion constants, 1 ACRE is 43560 sq ft. assumes input in acre-ft
-    VFACT = 43560.0
-    AFACT = 43560.0
-    LFACTA = 1.0
-    SFACTA = 1.0
-    TFACTA = 1.0
-    # physical constants (English units)
-    GAM = 62.4  # density of water
-    GRAV = 32.2  # gravitational acceleration
-    AKAPPA = 0.4  # von karmen constant
-    if rchres.uunits == 2:
-        # si units conversion constants, 1 hectare is 10000 sq m, assumes area input in hectares, vol in Mm3
-        VFACT = 1.0e6
-        AFACT = 10000.0
-        # physical constants (English units)
-        GAM = 9806.  # density of water
-        GRAV = 9.81  # gravitational acceleration
-
-    volumeFT = ts['volumeFT']
-    depthFT  = ts['depthFT']
-    sareaFT  = ts['sareaFT']
-
-    nodfv  = ui['nodfv']
-    ks     = ui['KS']
-    coks   = 1 - ks
-    facta1 = 1.0 / (coks * rchres.delts)
-
     # MAIN loop Initialization
-    IVOL   = ts['IVOL']  * VFACT           # or sum civol, zeros if no inflow ???
-    POTEV  = ts['POTEV'] / 12.0
-    PREC   = ts['PREC']  / 12.0
-    CONVF  = ts['CONVF']
-    convf  = CONVF[0]
-
-    # faster to preallocate arrays - like MATLAB)
-    o      = zeros(nexits)
-    odz    = zeros(nexits)
-    ovol   = zeros(nexits)
-    oseff  = zeros(nexits)
     od1    = zeros(nexits)
     od2    = zeros(nexits)
     outdgt = zeros(nexits)
@@ -128,36 +97,38 @@ def hydr_step(rchres, state, ts, step):
     O      = zeros((steps, nexits))
     OVOL   = zeros((steps, nexits))
 
-    ts['PRSUPY'] = PRSUPY = zeros(steps)
     ts['RO']     = RO     = zeros(steps)
     ts['ROVOL']  = ROVOL  = zeros(steps)
     ts['VOL']    = VOL    = zeros(steps)
     ts['VOLEV']  = VOLEV  = zeros(steps)
     ts['IRRDEM'] = IRRDEM = zeros(steps)
 
-    zeroindex = fndrow(0.0, volumeFT)                                           #$1126-1127
-    topvolume = volumeFT[-1]
+    #######################################################################################
+    # ******** BEGIN INITIALIZATION BEFORE FIRST RUN STEP ******************
+    #######################################################################################
+    zeroindex = fndrow(0.0, rchres.volumeFT)                                           #$1126-1127
+    topvolume = rchres.volumeFT[-1]
 
-    vol = ui['VOL'] * VFACT   # hydr-init, initial volume of water
+    vol = ui['VOL'] * rchres.VFACT   # hydr-init, initial volume of water
     if vol >= topvolume:
         errors[1] += 1      # ERRMSG1: extrapolation of rchtab will take place
 
     # find row index that brackets the VOL
-    indx = fndrow(vol, volumeFT)
-    if nodfv:  # simple interpolation, the hard way!!
-        v1 = volumeFT[indx]
-        v2 = volumeFT[indx+1]
-        rod1,od1[:] = demand(v1, rowsFT[indx,  :], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
-        rod2,od2[:] = demand(v2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
+    indx = fndrow(vol, rchres.volumeFT)
+    if rchres.nodfv:  # simple interpolation, the hard way!!
+        v1 = rchres.volumeFT[indx]
+        v2 = rchres.volumeFT[indx+1]
+        rod1,od1[:] = demand(v1, rowsFT[indx,  :], funct, rchres.nexits, rchres.delts, rchres.convf, colind, outdgt)
+        rod2,od2[:] = demand(v2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, rchres.convf, colind, outdgt)
         a1 = (v2 - vol) / (v2 - v1)
         o[:] = a1 * od1[:] + (1.0 - a1) * od2[:]
         ro   = (a1 * rod1) + ((1.0 - a1) * rod2)
     else:
-        ro,o[:] = demand(vol, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)  #$1159-1160
+        ro,o[:] = demand(vol, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, rchres.convf, colind, outdgt)  #$1159-1160
 
     # back to PHYDR
     if rchres.AUX1FG >= 1:
-        dep, stage, sarea, avdep, twid, hrad = auxil(volumeFT, depthFT, sareaFT, indx, vol, rchres.length, stcor, rchres.AUX1FG, errors) # initial
+        dep, stage, sarea, avdep, twid, hrad = auxil(rchres.volumeFT, rchres.depthFT, rchres.sareaFT, indx, vol, rchres.length, rchres.STCOR, rchres.AUX1FG, errors) # initial
 
     # hydr-irrig
     irexit = int(ui['IREXIT']) -1    # irexit - exit number for irrigation withdrawals, 0 based ???
@@ -174,9 +145,13 @@ def hydr_step(rchres, state, ts, step):
         ui['OS' + str(index + 1)] = o[index]
 
     # other initial vars
-    rovol = 0.0
+    rchres.rovol = 0.0
     volev = 0.0
-    IVOL0   = ts['IVOL']                   # the actual inflow in simulation native units
+    IVOL0   = model.IVOL                   # the actual inflow in simulation native units\
+    #######################################################################################
+    # ******** END INITIALIZATION BEFORE FIRST RUN STEP ******************
+    #######################################################################################
+
 
     #######################################################################################
     # the following section (2 of 3) added by rb to HYDR, this one to prepare for dynamic state including special actions
@@ -196,18 +171,17 @@ def hydr_step(rchres, state, ts, step):
     #######################################################################################
     
     # HYDR (except where noted)
-    convf  = CONVF[step]
     outdgt[:] = OUTDGT[step, :]
     colind[:] = COLIND[step, :]
     roseff = ro
-    oseff[:] = o[:]
+    rchres.oseff[:] = rchres.o[:]
 
     #######################################################################################
     # the following section (3 of 3) added by rb to accommodate dynamic code, operations models, and special actions
     #######################################################################################
     # set state_ix with value of local state variables and/or needed vars
     # Note: we pass IVOL0, not IVOL here since IVOL has been converted to different units
-    state_ix[ro_ix], state_ix[rovol_ix] = ro, rovol
+    state_ix[ro_ix], state_ix[rovol_ix] = ro, rchres.rovol
     di = 0
     for oi in range(rchres.nexits):
         state_ix[out_ix[oi]] = outdgt[oi] 
@@ -232,8 +206,8 @@ def hydr_step(rchres, state, ts, step):
             outdgt[oi] = state_ix[out_ix[oi]]
         # IVOL is writeable.
         # Note: we must convert IVOL to the units expected in _hydr_
-        # maybe routines should do this, and this is not needed (but pass VFACT in state)
-        IVOL[step] = state_ix[ivol_ix] * VFACT
+        # maybe routines should do this, and this is not needed (but pass rchres.VFACT in state)
+        rchres.ivol = state_ix[ivol_ix] * rchres.VFACT
     # End dynamic code step()
     #######################################################################################
 
@@ -241,14 +215,14 @@ def hydr_step(rchres, state, ts, step):
     if irexit >= 0:             # irrigation exit is set, zero based number
         if rirwdl > 0.0:  # equivalent to OVOL for the irrigation exit
             vol = irminv if irminv > vol - rirwdl else vol - rirwdl
-            if vol >= volumeFT[-1]:
+            if vol >= rchres.volumeFT[-1]:
                 errors[1] += 1 # ERRMSG1: extrapolation of rchtab will take place
 
             # DISCH with hydrologic routing
-            indx = fndrow(vol, volumeFT)                 # find row index that brackets the VOL
-            vv1 = volumeFT[indx]
+            indx = fndrow(vol, rchres.volumeFT)                 # find row index that brackets the VOL
+            vv1 = rchres.volumeFT[indx]
             rod1,od1[:] = demand(vv1, rowsFT[indx,  :], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
-            vv2 = volumeFT[indx+1]
+            vv2 = rchres.volumeFT[indx+1]
             rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
             aa1 = (vv2 - vol) / (vv2 - vv1)
             ro   = (aa1 * rod1)    + ((1.0 - aa1) * rod2)
@@ -256,21 +230,21 @@ def hydr_step(rchres, state, ts, step):
 
             # back to HYDR
             if rchres.AUX1FG >= 1:     # recompute surface area and depth
-                dep, stage, sarea, avdep, twid, hrad = auxil(volumeFT, depthFT, sareaFT, indx, vol, rchres.length, stcor,
+                dep, stage, sarea, avdep, twid, hrad = auxil(rchres.volumeFT, rchres.depthFT, rchres.sareaFT, indx, vol, rchres.length, rchres.STCOR,
                                                                 rchres.AUX1FG, errors)
         else:
             irrdem =  0.0
-        #o[irexit] = 0.0                                                   #???? not used anywhere, check if o[irexit]
+        #rchres.o[irexit] = 0.0                                                   #???? not used anywhere, check if rchres.o[irexit]
 
-    prsupy = PREC[step] * sarea
+    rchres.prsupy = rchres.prec * sarea
     if rchres.uunits == 2:
-        prsupy = PREC[step] * sarea / 3.281
-    volt   = vol + IVOL[step] + prsupy
+        rchres.prsupy = rchres.prec * sarea / 3.281
+    volt   = vol + rchres.ivol + rchres.prsupy
     volev = 0.0
     if rchres.AUX1FG:                  # subtract evaporation
-        volpev = POTEV[step] * sarea
+        volpev = rchres.POTEV[step] * sarea
         if rchres.uunits == 2:
-            volpev = POTEV[step] * sarea / 3.281
+            volpev = rchres.POTEV[step] * sarea / 3.281
         if volev >= volt:
             volev = volt
             volt = 0.0
@@ -280,35 +254,35 @@ def hydr_step(rchres, state, ts, step):
 
     # ROUTE/NOROUT  calls
     # common code
-    volint = volt - (ks * roseff * rchres.delts)    # find intercept of eq 4 on vol axis
+    volint = volt - (rchres.KS * roseff * rchres.delts)    # find intercept of eq 4 on vol axis
     if volint < (volt * 1.0e-5):
         volint = 0.0
     if volint <= 0.0:  #  case 3 -- no solution to simultaneous equations
         indx  = zeroindex
         vol   = 0.0
         ro    = 0.0
-        o[:]  = 0.0
-        rovol = volt
+        rchres.o[:]  = 0.0
+        rchres.rovol = volt
 
         if roseff > 0.0: # numba limitation, cant combine into one line
-            ovol[:] = (rovol/roseff) * oseff[:]
+            rchres.ovol[:] = (rchres.rovol/roseff) * rchres.oseff[:]
         else:
-            ovol[:] = rovol / rchres.nexits
+            rchres.ovol[:] = rchres.rovol / rchres.nexits
 
     else:   # case 1 or 2
         oint = volint * facta1      # == ointsp, so ointsp variable dropped
-        if nodfv:
+        if rchres.nodfv:
             # ROUTE
-            rodz,odz[:] = demand(0.0, rowsFT[zeroindex,:], funct, rchres.nexits, rchres.delts, convf, colind,  outdgt)
+            rodz,rchres.odz[:] = demand(0.0, rowsFT[zeroindex,:], funct, rchres.nexits, rchres.delts, convf, colind,  outdgt)
             if oint > rodz:
                 # SOLVE - case 1-- outflow demands can be met in full
                 # premov will be used to check whether we are in a trap, arbitrary value
                 premov = -20
                 move   = 10
 
-                vv1 = volumeFT[indx]
+                vv1 = rchres.volumeFT[indx]
                 rod1,od1[:] = demand(vv1, rowsFT[indx, :], funct, rchres.nexits, rchres.delts, convf,colind, outdgt)
-                vv2 = volumeFT[indx+1]
+                vv2 = rchres.volumeFT[indx+1]
                 rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
 
                 while move != 0:
@@ -332,7 +306,7 @@ def hydr_step(rchres, state, ts, step):
                             vv1    = vv2
                             od1[:] = od2[:]
                             rod1   = rod2
-                            vv2    = volumeFT[indx+1]
+                            vv2    = rchres.volumeFT[indx+1]
                             rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
                     elif vol < vv1:
                         indx  -= 1
@@ -340,7 +314,7 @@ def hydr_step(rchres, state, ts, step):
                         vv2    = vv1
                         od2[:] = od1[:]
                         rod2   = rod1
-                        vv1    = volumeFT[indx]
+                        vv1    = rchres.volumeFT[indx]
                         rod1,od1[:] = demand(vv1, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
                     else:
                         move = 0
@@ -358,21 +332,21 @@ def hydr_step(rchres, state, ts, step):
                 if ro < 1.0e-10:
                     ro  = 0.0
                 if ro <= 0.0:
-                    o[:] = 0.0
+                    rchres.o[:] = 0.0
                 else:
                     diff  = vol - vv1
                     factr = 0.0 if diff < 0.01 else  diff / (vv2 - vv1)
-                    o[:]  = od1[:] + (od2[:] - od1[:]) * factr
+                    rchres.o[:]  = od1[:] + (od2[:] - od1[:]) * factr
             else:
                 # case 2 -- outflow demands cannot be met in full
                 ro  = 0.0
                 for i in range(rchres.nexits):
-                    tro  = ro + odz[i]
+                    tro  = ro + rchres.odz[i]
                     if tro <= oint:
-                        o[i] = odz[i]
+                        rchres.o[i] = rchres.odz[i]
                         ro = tro
                     else:
-                        o[i] = oint - ro
+                        rchres.o[i] = oint - ro
                         ro = oint
                 vol = 0.0
                 indx = zeroindex
@@ -381,19 +355,19 @@ def hydr_step(rchres, state, ts, step):
             rod1,od1[:] = demand(vol, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
             if oint >= rod1: #case 1 -outflow demands are met in full
                 ro   = rod1
-                vol  = volint - coks * ro * rchres.delts
+                vol  = volint - rchres.coks * ro * rchres.delts
                 if vol < 1.0e-5:
                     vol = 0.0
-                o[:] = od1[:]
+                rchres.o[:] = od1[:]
             else:    # case 2 -outflow demands cannot be met in full
                 ro  = 0.0
                 for i in range(rchres.nexits):
-                    tro  = ro + odz[i]
+                    tro  = ro + rchres.odz[i]
                     if tro <= oint:
-                        o[i] = odz[i]
+                        rchres.o[i] = rchres.odz[i]
                         ro = tro
                     else:
-                        o[i] = oint - ro
+                        rchres.o[i] = oint - ro
                         ro = oint
                 vol = 0.0
                 indx = zeroindex
@@ -401,33 +375,32 @@ def hydr_step(rchres, state, ts, step):
         # common  ROUTE/NOROUT code
         #  an irrigation demand was made before routing
         if  (irexit >= 0) and (irrdem > 0.0):    #  an irrigation demand was made before routing
-            oseff[irexit] = irrdem
-            o[irexit]     = irrdem
+            rchres.oseff[irexit] = irrdem
+            rchres.o[irexit]     = irrdem
             roseff       += irrdem
             ro           += irrdem
             IRRDEM[step] = irrdem
 
         # estimate the volumes of outflow
-        ovol[:] = (ks * oseff[:] + coks * o[:]) * rchres.delts
-        rovol   = (ks * roseff   + coks * ro)   * rchres.delts
+        rchres.ovol[:] = (rchres.KS * rchres.oseff[:] + rchres.coks * rchres.o[:]) * rchres.delts
+        rchres.rovol   = (rchres.KS * roseff   + rchres.coks * ro)   * rchres.delts
 
     # HYDR
     if rchres.nexits > 1:
-        O[step,:]    = o[:]    * SFACTA * LFACTA
-        OVOL[step,:] = ovol[:] / VFACT
-    PRSUPY[step] = prsupy / VFACT
-    RO[step]     = ro     * SFACTA * LFACTA
-    ROVOL[step]  = rovol  / VFACT
-    VOLEV[step]  = volev  / VFACT
-    VOL[step]    = vol    / VFACT
+        O[step,:]    = rchres.o[:]    * rchres.SFACTA * rchres.LFACTA
+        OVOL[step,:] = rchres.ovol[:] / rchres.VFACT
+    RO[step]     = ro     * rchres.SFACTA * rchres.LFACTA
+    ROVOL[step]  = rchres.rovol  / rchres.VFACT
+    VOLEV[step]  = volev  / rchres.VFACT
+    VOL[step]    = vol    / rchres.VFACT
 
     if rchres.AUX1FG:   # compute final depth, surface area
         if vol >= topvolume:
             errors[1] += 1       # ERRMSG1: extrapolation of rchtab
-        indx = fndrow(vol, volumeFT)
-        dep, stage, sarea, avdep, twid, hrad = auxil(volumeFT, depthFT, sareaFT, indx, vol, rchres.length, stcor, rchres.AUX1FG, errors)
+        indx = fndrow(vol, rchres.volumeFT)
+        dep, stage, sarea, avdep, twid, hrad = auxil(rchres.volumeFT, rchres.depthFT, rchres.sareaFT, indx, vol, rchres.length, rchres.STCOR, rchres.AUX1FG, errors)
         DEP[step]   = dep
-        SAREA[step] = sarea / AFACT
+        SAREA[step] = sarea / rchres.AFACT
 
         if vol > 0.0 and sarea > 0.0:
             twid  = sarea / rchres.length
@@ -445,19 +418,19 @@ def hydr_step(rchres, state, ts, step):
             if avdep > 0.0:
                 # SHEAR; ustar (bed shear velocity), tau (bed shear stress)
                 if rchres.LKFG:              # flag, 1:lake, 0:stream
-                    ustar = avvel / (17.66 + (log10(avdep / (96.5 * rchres.db50u))) * 2.3 / AKAPPA)
-                    tau   =  GAM/GRAV * ustar**2              #3796
+                    ustar = avvel / (17.66 + (log10(avdep / (96.5 * rchres.db50u))) * 2.3 / rchres.AKAPPA)
+                    tau   =  rchres.GAM/rchres.GRAV * ustar**2              #3796
                 else:
                     hrad = (avdep*twid)/(2.0*avdep + twid) # hydraulic radius, manual eq 41
                     slope = rchres.DELTH / rchres.length
-                    ustar = sqrt(GRAV * slope * hrad)
-                    tau = (GAM * slope) * hrad
+                    ustar = sqrt(rchres.GRAV * slope * hrad)
+                    tau = (rchres.GAM * slope) * hrad
             else:
                 ustar = 0.0
                 tau   = 0.0
                 hrad  = 0.0
-            USTAR[step] = ustar * LFACTA
-            TAU[step]   = tau   * TFACTA
+            USTAR[step] = ustar * rchres.LFACTA
+            TAU[step]   = tau   * rchres.TFACTA
 
         AVDEP[step] = avdep
         AVVEL[step] = avvel

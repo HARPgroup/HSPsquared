@@ -2,9 +2,13 @@ from hsp2.hsp2.classes.base import HandlerBase
 
 class HandlerRCHRES(HandlerBase):
     float_props = ['DB50', 'db50u', 'AUX1FG', 'AUX2FG', 'AUX3FG', 'AVDEP', 'AVVEL', 'DELTH', 'DEP', 'HRAD', 'IRRDEM', 'LEN', 
-                   'LKFG', 'PRSUPY', 'RO', 'ROVOL', 'SAREA', 'LEN', 'length', 'STCOR', 'TAU', 'TWID', 'USTAR', 'VOL', 'VOLEV', 'delts']
-    int_props = ['nrows', 'nexits', 'AUX1FG', 'AUX2FG', 'AUX3FG', 'LKFG', 'DELTH','STCOR', 'uunits']
-    farray_props = ['o', 'odz', 'ovol', 'oseff', 'od1', 'od2', 'outdgt', 'colind', 'CONVF']
+                   'POTEV', 'PREC', 'IVOL',
+                   'potev', 'prec', 'ivol', 'avdep',
+                   'LKFG', 'PRSUPY', 'RO', 'ROVOL', 'SAREA', 'LEN', 'length', 'STCOR', 'TAU', 'TWID', 'USTAR', 'VOL', 'VOLEV', 'delts',
+                   'VFACT', 'AFACT', 'LFACTA', 'SFACTA', 'TFACTA', 'GAM', 'GRAV', 'length', 'AKAPPA',
+                   'volumeFT', 'depthFT', 'sareaFT', 'convf', 'nodfv', 'KS', 'coks', 'facta1']
+    int_props = ['nrows', 'nexits', 'AUX1FG', 'AUX2FG', 'AUX3FG', 'LKFG', 'DELTH','uunits']
+    farray_props = ['o', 'odz', 'ovol', 'oseff', 'od1', 'od2', 'outdgt', 'colind', 'CONVF', 'DEP']
     carray_props = ['state_read_vars', 'state_write_vars']
     # props with number of exits
     nexprops = ['o', 'odz', 'ovol', 'oseff', 'outdgt', 'od1', 'od2', 'colind']
@@ -12,12 +16,12 @@ class HandlerRCHRES(HandlerBase):
         super(HandlerRCHRES, self).__init__(model_props)
         return
     
-    def prep_run(model):
+    def prep_run(self, model):
         # insure that all local timeseries linkages are correct, inputs are sound
         # later we will test if this is advantageous or if the notation
         # self.inputs['PREC'] will work as well in equations
-        model.POTEV = model.ts['POTEV']
-        model.PREC = model.ts['PREC']
+        model.POTEV = model.ts['POTEV'] / 12.0 # why are these conversion in the HYDR.py _hydr() routine?  Seems like they belong elsewhere
+        model.PREC = model.ts['PREC'] / 12.0 # why are these conversion in the HYDR.py _hydr() routine?  Seems like they belong elsewhere
         model.CONVF = model.ts['CONVF']
         model.convf = model.CONVF[0]
         model.volumeFT = model.ts['volumeFT']
@@ -33,7 +37,9 @@ class HandlerRCHRES(HandlerBase):
         model.GAM = 62.4  # density of water
         model.GRAV = 32.2  # gravitational acceleration
         model.length = model.LEN * 5280.0 # length of reach, in feet
-        AKAPPA = 0.4  # von karmen constant
+        model.AKAPPA = 0.4  # von karmen constant
+        model.coks = 1.0 - model.KS
+        model.facta1 = 1.0 / (rchres.coks * rchres.delts)
         if model.uunits == 2:
             # si units conversion constants, 1 hectare is 10000 sq m, assumes area input in hectares, vol in Mm3
             model.VFACT = 1.0e6
@@ -41,9 +47,19 @@ class HandlerRCHRES(HandlerBase):
             # physical constants (English units)
             model.GAM = 9806.  # density of water
             model.GRAV = 9.81  # gravitational acceleration
-        model.IVOL = model.ts['IVOL']  * VFACT # or sum civol, zeros if no inflow ???
+        model.IVOL = model.ts['IVOL']  * model.VFACT # or sum civol, zeros if no inflow ???
         model.CONVF = model.ts['CONVF']
-        model.CONVF = model.ts['CONVF']
+        # try this approach from old version.  We segment the ts df so that our local model variables
+        # are references, thus, the updates made to the model property immediately propagate to the 
+        # ts - now, this should *really* propagate to the global ts. i.e. ts["TIMESERIES/" + model.path]
+        # these next rows are outputs of the model, so they will be calculated
+        model.ts['PRSUPY'] = model.PRSUPY = zeros(steps)
+        model.ts['RO']     = model.RO     = zeros(steps)
+        model.ts['ROVOL']  = model.ROVOL  = zeros(steps)
+        model.ts['VOL']    = model.VOL    = zeros(steps)
+        model.ts['VOLEV']  = model.VOLEV  = zeros(steps)
+        model.ts['IRRDEM'] = model.IRRDEM = zeros(steps)
+        model.avdep = 0.0
         if model.AUX1FG:
             model.ts['DEP']   = DEP   = zeros(steps)
             model.ts['SAREA'] = SAREA = zeros(steps)
