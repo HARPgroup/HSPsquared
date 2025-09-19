@@ -33,31 +33,93 @@ class ModelTEST:
     # explore different ways to set remote state values
     # 1. integer keyed array of state variables (i.e. self.st['potev'])
     # 2. Named class properties state variables (i.e. self.potev )
-    
-    def pre_step1(self, step):
+
+    # *******************************************************************
+    # ts_read*() : populate state with timeseries values
+    # ts_read*() : are a temporary, all timeseries objects will have a pre_step() function that loads their current
+    # *******************************************************************
+    # ts 
+    def ts_read_path2ix(self, step):
+        # reads time series from string keyed array
+        self.state_ix[self.potev_ix] = self.ts[self.path + '/POTEV']
+        self.state_ix[self.prec_ix] = self.ts[self.path + '/PREC']
+    def ts_read_ix2ix(self, step):
         # this is a temporary, all timeseries objects will have a pre_step() function that loads their current
-        # value into the state array
-        self.get_inputs1(1)
-    def get_inputs1(self, step):
-        # this is a temporary, all timeseries objects will have a pre_step() function that loads their current
+        # reads time series from integer keyed array
+        self.state_ix[self.potev_ix] = self.ts_ix[self.potev_ix]
+        self.state_ix[self.prec_ix] = self.ts_ix[self.prec_ix]
+    def ts_read_path2path(self, step):
+        # reads time series from string keyed array
+        for n in ['POTEV', 'PREC']:
+            self.state_paths[self.path + "/" + n] = self.ts[self.path + "/" + n]
+    # get_state* functions loads data from global to local state (essential for code readability)
+    def get_state_tspath2prop(self, step):
+        # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
         # value into the state array
         self.potev = self.ts[self.path + '/POTEV'][step]
         self.prec = self.ts[self.path + '/PREC'][step]
-    def state_read1(self, step):
-        self.potev = self.POTEV[step]
-        self.prec = self.PREC[step]
-        return
-    def exec1(self, step):
+    def get_state_tsix2arr(self, step):
+        # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
+        # value into the state array
+        # dynamically defined links could work this way: arbitrary TS links without code, just local name+ remote IX
+        self.st['POTEV'] = self.state_ix[self.potev_ix]
+        self.st['PREC'] = self.state_ix[self.prec_ix]
+    def get_state_tspath2arr(self, step):
+        # remote path value into the state array
+        for n in ['POTEV', 'PREC']:
+            self.st[n] = self.state_paths[self.path + "/" + n]
+    def get_state_ref2prop(self, step):
+        # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
+        # reference from a timeseries dataframe
+        self.potev = self.PREC[step]
+        self.prec = self.POTEV[step]
+    def get_state_ref2arr(self, step):
+        # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
+        # reference from a timeseries dataframe
+        for n in ['POTEV', 'PREC']:
+            self.st[n] = self.PREC[step]
+    def get_state_path2arr(self, step):
+        # remote path value into the state array
+        for n in ['POTEV', 'PREC']:
+            self.st[n] = self.state_paths[self.path + "/" + n]
+        # value into the state array
+        # dynamically defined links could work this way: arbitrary TS links without code, just local name+ remote IX
+        self.st['POTEV'] = self.state_ix[self.potev_ix]
+        self.st['PREC'] = self.state_ix[self.prec_ix]
+    
+    def exec_prop(self, step):
         # calculate the values
         result = self.prec - self.potev
         if (result < 0):
             result = 0
         self.ovol = result
-    def state_write1(self, step):
+    def exec_arr(self, step):
+        # calculate the values
+        result = self.st['PREC'] - self.st['POTEV']
+        if result < 0:
+            result = 0
+        self.ovol = result
+    
+    def state_write_prop2ix(self, step):
         self.state_ix[self.prec_ix] = self.prec
         self.state_ix[self.potev_ix] = self.potev
         self.state_ix[self.ovol_ix] = self.ovol
         return
+    def state_write_prop2path(self, step):
+        self.state_paths[self.path + '/' + '/PREC'] = self.prec
+        self.state_paths[self.path + '/' + '/POTEV'] = self.potev
+        self.state_paths[self.path + '/' + '/OVOL'] = self.ovol
+        return
+    def state_write_arr2path(self, step):
+        for i in ['PREC', 'OVOL', 'POTEV':]
+            self.state_paths[self.path + '/' + i] = self.st[i]
+        return
+    def state_write_arr2ix(self, step):
+        self.state_ix[self.prec_ix] = self.st['PREC']
+        self.state_ix[self.potev_ix] = self.st['POTEV']
+        self.state_ix[self.ovol_ix] = self.st['OVOL']
+        return
+    
     def step1(self, step):
         self.pre_step1(step)
         self.state_read1(step)
@@ -67,6 +129,8 @@ class ModelTEST:
     def get_inputs2(self, step):
         # this is a temporary, all timeseries objects will have a pre_step() function that loads their current
         # value into the state array
+        self.potev = self.POTEV[step]
+        self.prec = self.PREC[step]
         self.state_ix[self.potev_ix] = self.ts[self.path + '/POTEV']
         self.state_ix[self.prec_ix] = self.ts[self.path + '/PREC']
     def state_read2(self, step):
@@ -78,17 +142,12 @@ class ModelTEST:
         self.state_ix[self.potev_ix] = self.st['POTEV']
         return
         
-    def exec2(self, step):
-        # calculate the values
-        result = self.st['PREC'] - self.st['POTEV']
-        if result < 0:
-            result = 0
-        self.ovol = result
     
     def state_read3(self, step):
         self.potev = self.state_paths[self.path + '/POTEV']
         self.prec = self.state_paths[self.path + '/PREC']
         return
+    
     def state_read4(self, step):
         for n in ['POTEV', 'PREC']:
             self.st[n] = self.state_paths[self.path + str(n + 1)]
@@ -102,8 +161,17 @@ class ModelTEST:
             self.st[n] = self.ts[self.path + '/' + n]
         return
     
-    
-        
+
+@njit
+def iteration_test1(it_ops, it_nums):
+    ctr = 0
+    for n in range(it_nums):
+        for i in range(len(it_ops)):
+            it_ops[i].step1(n)
+        ctr=ctr+1
+    print("Completed ", ctr, " loops")
+
+
 
 @njit
 def fn_test_step(rchres, step):
@@ -131,3 +199,7 @@ m.POTEV = ts['/RCHRESR001/POTEV']
 m.PREC = ts['/RCHRESR001/PREC']
 m.get_inputs1(1)
 m.state_read1(1)
+
+# now do a full test
+obj_ist = numba.typed.List([m] )
+starttime = time.time();iteration_test1(obj_ist, steps );endtime = time.time()
