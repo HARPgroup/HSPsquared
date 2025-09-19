@@ -16,6 +16,7 @@ class ModelRCHRES:
         self.state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
         self.state_paths = Dict.empty(key_type=types.unicode_type, value_type=types.float64)
         self.ts = Dict.empty(key_type=types.unicode_type, value_type=types.float64[:])
+        self.st = Dict.empty(key_type=types.unicode_type, value_type=types.float64)
         return
     
     def step(self, step):
@@ -23,20 +24,40 @@ class ModelRCHRES:
         self.step_HYDR(step)
         #self.step_RQUAL(step)
         #self.step_SEDTRN(step)
+        #self.state_write(step)
     
     # state_read_vars: must declare class props that are mutable in state 
     # state_write_vars: all props to expose for reading
     def state_read(self, step):
         # If a particular variable should be shared, but *not* mutable 
         #     it would NOT be in state_read_vars but would be in state_write_vars
+        # maybe all of these initial setups should be in a get_inputs() method
+        # and then later here in state_read() (or get_state()) we could copy them back?
         self.potev = self.POTEV[step]
         self.prec = self.PREC[step]
         self.convf = self.CONVF[step]
+        self.outdgt[:] = self.OUTDGT[step, :]
         # now, the state implementation calls for us to 
         # 1. first set state to IVOL from ts
         # 2. step_state() (for overwrites)
         # 3. Read from state
         self.ivol = self.state_paths[self.path + '/IVOL']
+        for i in range(self.nexits):
+            self.outdgt[i] = self.state_paths[self.path + '/O' + str(i + 1)]
+        #print("state_read outdgt", self.outdgt[i])
+        return
+    
+    def state_read_arr(self, step):
+        for n in ['POTEV', 'PREC', 'IVOL', 'ROVOL']:
+           self.st[n] = self.state_paths[self.path + str(n + 1)]
+        for i in range(self.nexits):
+            self.outdgt[i] = self.state_paths[self.path + '/O' + str(i + 1)]
+        #print("state_read outdgt", self.outdgt[i])
+        return
+    
+    def state_write_arr(self, step):
+        for n in ['POTEV', 'PREC', 'IVOL', 'ROVOL']:
+           self.state_paths[self.path + str(n + 1)] = self.st[n] 
         for i in range(self.nexits):
             self.outdgt[i] = self.state_paths[self.path + '/O' + str(i + 1)]
         #print("state_read outdgt", self.outdgt[i])
@@ -83,14 +104,11 @@ def fn_hydr_step(rchres, step):
 
 # May be a method of the reach, but with many support functions to reduce size
 @njit(cache=True)
-def hydr_step(rchres, state, ts, step):
+def step_hydr(rchres, state, ts, step):
     # MAIN loop Initialization
     od1    = zeros(nexits)
     od2    = zeros(nexits)
-    outdgt = zeros(nexits)
     colind = zeros(nexits)
-
-    outdgt[:] = OUTDGT[0,:]
     colind[:] = COLIND[0,:]
 
     # numba limitation, ts can't have both 1-d and 2-d arrays in save Dict
@@ -112,19 +130,19 @@ def hydr_step(rchres, state, ts, step):
     vol = ui['VOL'] * rchres.VFACT   # hydr-init, initial volume of water
     if vol >= topvolume:
         errors[1] += 1      # ERRMSG1: extrapolation of rchtab will take place
-
+    
     # find row index that brackets the VOL
     indx = fndrow(vol, rchres.volumeFT)
     if rchres.nodfv:  # simple interpolation, the hard way!!
         v1 = rchres.volumeFT[indx]
         v2 = rchres.volumeFT[indx+1]
-        rod1,od1[:] = demand(v1, rowsFT[indx,  :], funct, rchres.nexits, rchres.delts, rchres.convf, colind, outdgt)
-        rod2,od2[:] = demand(v2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, rchres.convf, colind, outdgt)
+        rod1,od1[:] = demand(v1, rowsFT[indx,  :], funct, rchres.nexits, rchres.delts, rchres.convf, colind, rchres.outdgt)
+        rod2,od2[:] = demand(v2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, rchres.convf, colind, rchres.outdgt)
         a1 = (v2 - vol) / (v2 - v1)
         o[:] = a1 * od1[:] + (1.0 - a1) * od2[:]
         ro   = (a1 * rod1) + ((1.0 - a1) * rod2)
     else:
-        ro,o[:] = demand(vol, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, rchres.convf, colind, outdgt)  #$1159-1160
+        ro,o[:] = demand(vol, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, rchres.convf, colind, rchres.outdgt)  #$1159-1160
 
     # back to PHYDR
     if rchres.AUX1FG >= 1:
@@ -160,7 +178,7 @@ def hydr_step(rchres, state, ts, step):
     # these are integer placeholders faster than calling the array look each timestep
     o1_ix, o2_ix, o3_ix, ivol_ix = hydr_ix['O1'], hydr_ix['O2'], hydr_ix['O3'], hydr_ix['IVOL']
     ro_ix, rovol_ix, volev_ix, vol_ix = hydr_ix['RO'], hydr_ix['ROVOL'], hydr_ix['VOLEV'], hydr_ix['VOL']
-    # handle varying length outdgt
+    # handle varying length rchres.outdgt
     out_ix = arange(rchres.nexits)
     if rchres.nexits > 0:
         out_ix[0] = o1_ix
@@ -171,7 +189,6 @@ def hydr_step(rchres, state, ts, step):
     #######################################################################################
     
     # HYDR (except where noted)
-    outdgt[:] = OUTDGT[step, :]
     colind[:] = COLIND[step, :]
     roseff = ro
     rchres.oseff[:] = rchres.o[:]
@@ -184,7 +201,7 @@ def hydr_step(rchres, state, ts, step):
     state_ix[ro_ix], state_ix[rovol_ix] = ro, rchres.rovol
     di = 0
     for oi in range(rchres.nexits):
-        state_ix[out_ix[oi]] = outdgt[oi] 
+        state_ix[out_ix[oi]] = rchres.outdgt[oi] 
     state_ix[vol_ix], state_ix[ivol_ix] = vol, IVOL0[step]
     state_ix[volev_ix] = volev
     # - these if statements may be irrelevant if default functions simply return
@@ -203,7 +220,7 @@ def hydr_step(rchres, state, ts, step):
         # Do write-backs for editable STATE variables
         # OUTDGT is writeable
         for oi in range(rchres.nexits):
-            outdgt[oi] = state_ix[out_ix[oi]]
+            rchres.outdgt[oi] = state_ix[out_ix[oi]]
         # IVOL is writeable.
         # Note: we must convert IVOL to the units expected in _hydr_
         # maybe routines should do this, and this is not needed (but pass rchres.VFACT in state)
@@ -221,9 +238,9 @@ def hydr_step(rchres, state, ts, step):
             # DISCH with hydrologic routing
             indx = fndrow(vol, rchres.volumeFT)                 # find row index that brackets the VOL
             vv1 = rchres.volumeFT[indx]
-            rod1,od1[:] = demand(vv1, rowsFT[indx,  :], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
+            rod1,od1[:] = demand(vv1, rowsFT[indx,  :], funct, rchres.nexits, rchres.delts, convf, colind, rchres.outdgt)
             vv2 = rchres.volumeFT[indx+1]
-            rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
+            rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, rchres.outdgt)
             aa1 = (vv2 - vol) / (vv2 - vv1)
             ro   = (aa1 * rod1)    + ((1.0 - aa1) * rod2)
             o[:] = (aa1 * od1[:])  + ((1.0 - aa1) * od2[:])
@@ -241,7 +258,7 @@ def hydr_step(rchres, state, ts, step):
         rchres.prsupy = rchres.prec * sarea / 3.281
     volt   = vol + rchres.ivol + rchres.prsupy
     volev = 0.0
-    if rchres.AUX1FG:                  # subtract evaporation
+    if rchres.AUX1FG:                  # subtract evaporation 
         volpev = rchres.POTEV[step] * sarea
         if rchres.uunits == 2:
             volpev = rchres.POTEV[step] * sarea / 3.281
@@ -273,7 +290,7 @@ def hydr_step(rchres, state, ts, step):
         oint = volint * facta1      # == ointsp, so ointsp variable dropped
         if rchres.nodfv:
             # ROUTE
-            rodz,rchres.odz[:] = demand(0.0, rowsFT[zeroindex,:], funct, rchres.nexits, rchres.delts, convf, colind,  outdgt)
+            rodz,rchres.odz[:] = demand(0.0, rowsFT[zeroindex,:], funct, rchres.nexits, rchres.delts, convf, colind,  rchres.outdgt)
             if oint > rodz:
                 # SOLVE - case 1-- outflow demands can be met in full
                 # premov will be used to check whether we are in a trap, arbitrary value
@@ -281,9 +298,9 @@ def hydr_step(rchres, state, ts, step):
                 move   = 10
 
                 vv1 = rchres.volumeFT[indx]
-                rod1,od1[:] = demand(vv1, rowsFT[indx, :], funct, rchres.nexits, rchres.delts, convf,colind, outdgt)
+                rod1,od1[:] = demand(vv1, rowsFT[indx, :], funct, rchres.nexits, rchres.delts, convf,colind, rchres.outdgt)
                 vv2 = rchres.volumeFT[indx+1]
-                rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
+                rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, rchres.outdgt)
 
                 while move != 0:
                     facta2 = rod1 - rod2
@@ -307,7 +324,7 @@ def hydr_step(rchres, state, ts, step):
                             od1[:] = od2[:]
                             rod1   = rod2
                             vv2    = rchres.volumeFT[indx+1]
-                            rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
+                            rod2,od2[:] = demand(vv2, rowsFT[indx+1,:], funct, rchres.nexits, rchres.delts, convf, colind, rchres.outdgt)
                     elif vol < vv1:
                         indx  -= 1
                         move   = -1
@@ -315,7 +332,7 @@ def hydr_step(rchres, state, ts, step):
                         od2[:] = od1[:]
                         rod2   = rod1
                         vv1    = rchres.volumeFT[indx]
-                        rod1,od1[:] = demand(vv1, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
+                        rod1,od1[:] = demand(vv1, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, convf, colind, rchres.outdgt)
                     else:
                         move = 0
 
@@ -352,7 +369,7 @@ def hydr_step(rchres, state, ts, step):
                 indx = zeroindex
         else:
             # NOROUT
-            rod1,od1[:] = demand(vol, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, convf, colind, outdgt)
+            rod1,od1[:] = demand(vol, rowsFT[indx,:], funct, rchres.nexits, rchres.delts, convf, colind, rchres.outdgt)
             if oint >= rod1: #case 1 -outflow demands are met in full
                 ro   = rod1
                 vol  = volint - rchres.coks * ro * rchres.delts

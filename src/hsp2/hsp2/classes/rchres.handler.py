@@ -8,7 +8,7 @@ class HandlerRCHRES(HandlerBase):
                    'VFACT', 'AFACT', 'LFACTA', 'SFACTA', 'TFACTA', 'GAM', 'GRAV', 'length', 'AKAPPA',
                    'volumeFT', 'depthFT', 'sareaFT', 'convf', 'nodfv', 'KS', 'coks', 'facta1']
     int_props = ['nrows', 'nexits', 'AUX1FG', 'AUX2FG', 'AUX3FG', 'LKFG', 'DELTH','uunits']
-    farray_props = ['o', 'odz', 'ovol', 'oseff', 'od1', 'od2', 'outdgt', 'colind', 'CONVF', 'DEP']
+    farray_props = ['o', 'odz', 'ovol', 'oseff', 'od1', 'od2', 'colind', 'CONVF', 'DEP', 'OUTDGT']
     carray_props = ['state_read_vars', 'state_write_vars']
     # props with number of exits
     nexprops = ['o', 'odz', 'ovol', 'oseff', 'outdgt', 'od1', 'od2', 'colind']
@@ -40,6 +40,10 @@ class HandlerRCHRES(HandlerBase):
         model.AKAPPA = 0.4  # von karmen constant
         model.coks = 1.0 - model.KS
         model.facta1 = 1.0 / (rchres.coks * rchres.delts)
+        # is passed in to the _hydr routine as a standalone argument, but it is actually a timeseries
+        # The routine hydr() calculates it, and that is not ideal, as it should be parsed earlier, like in this step
+        # so, we set the model outdgt as the first time steps value to initialize
+        model.outdgt[:] = model.ts['OUTDGT'][0] 
         if model.uunits == 2:
             # si units conversion constants, 1 hectare is 10000 sq m, assumes area input in hectares, vol in Mm3
             model.VFACT = 1.0e6
