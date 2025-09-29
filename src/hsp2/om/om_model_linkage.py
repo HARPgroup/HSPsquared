@@ -5,8 +5,8 @@ during a model simulation.
 """
 
 from hsp2.hsp2.state import state_add_ts, get_state_ix
-from hsp2.hsp2.om.om import *
-from hsp2.hsp2.om.om_model_object import ModelObject
+from hsp2.om.om import *
+from hsp2.om.om_model_object import ModelObject
 from numba import njit
 
 

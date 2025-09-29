@@ -5,8 +5,8 @@ during a model simulation.
 """
 
 from hsp2.hsp2.state import set_state
-from hsp2.hsp2.om.om import ModelObject
-from hsp2.hsp2.om.om_model_object import ModelObject
+from hsp2.om.om import ModelObject
+from hsp2.om.om_model_object import ModelObject
 from pandas import DataFrame
 from numba import njit
 from numpy import int64
