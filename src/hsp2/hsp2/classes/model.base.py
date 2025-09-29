@@ -17,10 +17,12 @@ def model_make_spec(prop_names, prop_type):
 state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
 state_paths = Dict.empty(key_type=types.unicode_type, value_type=types.float64)
 ts = Dict.empty(key_type=types.unicode_type, value_type=types.float64[:])
+ts_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:])
 inputs = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
 
 state_paths_ty = ('state_paths', typeof(state_paths))
 state_ix_ty = ('state_ix', typeof(state_ix))
+ts_ix_ty = ('ts_ix', typeof(ts_ix))
 local_state_ty = ('st', typeof(state_paths))
 ts_ty = ('ts', typeof(ts))
 inputs_ty = ('inputs', typeof(inputs))
@@ -29,7 +31,7 @@ model_num_type = float32
 model_str_type = numba_str # Imported from numba.types.string
 model_str_props = ['name' , 'path']
 model_num_props = ['value']
-model_base = [state_paths_ty, state_ix_ty, ts_ty, local_state_ty, inputs_ty]+ model_make_spec(model_str_props,model_str_type ) + model_make_spec(model_num_props, model_num_type )
+model_base = [state_paths_ty, state_ix_ty, ts_ty, ts_ix_ty, local_state_ty, inputs_ty]+ model_make_spec(model_str_props,model_str_type ) + model_make_spec(model_num_props, model_num_type )
 
 @jitclass(model_base)
 class ModelBase:
