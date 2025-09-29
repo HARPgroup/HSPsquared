@@ -159,7 +159,7 @@ def hydr(io_manager, siminfo, parameters, ts, ftables, state):
     if hsp2_local_py != False:
         from hsp2_local_py import state_step_hydr
     else:
-        from hsp2.state_fn_defaults import state_step_hydr
+        from hsp2.state.state_fn_defaults import state_step_hydr
     # initialize the hydr paths in case they don't already reside here
     hydr_init_ix(state, state["domain"])
     # must split dicts out of state Dict since numba cannot handle mixed-type nested Dicts
