@@ -20,7 +20,7 @@ from hsp2.hsp2.utilities import initm, make_numba_dict
 
 # the following imports added by rb to handle dynamic code and special actions
 from hsp2.state.state import hydr_get_ix, hydr_init_ix, hydr_state_vars
-from hsp2.om import pre_step_model, step_model, model_domain_dependencies
+from hsp2.om.om import pre_step_model, step_model, model_domain_dependencies
 from numba.typed import Dict
 
 

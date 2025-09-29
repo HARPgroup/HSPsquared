@@ -5,7 +5,7 @@ from hsp2.state.state import (
     get_domain_state,
     set_domain_state,
 )
-from hsp2.om import pre_step_model, step_model
+from hsp2.om.om import pre_step_model, step_model
 
 
 @njit

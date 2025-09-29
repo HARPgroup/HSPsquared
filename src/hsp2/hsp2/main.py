@@ -25,7 +25,7 @@ from hsp2.state.state import (
     state_init_hsp2,
     state_context_hsp2,
 )
-from hsp2.om import (
+from hsp2.om.om import (
     om_init_state,
     state_om_model_run_prep,
     state_load_dynamics_om,

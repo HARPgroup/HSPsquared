@@ -11,7 +11,7 @@ from hsp2.hsp2.utilities import make_numba_dict
 
 # the following imports added to handle special actions
 from hsp2.state.state import sedtrn_get_ix, sedtrn_init_ix, sedtrn_state_vars
-from hsp2.om import pre_step_model, step_model, model_domain_dependencies
+from hsp2.om.om import pre_step_model, step_model, model_domain_dependencies
 from numba.typed import Dict
 
 ERRMSGS = (

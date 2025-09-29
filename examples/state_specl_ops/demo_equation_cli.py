@@ -3,7 +3,7 @@
 import os
 import numpy
 from hsp2.hsp2.main import *
-from hsp2.om import *
+from hsp2.om.om import *
 from hsp2.state.state import *
 from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager

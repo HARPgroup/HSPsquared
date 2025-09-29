@@ -13,7 +13,7 @@ from hsp2.hsp2.utilities import initm, initmd, make_numba_dict
 
 # the following imports added to handle special actions
 from hsp2.state.state import rqual_init_ix, rqual_state_vars
-from hsp2.om import model_domain_dependencies
+from hsp2.om.om import model_domain_dependencies
 
 ERRMSGS_oxrx = (
     "OXRX: Warning -- SATDO is less than zero. This usually occurs when water temperature is very high (above ~66 deg. C). This usually indicates an error in input GATMP (or TW, if HTRCH is not being simulated).",

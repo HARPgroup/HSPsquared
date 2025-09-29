@@ -12,8 +12,8 @@ Draft: @tbd:
 import numpy as np
 from numba import njit
 
-from hsp2.hsp2.om import is_float_digit
-from hsp2.hsp2.om_model_object import ModelObject
+from hsp2.hsp2.om.om import is_float_digit
+from hsp2.hsp2.om.om_model_object import ModelObject
 
 
 class SpecialAction(ModelObject):
