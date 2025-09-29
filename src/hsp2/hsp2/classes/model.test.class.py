@@ -83,6 +83,13 @@ class ModelTEST:
         # reference from a timeseries dataframe
         self.prec = self.PREC[step]
         self.potev = self.POTEV[step]
+    def get_state_ref2ix(self, step):
+        # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
+        # reference from a timeseries dataframe
+        self.state_ix[self.potev_ix] = self.PREC[step]
+        self.state_ix[self.prec_ix] = self.POTEV[step]
+    def ts_read_path2path(self, step):
+        return
     def get_state_ref2arr(self, step):
         # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
         # reference from a timeseries dataframe
@@ -109,10 +116,27 @@ class ModelTEST:
         if result < 0:
             result = 0
         self.st['OVOL'] = result
+    def exec_ref(self, step):
+        # calculate the values
+        result = self.PREC[step] - self.POTEV[step]
+        if result < 0:
+            result = 0
+        self.ovol = result
+    def exec_ix(self, step):
+        # calculate the values
+        result = self.state_ix[self.prec_ix] - self.state_ix[self.potev_ix]
+        if result < 0:
+            result = 0
+        self.ovol = result
     
     def state_write_prop2ix(self, step):
         self.state_ix[self.prec_ix] = self.prec
         self.state_ix[self.potev_ix] = self.potev
+        self.state_ix[self.ovol_ix] = self.ovol
+        return
+    def state_write_ref2ix(self, step):
+        self.state_ix[self.prec_ix] = self.PREC[step]
+        self.state_ix[self.potev_ix] = self.POTEV[step]
         self.state_ix[self.ovol_ix] = self.ovol
         return
     def state_write_prop2path(self, step):
@@ -133,6 +157,7 @@ class ModelTEST:
     def step1(self, step):
         self.get_state_ref2prop(step)
         self.exec_prop(step)
+        self.exec_prop(step)
         if ( (step/10000) == round(step/10000)):
             print("Rain - PET = OVOL", self.prec, self.potev, self.ovol)
             print("State = ", self.state_ix)
@@ -142,18 +167,50 @@ class ModelTEST:
     def step2(self, step):
         self.get_state_ref2arr(step)
         self.exec_arr(step)
+        self.exec_arr(step)
         if ( (step/10000) == round(step/10000)):
             print("Rain - PET = OVOL", self.st['PREC'], self.st['POTEV'], self.st['OVOL'])
             print("State = ", self.state_ix)
         self.state_write_arr2ix(step)
-    # reads ts path to state_ix, then state_ix to prop
+    # reads ts ix to prop, then writes prop to state_ix
+    # rougly 60% slower than step1
     def step3(self, step):
-        self.ts_read_path2ix(step)
+        # note: this does not need to copy the TS to state (though maybe it should for logging!)
         self.get_state_tsix2prop(step)
+        self.exec_prop(step)
         self.exec_prop(step)
         if ( (step/10000) == round(step/10000)):
             print("Rain - PET = OVOL", self.prec, self.potev, self.ovol)
             print("State = ", self.state_ix)
+        self.state_write_prop2ix(step)
+    # reads directly from timeseries reference property (most similar to current hsp2)
+    # this is identical to step1, except that there is NO copying to a local
+    # class property like self.prec and self.potev
+    # this is rougly equivalent in time used to step1
+    # meaning that there is little to no penalty for reading a value to the class property at beginning of each step
+    def step4(self, step):
+        self.exec_ref(step)
+        self.exec_ref(step)
+        if ( (step/10000) == round(step/10000)):
+            print("Rain - PET = OVOL", self.prec, self.potev, self.ovol)
+            print("State = ", self.state_ix)
+        self.state_write_ref2ix(step)
+    # reads ts ref to state_ix, then operates on state_ix 
+    # this is parsimonious in terms of instructions, and is 2nd fastest overall to step1/step4
+    # but still 80% more execution time for the calculation part of the step
+    # since the calc part repeats the cal 2 times to assess the impact of multipler reads
+    # this indicates that it is faster to save the value in a local variable if you are going to
+    # use that value in more than one calculation or read/write
+    def step5(self, step):
+        # note: this does not need to copy the TS to state (though maybe it should for logging!)
+        self.get_state_ref2ix(step)
+        self.exec_ix(step)
+        self.exec_ix(step)
+        if ( (step/10000) == round(step/10000)):
+            print("Rain - PET = OVOL", self.prec, self.potev, self.ovol)
+            print("State = ", self.state_ix)
+        # no writing needed since this operates directoly on state_ix
+        # but do this to isolate performance difference of reading values
         self.state_write_prop2ix(step)
     
     def get_inputs2(self, step):
@@ -216,6 +273,24 @@ def iteration_test3(it_ops, it_nums):
     for n in range(it_nums):
         for i in range(len(it_ops)):
             it_ops[i].step3(n)
+        ctr=ctr+1
+    print("Completed ", ctr, " loops")
+
+@njit
+def iteration_test4(it_ops, it_nums):
+    ctr = 0
+    for n in range(it_nums):
+        for i in range(len(it_ops)):
+            it_ops[i].step4(n)
+        ctr=ctr+1
+    print("Completed ", ctr, " loops")
+
+@njit
+def iteration_test5(it_ops, it_nums):
+    ctr = 0
+    for n in range(it_nums):
+        for i in range(len(it_ops)):
+            it_ops[i].step5(n)
         ctr=ctr+1
     print("Completed ", ctr, " loops")
 
