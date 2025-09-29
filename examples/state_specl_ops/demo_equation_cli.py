@@ -3,8 +3,8 @@
 import os
 import numpy
 from hsp2.hsp2.main import *
-from hsp2.hsp2.om import *
-from hsp2.hsp2.state import *
+from hsp2.om import *
+from hsp2.state import *
 from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager
 
@@ -53,6 +53,9 @@ model_exec_list = model_domain_dependencies(state, state['domain'], ep_list)
 rsed4 = state['model_object_cache'][domain + "/" + 'RSED4']
 test10eq = state['model_object_cache']['/STATE/test10eq']
 RCHRESR005 = state['model_object_cache']['/STATE/test10eq/RCHRES_R005']
+
+R5RSED04 = RCHRESR005.get_object('RSED4')
+state['model_object_cache']['/STATE/test10eq/RCHRES_R005']['RSED04']
 RCHRESR005.inputs
 hydr_get_ix(state['state_ix'], state['state_paths'], domain)
 hvars = hydr_state_vars()

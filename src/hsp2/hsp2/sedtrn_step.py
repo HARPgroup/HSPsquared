@@ -1,11 +1,11 @@
 from numba import njit
 
 # the following imports added to handle special actions
-from hsp2.hsp2.state import (
+from hsp2.state import (
     get_domain_state,
     set_domain_state,
 )
-from hsp2.hsp2.om import pre_step_model, step_model
+from hsp2.om import pre_step_model, step_model
 
 
 @njit

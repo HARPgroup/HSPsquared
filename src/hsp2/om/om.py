@@ -10,7 +10,7 @@ import numpy as np
 import time
 from numpy import zeros
 from numba import njit  # import the types
-from hsp2.hsp2.state import append_state, get_ix_path
+from hsp2.state import append_state, get_ix_path
 
 
 def get_exec_order(model_exec_list, var_ix):
@@ -64,15 +64,15 @@ def model_element_paths(mel, state):
 
 
 # Import Code Classes
-from hsp2.hsp2.om_model_object import ModelObject, ModelVariable, pre_step_register
-from hsp2.hsp2.om_sim_timer import SimTimer, step_sim_timer
-from hsp2.hsp2.om_equation import Equation, step_equation
-from hsp2.hsp2.om_model_linkage import ModelLinkage, step_model_link
-from hsp2.hsp2.om_special_action import SpecialAction, step_special_action
-# from hsp2.hsp2.om_data_matrix import *
-# from hsp2.hsp2.om_model_broadcast import *
-# from hsp2.hsp2.om_simple_channel import *
-# from hsp2.hsp2.om_impoundment import *
+from hsp2.om_model_object import ModelObject, ModelVariable, pre_step_register
+from hsp2.om_sim_timer import SimTimer, step_sim_timer
+from hsp2.om_equation import Equation, step_equation
+from hsp2.om_model_linkage import ModelLinkage, step_model_link
+from hsp2.om_special_action import SpecialAction, step_special_action
+# from hsp2.om_data_matrix import *
+# from hsp2.om_model_broadcast import *
+# from hsp2.om_simple_channel import *
+# from hsp2.om_impoundment import *
 
 
 def init_om_dicts():

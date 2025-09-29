@@ -18,14 +18,14 @@ from hsp2.hsp2.utilities import (
     get_gener_timeseries,
 )
 from hsp2.hsp2.configuration import activities, noop, expand_masslinks
-from hsp2.hsp2.state import (
+from hsp2.state import (
     init_state_dicts,
     state_siminfo_hsp2,
     state_load_dynamics_hsp2,
     state_init_hsp2,
     state_context_hsp2,
 )
-from hsp2.hsp2.om import (
+from hsp2.om import (
     om_init_state,
     state_om_model_run_prep,
     state_load_dynamics_om,

@@ -4,8 +4,8 @@
 ##########################################################################################
 import os, numpy
 from hsp2.hsp2.main import *
-from hsp2.hsp2.om import *
-from hsp2.hsp2.state import *
+from hsp2.om import *
+from hsp2.state import *
 from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager
 hdf5_instance = HDF5("./tests/test10specl/HSP2results/test10specl.demo.h5")
