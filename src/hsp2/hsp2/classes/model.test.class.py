@@ -13,7 +13,9 @@ class ModelTEST:
         # must copy any base method stuff from ModelBase
         self.path = '' # must initialize
         self.value = 0
-        self.state_ix = Dict.empty(key_type=types.int64, value_type=types.float64)
+        # NOTE: none of this should stay here, it is just for testing convenience and should be passed in
+        self.state_ix = zeros(100)
+        self.state_ix32 = Dict.empty(key_type=types.int64, value_type=types.float32)
         self.ts_ix = Dict.empty(key_type=types.int64, value_type=types.float64[:])
         self.state_paths = Dict.empty(key_type=types.unicode_type, value_type=types.float64)
         self.ts = Dict.empty(key_type=types.unicode_type, value_type=types.float64[:])
@@ -25,6 +27,8 @@ class ModelTEST:
         self.prec_ix = 2
         self.ovol_ix = 3
         self.ovol = 0.0
+        self.state_ix32[self.ovol_ix] = 0.0
+        self.state_ix[self.ovol_ix] = 0.0
         return
     
     # explore different ways to store local state values
@@ -58,6 +62,10 @@ class ModelTEST:
         # value into the state array
         self.potev = self.ts[self.path + '/POTEV'][step]
         self.prec = self.ts[self.path + '/PREC'][step]
+    def get_state(self, step):
+        self.ovol = self.state_ix[self.ovol_ix]
+    def get_state32(self, step):
+        self.ovol = self.state_ix32[self.ovol_ix]
     def get_state_tsix2prop(self, step):
         # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
         # value into the state array
@@ -88,8 +96,11 @@ class ModelTEST:
         # reference from a timeseries dataframe
         self.state_ix[self.potev_ix] = self.PREC[step]
         self.state_ix[self.prec_ix] = self.POTEV[step]
-    def ts_read_path2path(self, step):
-        return
+    def get_state_ref2ix32(self, step):
+        # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
+        # reference from a timeseries dataframe
+        self.state_ix32[self.potev_ix] = self.PREC[step]
+        self.state_ix32[self.prec_ix] = self.POTEV[step]
     def get_state_ref2arr(self, step):
         # this DOES NOT REQUIRE a ts_read* function, as the input is an actual object
         # reference from a timeseries dataframe
@@ -133,6 +144,11 @@ class ModelTEST:
         self.state_ix[self.prec_ix] = self.prec
         self.state_ix[self.potev_ix] = self.potev
         self.state_ix[self.ovol_ix] = self.ovol
+        return
+    def state_write_prop2ix32(self, step):
+        self.state_ix32[self.prec_ix] = self.prec
+        self.state_ix32[self.potev_ix] = self.potev
+        self.state_ix32[self.ovol_ix] = self.ovol
         return
     def state_write_ref2ix(self, step):
         self.state_ix[self.prec_ix] = self.PREC[step]
@@ -185,8 +201,8 @@ class ModelTEST:
         self.state_write_prop2ix(step)
     # reads directly from timeseries reference property (most similar to current hsp2)
     # this is identical to step1, except that there is NO copying to a local
-    # class property like self.prec and self.potev
-    # this is rougly equivalent in time used to step1
+    # class property like selhf.prec and self.potev
+    # this is roughly equivalent in time used to step1
     # meaning that there is little to no penalty for reading a value to the class property at beginning of each step
     def step4(self, step):
         self.exec_ref(step)
@@ -195,12 +211,15 @@ class ModelTEST:
             print("Rain - PET = OVOL", self.prec, self.potev, self.ovol)
             print("State = ", self.state_ix)
         self.state_write_ref2ix(step)
-    # reads ts ref to state_ix, then operates on state_ix 
-    # this is parsimonious in terms of instructions, and is 2nd fastest overall to step1/step4
-    # but still 80% more execution time for the calculation part of the step
-    # since the calc part repeats the cal 2 times to assess the impact of multipler reads
-    # this indicates that it is faster to save the value in a local variable if you are going to
-    # use that value in more than one calculation or read/write
+    # - reads ts ref to state_ix, then operates on state_ix 
+    #   this is parsimonious in terms of instructions, and is 2nd fastest overall to step1/step4
+    #   but still 80% more execution time for the calculation part of the step
+    # - The calc part repeats the cal 2 times to assess the impact of multipler reads
+    #   this indicates that it is faster to save the value in a local variable if you are going to
+    #   use that value in more than one calculation or read/write
+    # - this does NOT explore the impact of reading from the same time series multiple times
+    #   which *could* result in better performance if loaded once into state_ix was more economical
+    #   than multiple searches of the ts reference for the current timestep key (or not)
     def step5(self, step):
         # note: this does not need to copy the TS to state (though maybe it should for logging!)
         self.get_state_ref2ix(step)
@@ -212,6 +231,31 @@ class ModelTEST:
         # no writing needed since this operates directoly on state_ix
         # but do this to isolate performance difference of reading values
         self.state_write_prop2ix(step)
+    # same as step 1 + reads OVOL from the state_ix to allow for operational overwrite
+    def step6(self, step):
+        self.get_state(step)
+        self.get_state_ref2ix(step)
+        self.exec_ix(step)
+        self.exec_ix(step)
+        if ( (step/10000) == round(step/10000)):
+            print("Rain - PET = OVOL", self.prec, self.potev, self.ovol)
+            print("State = ", self.state_ix)
+        # no writing needed since this operates directoly on state_ix
+        # but do this to isolate performance difference of reading values
+        self.state_write_prop2ix(step)
+    # same as step 6 but uses 32 bit inteer keyed state_ix32
+    def step7(self, step):
+        # note: this does not need to copy the TS to state (though maybe it should for logging!)
+        self.get_state32(step)
+        self.get_state_ref2ix(step)
+        self.exec_ix(step)
+        self.exec_ix(step)
+        if ( (step/10000) == round(step/10000)):
+            print("Rain - PET = OVOL", self.prec, self.potev, self.ovol)
+            print("State = ", self.state_ix)
+        # no writing needed since this operates directoly on state_ix
+        # but do this to isolate performance difference of reading values
+        self.state_write_prop2ix32(step)
     
     def get_inputs2(self, step):
         # this is a temporary, all timeseries objects will have a pre_step() function that loads their current
@@ -295,6 +339,24 @@ def iteration_test5(it_ops, it_nums):
     print("Completed ", ctr, " loops")
 
 @njit
+def iteration_test6(it_ops, it_nums):
+    ctr = 0
+    for n in range(it_nums):
+        for i in range(len(it_ops)):
+            it_ops[i].step6(n)
+        ctr=ctr+1
+    print("Completed ", ctr, " loops")
+
+@njit
+def iteration_test7(it_ops, it_nums):
+    ctr = 0
+    for n in range(it_nums):
+        for i in range(len(it_ops)):
+            it_ops[i].step7(n)
+        ctr=ctr+1
+    print("Completed ", ctr, " loops")
+
+@njit
 def fn_test_step(rchres, step):
     # will need to pass in dt and get all others from the object state memory
     rchres.ovol[0] = rchres.state_ix[ix] * rchres.ROVOL / rchres.RO
@@ -312,6 +374,7 @@ m.path = '/RCHRESR001'
 ts = m.ts
 ts_ix = m.ts_ix
 state_ix = m.state_ix
+state_ix32 = m.state_ix32
 state_paths = m.state_paths
 ts['/RCHRESR001/PREC'] = prec
 ts['/RCHRESR001/POTEV'] = potev
@@ -327,7 +390,22 @@ m.PREC = ts['/RCHRESR001/PREC']
 
 # now do a full test
 obj_ist = numba.typed.List([m] )
+iteration_test1(obj_ist, 1)
 starttime = time.time();iteration_test1(obj_ist, steps );endtime = time.time()
-print("Elapsed time:", (endtime - starttime))
+print("iteration_test1 Elapsed time:", (endtime - starttime))
 print("Rain - PET = OVOL", m.prec, m.potev, m.ovol)
 
+iteration_test2(obj_ist, 1)
+starttime = time.time();iteration_test2(obj_ist, steps );endtime = time.time()
+print("iteration_test2 Elapsed time:", (endtime - starttime))
+print("Rain - PET = OVOL", m.prec, m.potev, m.ovol)
+
+iteration_test3(obj_ist, 1)
+starttime = time.time();iteration_test3(obj_ist, steps );endtime = time.time()
+print("iteration_test3Elapsed time:", (endtime - starttime))
+print(" Rain - PET = OVOL", m.prec, m.potev, m.ovol)
+
+iteration_test4(obj_ist, 1)
+starttime = time.time();iteration_test4(obj_ist, steps );endtime = time.time()
+print("iteration_test4 Elapsed time:", (endtime - starttime))
+print("Rain - PET = OVOL", m.prec, m.potev, m.ovol)
