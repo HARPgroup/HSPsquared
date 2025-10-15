@@ -3,7 +3,11 @@ from hsp2.hsp2.classes.rchres.handler import HandlerRCHRES
 # Define the spec for the ModelRCHRES class
 # note: we store the float, int, array props on the HandlerRCHRES object for convenience
 #       but we could just as easily opt to keep it in a separate location loaded via include
-model_rchres_spec = model_base + model_make_spec(HandlerRCHRES.float_props, float64) + model_make_spec(HandlerRCHRES.farray_props, float64[:]) + model_make_spec(HandlerRCHRES.carray_props, types.unicode_type) + model_make_spec(HandlerRCHRES.int_props, int32)
+model_rchres_spec = (model_base + model_make_spec(HandlerRCHRES.float_props, float64) + 
+    model_make_spec(HandlerRCHRES.farray_props, float64[:]) + 
+    model_make_spec(HandlerRCHRES.carray_props, types.unicode_type) + 
+    model_make_spec(HandlerRCHRES.int_props, int32)
+)
 
 @jitclass(model_rchres_spec )
 class ModelRCHRES:
