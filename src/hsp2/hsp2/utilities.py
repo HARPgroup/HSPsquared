@@ -203,6 +203,14 @@ def make_numba_dict(parameters):
                 ui[key] = float(value)
     return ui
 
+def make_class_spec(prop_names, prop_type):
+    """
+    Iterate through an array of names, creating a numba compatible class specification
+    that can be used to create easily readable class definitions, when the number of 
+    class attributes is enormous.
+    """
+    new_spec = [(x, prop_type) for x in prop_names]
+    return new_spec
 
 def transform(ts, name, how, siminfo):
     """
