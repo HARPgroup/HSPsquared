@@ -87,7 +87,7 @@ def main(
     # initialize STATE dicts
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
-    state = init_state_dicts()
+    state = state_object()
     state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
     # Add support for dynamic functions to operate on STATE
     # - Load any dynamic components if present, and store variables on objects
@@ -96,9 +96,8 @@ def main(
     # before loading dynamic components that may reference them
     state_init_hsp2(state, opseq, activities)
     # - finally stash specactions in state, not domain (segment) dependent so do it once
-    state["specactions"] = specactions  # stash the specaction dict in state
     om_init_state(state)  # set up operational model specific state entries
-    specl_load_state(state, io_manager, siminfo)  # traditional special actions
+    specl_load_state(state, io_manager, siminfo, specactions)  # traditional special actions
     state_load_dynamics_om(
         state, io_manager, siminfo
     )  # operational model for custom python

@@ -9,9 +9,9 @@ Notes:
 from numba import njit
 
 
-def specl_load_om(state, io_manager, siminfo):
-    if "ACTIONS" in state["specactions"]:
-        dc = state["specactions"]["ACTIONS"]
+def specl_load_om(state, io_manager, siminfo, specactions):
+    if "ACTIONS" in specactions:
+        dc = specactions["ACTIONS"]
         for ix in dc.index:
             # add the items to the state['model_data'] dict
             speca = dc[ix : (ix + 1)]
@@ -34,8 +34,8 @@ def specl_load_om(state, io_manager, siminfo):
     return
 
 
-def specl_load_state(state, io_manager, siminfo):
-    specl_load_om(state, io_manager, siminfo)
+def specl_load_state(state, io_manager, siminfo, specactions):
+    specl_load_om(state, io_manager, siminfo, specactions)
     # others defined below, like:
     # specl_load_uvnames(state, io_manager, siminfo)
     # ...
