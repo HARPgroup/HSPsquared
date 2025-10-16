@@ -18,10 +18,8 @@ from hsp2.hsp2.utilities import (
     get_gener_timeseries,
 )
 from hsp2.hsp2.configuration import activities, noop, expand_masslinks
-from hsp2.hsp2.state.state_fn import (
-    init_state_dicts,
-    state_siminfo_hsp2,
-    state_load_dynamics_hsp2,
+from hsp2.hsp2.state.state import (
+    state_object,
     state_init_hsp2,
     state_context_hsp2,
 )
@@ -88,15 +86,15 @@ def main(
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
     state = state_object()
-    state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
+    state_siminfo_hsp2(state, parameter_obj, siminfo, io_manager)
     # Add support for dynamic functions to operate on STATE
     # - Load any dynamic components if present, and store variables on objects
-    state_load_dynamics_hsp2(state, io_manager, siminfo)
+    state.load_dynamics_hsp2(state, io_manager, siminfo)
     # Iterate through all segments and add crucial paths to state
     # before loading dynamic components that may reference them
     state_init_hsp2(state, opseq, activities)
     # - finally stash specactions in state, not domain (segment) dependent so do it once
-    om_init_state(state)  # set up operational model specific state entries
+    om_operations = om_init_state()  # set up operational model specific state entries
     specl_load_state(state, io_manager, siminfo, specactions)  # traditional special actions
     state_load_dynamics_om(
         state, io_manager, siminfo

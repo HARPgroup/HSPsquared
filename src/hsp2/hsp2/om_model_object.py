@@ -105,17 +105,7 @@ class ModelObject:
         # req_props = super(DataMatrix, DataMatrix).required_properties()
         req_props = ["name"]
         return req_props
-
-    @staticmethod
-    def make_op_tokens(num_ops=5000):
-        if ModelObject.ops_data_type == "ndarray":
-            op_tokens = int32(
-                zeros((num_ops, 64))
-            )  # was Dict.empty(key_type=types.int64, value_type=types.i8[:])
-        else:
-            op_tokens = Dict.empty(key_type=types.int64, value_type=types.i8[:])
-        return op_tokens
-
+    
     @staticmethod
     def runnable_op_list(op_tokens, meo, debug=False):
         # only return those objects that do something at runtime
@@ -208,8 +198,8 @@ class ModelObject:
 
     def set_state(self, set_value):
         var_ix = set_state(
-            self.state["state_ix"],
-            self.state["state_paths"],
+            self.state.state_ix,
+            self.state.state_paths,
             self.state_path,
             set_value,
         )
@@ -217,8 +207,8 @@ class ModelObject:
 
     def load_state_dicts(self, op_tokens, state_paths, state_ix, dict_ix):
         self.state["op_tokens"] = op_tokens
-        self.state["state_paths"] = state_paths
-        self.state["state_ix"] = state_ix
+        self.state.state_paths = state_paths
+        self.state.state_ix = state_ix
         self.state["dict_ix"] = dict_ix
 
     def save_object_hdf(self, hdfname, overwrite=False):
@@ -250,15 +240,15 @@ class ModelObject:
 
     def get_state(self, var_name=False):
         if var_name == False:
-            return self.state["state_ix"][self.ix]
+            return self.state.state_ix[self.ix]
         else:
             var_path = self.find_var_path(var_name)
             var_ix = get_state_ix(
-                self.state["state_ix"], self.state["state_paths"], var_path
+                self.state.state_ix, self.state.state_paths, var_path
             )
         if var_ix == False:
             return False
-        return self.state["state_ix"][var_ix]
+        return self.state.state_ix[var_ix]
 
     def get_exec_order(self, var_name=False):
         if var_name == False:
@@ -266,7 +256,7 @@ class ModelObject:
         else:
             var_path = self.find_var_path(var_name)
             var_ix = get_state_ix(
-                self.state["state_ix"], self.state["state_paths"], var_path
+                self.state.state_ix, self.state.state_paths, var_path
             )
         exec_order = get_exec_order(self.state["model_exec_list"], var_ix)
         return exec_order
@@ -292,11 +282,11 @@ class ModelObject:
         if not (self.container == False):
             return self.container.find_var_path(var_name)
         # check for root state vars STATE + var_name
-        if ("/STATE/" + var_name) in self.state["state_paths"].keys():
+        if ("/STATE/" + var_name) in self.state.state_paths.keys():
             # return self.state['state_paths'][("/STATE/" + var_name)]
             return "/STATE/" + var_name
         # check for full paths
-        if var_name in self.state["state_paths"].keys():
+        if var_name in self.state.state_paths.keys():
             # return self.state['state_paths'][var_name]
             return var_name
         return False
@@ -319,8 +309,8 @@ class ModelObject:
         if self.state_path == "" or self.state_path == False:
             self.make_paths()
         self.ix = set_state(
-            self.state["state_ix"],
-            self.state["state_paths"],
+            self.state.state_ix,
+            self.state.state_paths,
             self.state_path,
             self.default_value,
         )
@@ -352,7 +342,7 @@ class ModelObject:
         found_path = self.find_var_path(var_path)
         # print("Searched", var_name, "with path", var_path,"found", found_path)
         var_ix = get_state_ix(
-            self.state["state_ix"], self.state["state_paths"], found_path
+            self.state.state_ix, self.state.state_paths, found_path
         )
         if var_ix == False:
             if trust == False:
@@ -409,7 +399,7 @@ class ModelObject:
         # and that it has needed object class to render it at runtime (some are automatic)
         # RIGHT NOW THIS DOES NOTHING TO CHECK IF THE VAR EXISTS THIS MUST BE FIXED
         var_ix = set_state(
-            self.state["state_ix"], self.state["state_paths"], var_path, 0.0
+            self.state.state_ix, self.state.state_paths, var_path, 0.0
         )
         return var_ix
 
@@ -504,7 +494,7 @@ class ModelObject:
         step_one(
             self.state["op_tokens"],
             self.state["op_tokens"][self.ix],
-            self.state["state_ix"],
+            self.state.state_ix,
             self.state["dict_ix"],
             self.state["ts_ix"],
             step,

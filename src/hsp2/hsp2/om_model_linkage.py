@@ -50,7 +50,7 @@ class ModelLinkage(ModelObject):
         if self.link_type == 0:
             # if this is a simple input  we remove the object from the model_object_cache, and pass back to parent as an input
             del self.state["model_object_cache"][self.state_path]
-            del self.state["state_ix"][self.ix]
+            del self.state.state_ix[self.ix]
             container.add_input(self.name, self.right_path)
         if self.link_type == 6:
             # add an entry into time series dataframe
@@ -140,7 +140,7 @@ class ModelLinkage(ModelObject):
     def write_ts(self, ts=None, ts_cols=None, write_path=None, tindex=None):
         if ts == None:
             tix = get_state_ix(
-                self.state["state_ix"], self.state["state_paths"], self.left_path
+                self.state.state_ix, self.state.state_paths, self.left_path
             )
             # get the ts. Note, we get the ts entry that corresponds to the left_path setting
             ts = self.state["ts_ix"][tix]
@@ -188,7 +188,7 @@ class ModelLinkage(ModelObject):
         # print("Linkage/link_type ", self.name, self.link_type,"created with params", self.model_props_parsed)
         if self.link_type in (2, 3):
             src_ix = get_state_ix(
-                self.state["state_ix"], self.state["state_paths"], self.right_path
+                self.state.state_ix, self.state.state_paths, self.right_path
             )
             if not (src_ix == False):
                 self.ops = self.ops + [src_ix, self.link_type]
@@ -198,10 +198,10 @@ class ModelLinkage(ModelObject):
         if (self.link_type == 4) or (self.link_type == 5) or (self.link_type == 6):
             # we push to the remote path in this one
             left_ix = get_state_ix(
-                self.state["state_ix"], self.state["state_paths"], self.left_path
+                self.state.state_ix, self.state.state_paths, self.left_path
             )
             right_ix = get_state_ix(
-                self.state["state_ix"], self.state["state_paths"], self.right_path
+                self.state.state_ix, self.state.state_paths, self.right_path
             )
             if (left_ix != False) and (right_ix != False):
                 self.ops = self.ops + [left_ix, self.link_type, right_ix]

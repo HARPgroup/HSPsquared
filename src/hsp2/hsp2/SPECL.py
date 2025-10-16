@@ -9,7 +9,7 @@ Notes:
 from numba import njit
 
 
-def specl_load_om(state, io_manager, siminfo, specactions):
+def specl_load_om(state, io_manager, siminfo, specactions, om_operations):
     if "ACTIONS" in specactions:
         dc = specactions["ACTIONS"]
         for ix in dc.index:
@@ -17,19 +17,19 @@ def specl_load_om(state, io_manager, siminfo, specactions):
             speca = dc[ix : (ix + 1)]
             # need to add a name attribute
             opname = "SPEC" + "ACTION" + str(ix)
-            state["model_data"][opname] = {}
-            state["model_data"][opname]["name"] = opname
+            om_operations["model_data"][opname] = {}
+            om_operations["model_data"][opname]["name"] = opname
             for ik in speca.keys():
                 # print("looking for speca key ", ik)
-                state["model_data"][opname][ik] = speca.to_dict()[ik][
+                om_operations["model_data"][opname][ik] = speca.to_dict()[ik][
                     ix
                 ]  # add subscripts?
                 if ik == "VARI":
                     if len(speca.to_dict()["S1"][ix]) > 0:
-                        state["model_data"][opname][ik] += speca.to_dict()["S1"][ix]
+                        om_operations["model_data"][opname][ik] += speca.to_dict()["S1"][ix]
                     if len(speca.to_dict()["S2"][ix]) > 0:
-                        state["model_data"][opname][ik] += speca.to_dict()["S2"][ix]
-            state["model_data"][opname]["object_class"] = "SpecialAction"
+                        om_operations["model_data"][opname][ik] += speca.to_dict()["S2"][ix]
+            om_operations["model_data"][opname]["object_class"] = "SpecialAction"
             # print("model_data", ix, " = ", state['model_data'][opname])
     return
 

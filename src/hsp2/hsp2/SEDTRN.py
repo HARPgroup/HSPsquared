@@ -99,9 +99,9 @@ def sedtrn(io_manager, siminfo, parameters, ts, state):
         state["segment"],
         state["activity"],
     )
-    state_info["domain"], state_info["state_step_hydr"], state_info["state_step_om"] = (
+    state_info["domain"], state_info.state_step_hydr, state_info["state_step_om"] = (
         state["domain"],
-        state["state_step_hydr"],
+        state.state_step_hydr,
         state["state_step_om"],
     )
     # hsp2_local_py = state['hsp2_local_py']
@@ -114,8 +114,8 @@ def sedtrn(io_manager, siminfo, parameters, ts, state):
     # must split dicts out of state Dict since numba cannot handle mixed-type nested Dicts
     # initialize the sedtrn paths in case they don't already reside here
     sedtrn_init_ix(state, state["domain"])
-    state_ix, dict_ix, ts_ix = state["state_ix"], state["dict_ix"], state["ts_ix"]
-    state_paths = state["state_paths"]
+    state_ix, dict_ix, ts_ix = state.state_ix, state["dict_ix"], state["ts_ix"]
+    state_paths = state.state_paths
     op_tokens = state["op_tokens"]
     # Aggregate the list of all SEDTRN end point dependencies
     ep_list = (

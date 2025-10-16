@@ -19,7 +19,7 @@ from numba.typed import List
 from hsp2.hsp2.utilities import initm, make_numba_dict
 
 # the following imports added by rb to handle dynamic code and special actions
-from hsp2.state.state_fn import hydr_get_ix, hydr_init_ix, hydr_state_vars
+from hsp2.state.state import hydr_get_ix, hydr_init_ix, hydr_state_vars
 from hsp2.hsp2.om import pre_step_model, step_model, model_domain_dependencies
 from numba.typed import Dict
 
@@ -148,23 +148,23 @@ def hydr(io_manager, siminfo, parameters, ts, ftables, state):
         state["segment"],
         state["activity"],
     )
-    state_info["domain"], state_info["state_step_hydr"], state_info["state_step_om"] = (
+    state_info["domain"], state_info.state_step_hydr, state_info["state_step_om"] = (
         state["domain"],
-        state["state_step_hydr"],
+        state.state_step_hydr,
         state["state_step_om"],
     )
-    hsp2_local_py = state["hsp2_local_py"]
+    hsp2_local_py = state.hsp2_local_py
     # It appears necessary to load this here, instead of from main.py, otherwise,
     # _hydr_() does not recognize the function state_step_hydr()?
     if hsp2_local_py != False:
         from hsp2_local_py import state_step_hydr
     else:
-        from hsp2.state.state_fn_fn_defaults import state_step_hydr
+        from hsp2.state.state_fn_defaults import state_step_hydr
     # initialize the hydr paths in case they don't already reside here
     hydr_init_ix(state, state["domain"])
     # must split dicts out of state Dict since numba cannot handle mixed-type nested Dicts
-    state_ix, dict_ix, ts_ix = state["state_ix"], state["dict_ix"], state["ts_ix"]
-    state_paths = state["state_paths"]
+    state_ix, dict_ix, ts_ix = state.state_ix, state["dict_ix"], state["ts_ix"]
+    state_paths = state.state_paths
     ep_list = (
         hydr_state_vars()
     )  # define all eligibile for state integration in state.py
@@ -207,7 +207,7 @@ def hydr(io_manager, siminfo, parameters, ts, ftables, state):
     for i in range(nexits):
         parameters["PARAMETERS"]["OS" + str(i + 1)] = ui["OS" + str(i + 1)]
     # copy back (modified) operational element data
-    state["state_ix"], state["dict_ix"], state["ts_ix"] = state_ix, dict_ix, ts_ix
+    state.state_ix, state["dict_ix"], state["ts_ix"] = state_ix, dict_ix, ts_ix
     return errors, ERRMSGS
 
 
@@ -420,7 +420,7 @@ def _hydr_(
         #   when no objects are defined.
         if state_info["state_step_om"] == "enabled":
             pre_step_model(model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step)
-        if state_info["state_step_hydr"] == "enabled":
+        if state_info.state_step_hydr == "enabled":
             state_step_hydr(
                 state_info, state_paths, state_ix, dict_ix, ts_ix, hydr_ix, step
             )
@@ -431,7 +431,7 @@ def _hydr_(
             step_model(
                 model_exec_list, op_tokens, state_ix, dict_ix, ts_ix, step
             )  # traditional 'ACTIONS' done in here
-        if (state_info["state_step_hydr"] == "enabled") or (
+        if (state_info.state_step_hydr == "enabled") or (
             state_info["state_step_om"] == "enabled"
         ):
             # Do write-backs for editable STATE variables
