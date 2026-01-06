@@ -11,17 +11,16 @@ Conversion of no category version of HSPF HRCHHYD.FOR into Python"""
 """
 
 
-from numpy import zeros, any, full, nan, array, int64, arange, asarray
+from numpy import zeros, any, full, nan, array, int64, arange
 from pandas import DataFrame
 from math import sqrt, log10
-from numba import njit, types
+from numba import njit
 from numba.typed import List
 from hsp2.hsp2.utilities import initm, make_numba_dict
 
 # the following imports added by rb to handle dynamic code and special actions
-from hsp2.state.state import hydr_get_ix, hydr_init_ix, hydr_state_vars
-from hsp2.hsp2.om import pre_step_model, step_model, model_domain_dependencies
-from numba.typed import Dict
+from hsp2.state.state import hydr_get_ix, state_class_lite
+from hsp2.hsp2.om import pre_step_model, step_model
 
 
 ERRMSGS = (
@@ -155,6 +154,8 @@ def hydr(siminfo, parameters, ts, ftables, state):
     activity_path = state.domain + "/" + 'HYDR'
     activity_id = state.get_state_ix(activity_path)
     model_exec_list = state.op_exec_lists[activity_id]
+    # now numbaize this
+    statenb = state_class_lite(state.num_ops, state.state_ix, state.op_tokens, state.op_exec_lists, state.model_exec_list)
     #######################################################################################
 
     # Do the simulation with _hydr_   (ie run reaches simulation code)
@@ -167,7 +168,7 @@ def hydr(siminfo, parameters, ts, ftables, state):
         funct,
         Olabels,
         OVOLlabels,
-        state,
+        statenb,
         state_step_hydr,
         model_exec_list
     )
@@ -176,7 +177,10 @@ def hydr(siminfo, parameters, ts, ftables, state):
         del ts["O"]
     if "OVOL" in ts:
         del ts["OVOL"]
-
+    
+    (state.num_ops, state.state_ix, state.op_tokens, state.op_exec_lists, state.model_exec_list) = (
+        statenb.num_ops, statenb.state_ix, statenb.op_tokens, statenb.op_exec_lists, statenb.model_exec_list
+    )
     # save initial outflow(s) from reach:
     parameters["PARAMETERS"]["ROS"] = ui["ROS"]
     for i in range(nexits):
