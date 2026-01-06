@@ -17,6 +17,34 @@ from pandas.tseries.offsets import Minute
 # But for now, they are here to maintain compatiility with the existing code base
 # Combine these into a spec to create the class
 tindex = date_range("1984-01-01", "2020-12-31", freq=Minute(60))
+
+state_spec = [
+    # the first entries here are NP arrays, fixed dimenstions, and fast
+    ("state_ix", typeof(np.asarray(zeros(1), dtype="float64")) ),
+    ("op_tokens", typeof(types.int64(zeros((1, 64)))) ),
+    ("op_exec_lists", typeof(types.int64(zeros((1, 1024)))) ),
+    ("model_exec_list", typeof(np.asarray(zeros(1), dtype="int64")) ),
+    ("tindex", typeof(tindex.to_numpy()) ),
+    # dict_ix SHOULD BE an array, this is TBD.  Likely defer till OM class runtimes
+    ("dict_ix", types.DictType(types.int64, types.float64[:, :]) ),
+    # below here are dictionaries as they are not used in runtime and can be slow
+    ("state_paths", types.DictType(types.unicode_type, types.int64) ),
+    ("ts_paths", types.DictType(types.unicode_type, types.float64[:]) ),
+    ("ts_ix", types.DictType(types.int64, types.float64[:]) ),
+    ("last_id", types.int64),
+    ("model_root_name", types.unicode_type),
+    ("state_step_hydr", types.unicode_type),
+    ("hsp2_local_py", types.boolean),
+    ("num_ops", types.int64),
+    ("operation", types.unicode_type),
+    ("segment", types.unicode_type),
+    ("activity", types.unicode_type),
+    ("domain", types.unicode_type),
+    ("state_step_om", types.unicode_type),
+    ("hsp_segments", types.DictType(types.unicode_type, types.unicode_type) )
+]
+
+@jitclass(state_spec)
 class state_class:
     def __init__(self):
         self.num_ops = 0
@@ -178,13 +206,13 @@ state_lite = [
     ("state_ix", nb.float64[:]),
     # the first entries here are NP arrays, fixed dimenstions, and fast
     #("state_ix", typeof(np.asarray(zeros(1), dtype="float64")) ),
-    #("op_tokens", typeof(types.int64(zeros((1, 64)))) ),
-    #("op_exec_lists", typeof(types.int64(zeros((1, 1024)))) ),
-    #("model_exec_list", typeof(np.asarray(zeros(1), dtype="int64")) ),
+    ("op_tokens", typeof(types.int64(zeros((1, 64)))) ),
+    ("op_exec_lists", typeof(types.int64(zeros((1, 1024)))) ),
+    ("model_exec_list", typeof(np.asarray(zeros(1), dtype="int64")) ),
     #("tindex", typeof(tindex.to_numpy()) ),
     # dict_ix SHOULD BE an array, this is TBD.  Likely defer till OM class runtimes
-    #("dict_ix", types.DictType(types.int64, types.float64[:, :]) ),
-    #("ts_ix", types.DictType(types.int64, types.float64[:]) )
+    ("dict_ix", types.DictType(types.int64, types.float64[:, :]) ),
+    ("ts_ix", types.DictType(types.int64, types.float64[:]) )
 ]
 
 @jitclass(state_lite)
