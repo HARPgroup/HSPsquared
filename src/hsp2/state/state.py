@@ -67,7 +67,7 @@ class state_class:
         # on an as-needed basis if possible.  Especially for dataMatrix types which are supposed to be fast
         # state can still get values via get_state, by grabbing a reference object and then accessing it's storage
         self.dict_ix = ntdict.empty(key_type=types.int64, value_type=types.float64[:, :])
-        self.dict_ix = ntdict.empty(key_type=types.int64, value_type=types.float64[:, :])
+        self.ts_ix = ntdict.empty(key_type=types.int64, value_type=types.float64[:, :])
         self.state_paths = ntdict.empty(
             key_type=types.unicode_type, value_type=types.int64
         )
@@ -217,7 +217,7 @@ state_lite = [
 
 @jitclass(state_lite)
 class state_class_lite:
-    def __init__(self, num_ops, state_ix, op_tokens, op_exec_lists, model_exec_list):
+    def __init__(self, num_ops, state_ix, op_tokens, op_exec_lists, model_exec_list, ts_ix, dict_ix):
         self.num_ops = num_ops
         self.state_ix = state_ix.astype(npfloat64)
         self.op_tokens = op_tokens.astype(npint64)
@@ -225,6 +225,9 @@ class state_class_lite:
         self.op_exec_lists = op_exec_lists.astype(npint64)
         # TODO: is this even needed? Since each domain has it's own exec list?
         self.model_exec_list = model_exec_list.astype(npint64)
+        self.ts_ix = ts_ix
+        self.dict_ix = dict_ix
+
 
 def op_path_name(operation, id):
     """
