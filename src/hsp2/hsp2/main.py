@@ -91,7 +91,7 @@ def main(
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
     state = init_state_dicts()
-    print("initstate_dicts()", timer.split(), "seconds")
+    print("init_state_dicts()", timer.split(), "seconds")
     state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
     # Add support for dynamic functions to operate on STATE
     # - Load any dynamic components if present, and store variables on objects
