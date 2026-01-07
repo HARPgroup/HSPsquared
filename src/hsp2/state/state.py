@@ -6,7 +6,7 @@ from pandas.tseries.offsets import Minute
 from numba.typed import Dict
 from numpy import zeros
 from numba import njit, types  # import the types
-from state_definitions import rqual_state_vars
+from hsp2.state.state_definitions import rqual_state_vars
 import os
 import importlib.util
 import sys
