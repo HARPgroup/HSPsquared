@@ -18,7 +18,7 @@ from hsp2.hsp2.utilities import (
     get_gener_timeseries,
 )
 from hsp2.hsp2.configuration import activities, noop, expand_masslinks
-from state.state_fn_defaults import state_empty
+from hsp2.state.state_fn_defaults import state_empty
 from hsp2.state.state import (
     state_siminfo_hsp2,
     state_load_dynamics_hsp2,
