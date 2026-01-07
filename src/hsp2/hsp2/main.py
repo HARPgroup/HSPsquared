@@ -18,7 +18,7 @@ from hsp2.hsp2.utilities import (
     get_gener_timeseries,
 )
 from hsp2.hsp2.configuration import activities, noop, expand_masslinks
-import * from state.state_fn_defaults
+from state.state_fn_defaults import state
 from hsp2.state.state import (
     state_siminfo_hsp2,
     state_load_dynamics_hsp2,
@@ -90,7 +90,7 @@ def main(
     # initialize STATE dicts
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
-    state = init_state_dicts()
+    #state = init_state_dicts() # automatically imported from state_fn_defaults
     print("init_state_dicts()", timer.split(), "seconds")
     state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
     # Add support for dynamic functions to operate on STATE
