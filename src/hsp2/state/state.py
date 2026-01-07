@@ -171,7 +171,7 @@ def state_init_hsp2(state, opseq, activities, timer):
                 elif activity == "RQUAL":
                     state_context_hsp2(state, operation, segment, activity)
                     rqual_init_ix(state, state["domain"])
-                print(activity, timer.split())
+                #print(activity, timer.split())
 
 
 def state_load_hdf5_components(
