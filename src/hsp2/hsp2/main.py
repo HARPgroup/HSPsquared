@@ -18,7 +18,7 @@ from hsp2.hsp2.utilities import (
     get_gener_timeseries,
 )
 from hsp2.hsp2.configuration import activities, noop, expand_masslinks
-from hsp2.state.state_fn_defaults import state_empty
+from hsp2.state.state_definitions import state_empty
 from hsp2.state.state import (
     state_siminfo_hsp2,
     state_load_dynamics_hsp2,
@@ -100,7 +100,7 @@ def main(
     print("state_load_dynamics_hsp2() call and config", timer.split(), "seconds")
     # Iterate through all segments and add crucial paths to state
     # before loading dynamic components that may reference them
-    state_init_hsp2(state, opseq, activities)
+    state_init_hsp2(state, opseq, activities, timer)
     print("state_init_hsp2() call and config", timer.split(), "seconds")
     # - finally stash specactions in state, not domain (segment) dependent so do it once
     state["specactions"] = specactions  # stash the specaction dict in state

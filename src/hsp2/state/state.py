@@ -6,6 +6,7 @@ from pandas.tseries.offsets import Minute
 from numba.typed import Dict
 from numpy import zeros
 from numba import njit, types  # import the types
+from state_definitions import rqual_state_vars
 import os
 import importlib.util
 import sys
@@ -152,7 +153,7 @@ def state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state):
     state["model_root_name"] = os.path.split(fbase)[1]  # takes the text before .h5
 
 
-def state_init_hsp2(state, opseq, activities):
+def state_init_hsp2(state, opseq, activities, timer):
     # This sets up the state entries for all state compatible HSP2 model variables
     # print("STATE initializing contexts.")
     for _, operation, segment, delt in opseq.itertuples():
@@ -170,6 +171,7 @@ def state_init_hsp2(state, opseq, activities):
                 elif activity == "RQUAL":
                     state_context_hsp2(state, operation, segment, activity)
                     rqual_init_ix(state, state["domain"])
+                print(activity, timer.split())
 
 
 def state_load_hdf5_components(
@@ -292,27 +294,16 @@ def sedmnt_init_ix(state, domain):
         sedmnt_ix[i] = set_state(state["state_ix"], state["state_paths"], var_path, 0.0)
     return sedmnt_ix
 
-
-def rqual_state_vars():
-    rqual_state = [
-        "DOX",
-        "BOD",
-        "NO3",
-        "TAM",
-        "NO2",
-        "PO4",
-        "BRTAM1",
-        "BRTAM2",
-        "BRPO41",
-        "BRPO42",
-        "CFOREA",
-    ]
-    return rqual_state
+def state_init_vars(state, domain, vars):
+    for i in vars:
+        var_path = domain + "/" + i
+        vars_ix[i] = set_state(state["state_ix"], state["state_paths"], var_path, 0.0)
+    return vars_ix
 
 
 def rqual_init_ix(state, domain):
     # get a list of keys for all rqual state variables
-    rqual_state = rqual_state_vars()
+    rqual_state = rqual_state_vars
     rqual_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
     for i in rqual_state:
         var_path = domain + "/" + i

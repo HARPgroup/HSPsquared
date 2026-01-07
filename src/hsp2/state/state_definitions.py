@@ -14,6 +14,12 @@ state_empty["ts_ix"] = Dict.empty(key_type=types.int64, value_type=types.float64
 # add a generic place to stash model_data for dynamic components
 state_empty["model_data"] = {}
 
+# variables: these could go into individual files later or in object defs
+rqual_state_vars = [ 
+    "DOX", "BOD", "NO3", "TAM", "NO2", "PO4", "BRTAM1",
+    "BRTAM2", "BRPO41", "BRPO42", "CFOREA"
+]
+
 @njit
 def state_step_hydr(state_info, state_paths, state_ix, dict_ix, ts_ix, hydr_ix, step):
     return
