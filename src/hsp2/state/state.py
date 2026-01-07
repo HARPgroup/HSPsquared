@@ -304,10 +304,9 @@ def state_init_vars(state, domain, vars):
 def rqual_init_ix(state, domain):
     # get a list of keys for all rqual state variables
     rqual_state = rqual_state_vars
-    rqual_ix = Dict.empty(key_type=types.unicode_type, value_type=types.int64)
     for i in rqual_state:
         var_path = domain + "/" + i
-        rqual_ix[i] = set_state(state["state_ix"], state["state_paths"], var_path, 0.0)
+        set_state(state["state_ix"], state["state_paths"], var_path, 0.0)
     return rqual_ix
 
 
