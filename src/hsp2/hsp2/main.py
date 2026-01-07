@@ -32,6 +32,7 @@ from hsp2.hsp2.om import (
     state_om_model_run_finish,
 )
 from hsp2.hsp2.SPECL import specl_load_state
+from hsp2.hsp2.om_sim_timer import timer_class
 
 from hsp2.hsp2io.io import IOManager, SupportsReadTS, Category
 
@@ -55,6 +56,8 @@ def main(
     None
 
     """
+    timer = timer_class()
+    print("main() call", timer.split(), "seconds")
     if isinstance(io_manager, str):
         hdf5_instance = HDF5(io_manager)
         io_manager = IOManager(hdf5_instance)
@@ -82,16 +85,18 @@ def main(
 
     copy_instances = {}
     gener_instances = {}
-
+    print("io_manager.read_parameters() call and config", timer.split(), "seconds")
     #######################################################################################
     # initialize STATE dicts
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
     state = init_state_dicts()
+    print("initstate_dicts()", timer.split(), "seconds")
     state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
     # Add support for dynamic functions to operate on STATE
     # - Load any dynamic components if present, and store variables on objects
     state_load_dynamics_hsp2(state, io_manager, siminfo)
+    print("state_load_dynamics_hsp2() call and config", timer.split(), "seconds")
     # Iterate through all segments and add crucial paths to state
     # before loading dynamic components that may reference them
     state_init_hsp2(state, opseq, activities)
@@ -104,6 +109,7 @@ def main(
     )  # operational model for custom python
     # finalize all dynamically loaded components and prepare to run the model
     state_om_model_run_prep(state, io_manager, siminfo)
+    print("state_om_model_run_prep() call and config", timer.split(), "seconds")
     #######################################################################################
 
     # main processing loop
