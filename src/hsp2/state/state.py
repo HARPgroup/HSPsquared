@@ -307,7 +307,7 @@ def rqual_init_ix(state, domain):
     for i in rqual_state:
         var_path = domain + "/" + i
         set_state(state["state_ix"], state["state_paths"], var_path, 0.0)
-    return rqual_ix
+    return
 
 
 @njit
