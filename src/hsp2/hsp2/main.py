@@ -90,6 +90,7 @@ def main(
     # initialize STATE dicts
     #######################################################################################
     # Set up Things in state that will be used in all modular activities like SPECL
+    from hsp2.state.state_fn_defaults import state_empty
     state = state_empty # init_state_dicts() # automatically imported from state_fn_defaults
     print("init_state_dicts()", timer.split(), "seconds")
     state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
