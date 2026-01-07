@@ -101,13 +101,17 @@ def main(
     # Iterate through all segments and add crucial paths to state
     # before loading dynamic components that may reference them
     state_init_hsp2(state, opseq, activities)
+    print("state_init_hsp2() call and config", timer.split(), "seconds")
     # - finally stash specactions in state, not domain (segment) dependent so do it once
     state["specactions"] = specactions  # stash the specaction dict in state
     om_init_state(state)  # set up operational model specific state entries
+    print("om_init_state() call and config", timer.split(), "seconds")
     specl_load_state(state, io_manager, siminfo)  # traditional special actions
+    print("specl_load_state() call and config", timer.split(), "seconds")
     state_load_dynamics_om(
         state, io_manager, siminfo
     )  # operational model for custom python
+    print("state_load_dynamics_om() call and config", timer.split(), "seconds")
     # finalize all dynamically loaded components and prepare to run the model
     state_om_model_run_prep(state, io_manager, siminfo)
     print("state_om_model_run_prep() call and config", timer.split(), "seconds")
