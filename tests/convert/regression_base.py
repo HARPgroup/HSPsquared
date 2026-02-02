@@ -8,7 +8,8 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 import pandas as pd
 from hsp2.hsp2tools.HBNOutput import HBNOutput
-from hsp2.hsp2io.hdf import HDF5, hsp2_hspf_aliases
+from hsp2.hsp2tools.HJDF5 import hsp2_hspf_aliases
+from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager, Category
 
 OperationsTuple = Tuple[str, str, str, str, str]
@@ -32,6 +33,7 @@ class RegressTest:
         self.ids = ids
         self.threads = threads
         self.quiet = False # allows users to set this later
+        self.aliases = hsp2_hspf_aliases() # mapping object
         self._init_files()
 
     def _init_files(self):
@@ -74,6 +76,7 @@ class RegressTest:
     def get_hsp2_time_series(self, ops: OperationsTuple) -> Union[pd.Series, None]:
         operation, activity, id, constituent, tcode = ops
         segment = operation[0] + id
+        constituent = self.aliases.get_alias((operation, segment, activity, constituent))
         series = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)[constituent]
         return series
 
