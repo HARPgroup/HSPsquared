@@ -33,7 +33,6 @@ class RegressTest:
         self.ids = ids
         self.threads = threads
         self.quiet = False # allows users to set this later
-        self.aliases = hsp2_hspf_aliases() # mapping object
         self._init_files()
 
     def _init_files(self):
@@ -79,8 +78,11 @@ class RegressTest:
         conalias = self.aliases.get_alias((operation, activity, constituent))
         if conalias is not False:
             constituent = conalias
+        constituent_prefix = self.aliases.get_constituent_prefix(activity, constituent)
         stable = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)
         if (constituent in stable):
+            series = stable[constituent]
+        if ( constituent_prefix + constituent in stable):
             series = stable[constituent]
         else:
             print("Warning: cannot find", ops, "mapped to", conalias)
@@ -89,11 +91,15 @@ class RegressTest:
 
     def _get_hdf5_data(self, test_dir: str) -> None:
         sub_dir = os.path.join(test_dir, "HSP2results")
+        hdf5_path = None
         for file in os.listdir(sub_dir):
             if file.lower().endswith(".h5") or file.lower().endswith(".hdf"):
-                hdf5_instance = HDF5(os.path.join(sub_dir, file))
+                hdf5_path = os.path.join(sub_dir, file)
+                hdf5_instance = HDF5(hdf5_path)
                 self.hsp2_data = IOManager(hdf5_instance)
                 break
+        if hdf5_path is not None:
+            self.aliases = hsp2_hspf_aliases() # mapping object
 
     def should_compare(
         self, operation: str, activity: str, id: str, tcode: str
