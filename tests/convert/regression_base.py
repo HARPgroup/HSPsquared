@@ -79,7 +79,11 @@ class RegressTest:
         conalias = self.aliases.get_alias((operation, activity, constituent))
         if conalias is not False:
             constituent = conalias
-        series = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)[constituent]
+        stable = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)
+        if (constituent in series)
+            series = stable[constituent]
+        else:
+            print("Warning: cannot find", ops, "mapped to", conalias)
         return series
 
     def _get_hdf5_data(self, test_dir: str) -> None:
