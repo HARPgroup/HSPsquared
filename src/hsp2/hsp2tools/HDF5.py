@@ -38,7 +38,7 @@ class HDF5:
             if constituent_prefix + constituent in df.columns:
                 return df[constituent_prefix + constituent]
             else:
-                constituent_alias = self.aliases.get_alias((operation, activity, constituent))
+                constituent_alias = self.aliases.get_alias(constituent, (operation, activity, constituent))
                 return df[constituent_prefix + constituent_alias]
         except KeyError:
             return None
@@ -124,9 +124,9 @@ class hsp2_hspf_aliases:
                         constituent = constituent.replace(key, "")
         return (constituent, constituent_prefix)
     
-    def get_alias(self, params):
+    def get_alias(self, constituent, params):
        if params in self.aliases:
            return self.aliases[params]
        else:
-           return False
+           return constituent
     

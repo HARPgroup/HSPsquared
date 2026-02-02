@@ -75,20 +75,30 @@ class RegressTest:
     def get_hsp2_time_series(self, ops: OperationsTuple) -> Union[pd.Series, None]:
         operation, activity, id, constituent, tcode = ops
         segment = operation[0] + id
-        conalias = self.aliases.get_alias((operation, activity, constituent))
-        if conalias is not False:
-            constituent = conalias
-        constituent_prefix = self.aliases.get_constituent_prefix(activity, constituent)
         stable = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)
-        if (constituent in stable):
-            series = stable[constituent]
+        (constituent, constituent_prefix) = self.aliases.get_constituent_prefix(activity, constituent)
         if ( constituent_prefix + constituent in stable):
-            series = stable[constituent]
+            series = stable[constituent_prefix + constituent]
         else:
-            print("Warning: cannot find", ops, "mapped to", conalias)
-            series = None
+            constituent = self.aliases.get_alias((operation, activity, constituent))
+            if (constituent in stable):
+                series = stable[constituent]
+            else:
+                print("Warning: cannot find", ops, "mapped to", constituent)
+                series = None
         return series
 
+        try:
+
+            df = self.data[key]
+            if constituent_prefix + constituent in df.columns:
+                return df[constituent_prefix + constituent]
+            else:
+                constituent_alias = self.aliases.get_alias(constituent, (operation, activity, constituent))
+                return df[constituent_prefix + constituent_alias]
+        except KeyError:
+            return None
+        
     def _get_hdf5_data(self, test_dir: str) -> None:
         sub_dir = os.path.join(test_dir, "HSP2results")
         hdf5_path = None
