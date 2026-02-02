@@ -80,7 +80,7 @@ class RegressTest:
         if conalias is not False:
             constituent = conalias
         stable = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)
-        if (constituent in series)
+        if (constituent in series):
             series = stable[constituent]
         else:
             print("Warning: cannot find", ops, "mapped to", conalias)
