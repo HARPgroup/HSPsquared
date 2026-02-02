@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 import pandas as pd
 from hsp2.hsp2tools.HBNOutput import HBNOutput
-from hsp2.hsp2io.hdf import HDF5
+from hsp2.hsp2io.hdf import HDF5, hsp2_hspf_aliases
 from hsp2.hsp2io.io import IOManager, Category
 
 OperationsTuple = Tuple[str, str, str, str, str]
