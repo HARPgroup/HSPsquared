@@ -95,11 +95,11 @@ class RegressTest:
         for file in os.listdir(sub_dir):
             if file.lower().endswith(".h5") or file.lower().endswith(".hdf"):
                 hdf5_path = os.path.join(sub_dir, file)
-                hdf5_instance = HDF5(hdf5_path)
-                self.hsp2_data = IOManager(hdf5_instance)
                 break
         if hdf5_path is not None:
             self.aliases = hsp2_hspf_aliases(hdf5_path) # mapping object
+            hdf5_instance = HDF5(hdf5_path)
+            self.hsp2_data = IOManager(hdf5_instance)
 
     def should_compare(
         self, operation: str, activity: str, id: str, tcode: str
