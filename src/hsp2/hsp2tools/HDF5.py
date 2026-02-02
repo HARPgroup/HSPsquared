@@ -58,13 +58,13 @@ class HDF5:
 
 class hsp2_hspf_aliases:
     REQUIRES_MAPPING = ["GQUAL", "CONS", "IQUAL", "PQUAL"]
-    def __init__(self, file_name) -> None:
+    def __init__(self, file_name: str) -> None:
+        self.file_name = file_name # this stores the simulation specific constituents included
         self.aliases = self._read_aliases_csv()
         self.gqual_prefixes = self._read_gqual_mapping()
         self.cons_prefixes = self._read_cons_mapping()
         self.iqual_prefixes = self._read_iqual_mapping()
         self.pqual_prefixes = self._read_pqual_mapping()
-        self.file_name = file_name # this stores the simulation specific constituents included
 
     def _read_nqual_mapping(
         self, key: str, target_col: str, nquals: int = 10
