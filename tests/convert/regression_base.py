@@ -84,6 +84,7 @@ class RegressTest:
             series = stable[constituent]
         else:
             print("Warning: cannot find", ops, "mapped to", conalias)
+            series = None
         return series
 
     def _get_hdf5_data(self, test_dir: str) -> None:
