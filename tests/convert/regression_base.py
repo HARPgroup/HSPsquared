@@ -80,7 +80,7 @@ class RegressTest:
         if ( constituent_prefix + constituent in stable):
             series = stable[constituent_prefix + constituent]
         else:
-            constituent = self.aliases.get_alias((operation, activity, constituent))
+            constituent = self.aliases.get_alias(constituent, (operation, activity, constituent))
             if (constituent in stable):
                 series = stable[constituent]
             else:
