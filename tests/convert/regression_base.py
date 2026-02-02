@@ -8,7 +8,8 @@ from typing import Dict, List, Tuple, Union
 import numpy as np
 import pandas as pd
 from hsp2.hsp2tools.HBNOutput import HBNOutput
-from hsp2.hsp2tools.HDF5 import HDF5
+from hsp2.hsp2io.hdf import HDF5
+from hsp2.hsp2io.io import IOManager, Category
 
 OperationsTuple = Tuple[str, str, str, str, str]
 ResultsTuple = Tuple[bool, bool, bool, float]
@@ -70,11 +71,18 @@ class RegressTest:
         )
         return series
 
+    def get_hsp2_time_series(self, ops: OperationsTuple) -> Union[pd.Series, None]:
+        operation, activity, id, constituent, tcode = ops
+        segment = operation[0] + id
+        series = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)[constituent]
+        return series
+
     def _get_hdf5_data(self, test_dir: str) -> None:
         sub_dir = os.path.join(test_dir, "HSP2results")
         for file in os.listdir(sub_dir):
             if file.lower().endswith(".h5") or file.lower().endswith(".hdf"):
-                self.hsp2_data = HDF5(os.path.join(sub_dir, file))
+                hdf5_instance = HDF5(os.path.join(sub_dir, file))
+                self.hsp2_data = IOManager(hdf5_instance)
                 break
 
     def should_compare(
@@ -188,7 +196,7 @@ class RegressTest:
         if not self.quiet:
             print(f"    {operation}_{id}  {activity}  {constituent}\n")
 
-        ts_hsp2 = self.hsp2_data.get_time_series(operation, id, constituent, activity)
+        ts_hsp2 = self.get_hsp2_time_series(params)
         ts_hspf = self.get_hspf_time_series(params)
 
         no_data_hsp2 = ts_hsp2 is None
@@ -262,13 +270,10 @@ class RegressTest:
         ### special cases
         # if tiny suro in one and no suro in the other, don't trigger on suro-dependent numbers
         if activity == "PWTGAS" and cons in ["SOTMP", "SODOX", "SOCO2"]:
-            ts_suro_hsp2 = self.hsp2_data.get_time_series(
-                operation, id, "SURO", "PWATER"
-            )
+            params = (operation, "PWATER", id, "SURO", 2)
+            ts_suro_hsp2 = self.get_hsp2_time_series(params)
             ts_suro_hsp2 = self.fill_nan_and_null(ts_suro_hsp2)
-            ts_suro_hspf = self.get_hspf_time_series(
-                (operation, "PWATER", id, "SURO", 2)
-            )
+            ts_suro_hspf = self.get_hspf_time_series(params)
             ts_suro_hspf = self.fill_nan_and_null(ts_suro_hspf)
 
             idx_zero_suro_hsp2 = ts_suro_hsp2 == 0
@@ -322,7 +327,9 @@ class RegressTest:
             )
             or (activity == "PHCARB" and cons in ["TICCONC", "CO2CONC"])
         ):
-            ts_vol_hsp2 = self.hsp2_data.get_time_series(operation, id, "VOL", "HYDR")
+            ts_vol_hsp2 = self.get_hsp2_time_series(
+                (operation, "HYDR", id, "VOL", 2)
+            )
             ts_vol_hsp2 = self.fill_nan_and_null(ts_vol_hsp2)
 
             idx_low_vol = ts_vol_hsp2 < 1.0e-4
