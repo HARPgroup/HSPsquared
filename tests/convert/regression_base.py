@@ -77,15 +77,18 @@ class RegressTest:
         segment = operation[0] + id
         stable = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)
         (constituent, constituent_prefix) = self.aliases.get_constituent_prefix(activity, constituent)
-        if ( constituent_prefix + constituent in stable):
-            series = stable[constituent_prefix + constituent]
-        else:
-            constituent = self.aliases.get_alias(constituent, (operation, activity, constituent))
-            if (constituent in stable):
-                series = stable[constituent]
+        try:
+            if ( constituent_prefix + constituent in stable):
+                series = stable[constituent_prefix + constituent]
             else:
-                print("Warning: cannot find", ops, "mapped to", constituent)
-                series = None
+                constituent_alias = self.aliases.get_alias(constituent, (operation, activity, constituent))
+                if (constituent_alias in stable):
+                    series = stable[constituent_prefix + constituent_alias]
+                else:
+                    print("Warning: cannot find", ops, "mapped to", constituent)
+                    series = None
+        except KeyError:
+            return None
         return series
     
     def _get_hdf5_data(self, test_dir: str) -> None:
