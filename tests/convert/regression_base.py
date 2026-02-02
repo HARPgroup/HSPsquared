@@ -76,7 +76,9 @@ class RegressTest:
     def get_hsp2_time_series(self, ops: OperationsTuple) -> Union[pd.Series, None]:
         operation, activity, id, constituent, tcode = ops
         segment = operation[0] + id
-        constituent = self.aliases.get_alias((operation, segment, activity, constituent))
+        conalias = self.aliases.get_alias((operation, segment, activity, constituent))
+        if conalias is not False:
+            constituent = conalias
         series = self.hsp2_data.read_ts(Category.RESULTS, operation, segment, activity)[constituent]
         return series
 
