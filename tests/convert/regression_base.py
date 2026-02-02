@@ -99,7 +99,7 @@ class RegressTest:
                 self.hsp2_data = IOManager(hdf5_instance)
                 break
         if hdf5_path is not None:
-            self.aliases = hsp2_hspf_aliases() # mapping object
+            self.aliases = hsp2_hspf_aliases(hdf5_path) # mapping object
 
     def should_compare(
         self, operation: str, activity: str, id: str, tcode: str
