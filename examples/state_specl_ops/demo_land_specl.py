@@ -13,7 +13,7 @@ h5file = "aopN51730.h5"
 
 hdf5_instance = HDF5(h5file)
 io_manager = IOManager(hdf5_instance)
-uci_obj = io_manager.read_uci()
+uci_obj = io_manager.read_parameters()
 siminfo = uci_obj.siminfo
 opseq = uci_obj.opseq
 # Note: now that the UCI is read in and hdf5 loaded, you can see things like:
