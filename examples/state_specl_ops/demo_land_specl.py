@@ -13,9 +13,24 @@ h5file = "aopN51730.h5"
 
 hdf5_instance = HDF5(h5file)
 io_manager = IOManager(hdf5_instance)
-uci_obj = io_manager.read_parameters()
-siminfo = uci_obj.siminfo
-opseq = uci_obj.opseq
+
+# read user control, parameters, states, and flags parameters and map to local variables
+parameter_obj = io_manager.read_parameters()
+opseq = parameter_obj.opseq
+ddlinks = parameter_obj.ddlinks
+ddmasslinks = parameter_obj.ddmasslinks
+ddext_sources = parameter_obj.ddext_sources
+ddgener = parameter_obj.ddgener
+model = parameter_obj.model
+siminfo = parameter_obj.siminfo
+ftables = parameter_obj.ftables
+specactions = parameter_obj.specactions
+monthdata = parameter_obj.monthdata
+
+start, stop = siminfo["start"], siminfo["stop"]
+
+copy_instances = {}
+gener_instances = {}
 # Note: now that the UCI is read in and hdf5 loaded, you can see things like:
 state = init_state_dicts()
 state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
