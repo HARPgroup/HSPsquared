@@ -5,7 +5,7 @@ import numpy
 from hsp2.hsp2.main import *
 from hsp2.hsp2.om import *
 from hsp2.hsp2.state import *
-from hsp2.hsp2io.hdf import HDF5
+from hsp2.hsp2io.hdf import *
 from hsp2.hsp2io.io import IOManager
 
 fpath = "./tests/test10eq/HSP2results/test10eq.h5"
