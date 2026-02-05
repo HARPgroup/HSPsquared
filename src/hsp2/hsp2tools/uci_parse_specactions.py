@@ -51,7 +51,7 @@ def specactions_parse(info, llines):
             if not (line.strip()[:7] == "ELSE IF"):
                 sibling_id = -1 
             else:
-                sibling_id =  sa_conditions[-1,]['cond_id']
+                sibling_id =  sa_conditions[-1]['cond_id']
             d['cond_id'] = len(sa_conditions) # set to next index value
             d['sibling_id'] = sibling_id
             d["parent_id"] = specl_get_parent_condition(open_conditions)
@@ -60,7 +60,7 @@ def specactions_parse(info, llines):
         elif line.strip()[:4] == "ELSE":
             # now we have at least 1 prior condition (maybe the opening IF)
             d = ucifn.parseD(line, parse["SPEC-ACTIONS", "conditions"])
-            sibling_id =  sa_conditions[-1,]['cond_id']
+            sibling_id =  sa_conditions[-1]['cond_id']
             d['sibling_id'] = sibling_id
             d["parent_id"] = specl_get_parent_condition(open_conditions)
         elif line.strip() == "END IF":
