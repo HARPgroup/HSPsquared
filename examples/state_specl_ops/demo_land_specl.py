@@ -17,27 +17,25 @@ uci_obj = io_manager.read_parameters()
 siminfo = uci_obj.siminfo
 opseq = uci_obj.opseq
 # Note: now that the UCI is read in and hdf5 loaded, you can see things like:
-# - hdf5_instance._store.keys() - all the paths in the UCI/hdf5
-# - finally stash specactions in state, not domain (segment) dependent so do it once
-# now load state and the special actions
 state = init_state_dicts()
-state_initialize_om(state)
-state["specactions"] = uci_obj.specactions  # stash the specaction dict in state
-
-state_siminfo_hsp2(uci_obj, siminfo)
+state_siminfo_hsp2(parameter_obj, siminfo, io_manager, state)
 # Add support for dynamic functions to operate on STATE
 # - Load any dynamic components if present, and store variables on objects
 state_load_dynamics_hsp2(state, io_manager, siminfo)
 # Iterate through all segments and add crucial paths to state
 # before loading dynamic components that may reference them
 state_init_hsp2(state, opseq, activities)
-state_load_dynamics_specl(state, io_manager, siminfo)  # traditional special actions
+# - finally stash specactions in state, not domain (segment) dependent so do it once
+state["specactions"] = specactions  # stash the specaction dict in state
+om_init_state(state)  # set up operational model specific state entries
+specl_load_state(state, io_manager, siminfo)  # traditional special actions
 state_load_dynamics_om(
     state, io_manager, siminfo
 )  # operational model for custom python
-state_om_model_run_prep(
-    state, io_manager, siminfo
-)  # this creates all objects from the UCI and previous loads
+# finalize all dynamically loaded components and prepare to run the model
+state_om_model_run_prep(state, io_manager, siminfo)
+#######################################################################################
+
 # state['model_root_object'].find_var_path('RCHRES_R001')
 # Get the timeseries naked, without an object
 Rlocal = state["model_object_cache"]["/STATE/RCHRES_R001/Rlocal"]
