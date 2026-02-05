@@ -9,12 +9,9 @@ from hsp2.hsp2io.hdf import HDF5
 from hsp2.hsp2io.io import IOManager
 from hsp2.state.state import *
 
-fpath = "./tests/testcbp/HSP2results/JL1_6562_6560.h5"
-
-ucifile = "aopN51730.uci"
 h5file = "aopN51730.h5"
 
-hdf5_instance = HDF5(fpath)
+hdf5_instance = HDF5(h5file)
 io_manager = IOManager(hdf5_instance)
 uci_obj = io_manager.read_uci()
 siminfo = uci_obj.siminfo
