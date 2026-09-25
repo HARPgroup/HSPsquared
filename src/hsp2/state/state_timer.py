@@ -8,6 +8,7 @@ import ctypes
 import time
 from numba import njit, types
 
+"""
 # Access the _PyTime_AsSecondsDouble and _PyTime_GetSystemClock functions from pythonapi
 get_system_clock = ctypes.pythonapi._PyTime_GetSystemClock
 as_seconds_double = ctypes.pythonapi._PyTime_AsSecondsDouble
@@ -42,6 +43,7 @@ class timer_class_jit():
         if (self.tsplit > 0):
             split = self.tsplit
         return split
+"""
 
 class timer_class():
     def __init__(self):
