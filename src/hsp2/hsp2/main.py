@@ -25,8 +25,8 @@ from hsp2.hsp2.om import (
 )
 from hsp2.hsp2.SPECL import specl_load_state
 
-from hsp2.hsp2io.io import IOManager, SupportsReadTS, Category
-
+from hsp2.hsp2io.hdf import HDF5
+from hsp2.hsp2io.io import Category, IOManager, SupportsReadTS
 
 def main(
     io_manager: Union[str, IOManager], saveall: bool = False, jupyterlab: bool = True
