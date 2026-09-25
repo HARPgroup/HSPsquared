@@ -316,7 +316,7 @@ def set_state(state_ix, state_paths, var_path, default_value=0.0, debug=False):
         # we need to add this to the state
         state_paths[var_path] = append_state(state_ix, default_value)
     var_ix = get_state_ix(state_ix, state_paths, var_path)
-    if debug == True:
+    if debug is True:
         print("Setting state_ix[", var_ix, "], to", default_value)
     state_ix[var_ix] = default_value
     return var_ix
@@ -410,6 +410,8 @@ def state_init_hsp2(state, opseq, activities):
     # This sets up the state entries for all state compatible HSP2 model variables
     # print("STATE initializing contexts.")W
     for _, operation, segment, delt in opseq.itertuples():
+        if operation in ["DISPLY", "PLTGEN"]:
+            continue
         if operation != "GENER" and operation != "COPY":
             for activity, function in activities[operation].items():
                 if activity == "HYDR":
@@ -668,7 +670,7 @@ def dynamic_module_import(local_name, local_path, module_name):
     try:
         # load_module dynamically loads the module
         # the parameters are pointer, path and description of the module
-        if local_spec != False:
+        if local_spec is True:
             module = importlib.util.module_from_spec(local_spec)
             sys.modules[local_spec.name] = module
             sys.modules[module_name] = module
@@ -681,7 +683,6 @@ def dynamic_module_import(local_name, local_path, module_name):
 
 
 def load_dynamics(io_manager, siminfo):
-    local_path = os.getcwd()
     # try this
     hdf5_path = io_manager._input.file_path
     (fbase, fext) = os.path.splitext(hdf5_path)
