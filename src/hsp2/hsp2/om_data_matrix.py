@@ -110,8 +110,7 @@ class DataMatrix(ModelObject):
                     else:
                         header_suspects = header_suspects + 1 
         print("Checked the first row for headers, header_suspects = ", header_suspects)
-        if (header_suspects > 0):
-            if (header_suspects == self.ncols):
+        if ((header_suspects > 0) (header_suspects == self.ncols)):
                 print("Removing the header row")
                 # we have what looks like a header, discard, but warn that this sucks
                 self.matrix = np.delete(self.matrix, 0, 0) # now remove it 
