@@ -1,15 +1,16 @@
 """Copyright (c) 2020 by RESPEC, INC.
 Author: Robert Heaphy, Ph.D.
 License: LGPL2
-Conversion of no category version of HSPF HRCHHYD.FOR into Python"""
+Conversion of no category version of HSPF HRCHHYD.FOR into Python
 
-""" Development Notes:
+Development Notes:
   Categories not implimented in this version
   Irregation only partially implimented in this version
   Only English units currently supported
   FTABLE can come from WDM or UCI file based on FTBDSN 1 or 0
 """
 
+from math import log10, sqrt
 
 from numpy import zeros, any, full, nan, array, int64, arange
 from pandas import DataFrame
@@ -66,34 +67,28 @@ def hydr(siminfo, parameters, ts, ftables, state):
     u = parameters["PARAMETERS"]
     funct = array([u[name] for name in u.keys() if name.startswith("FUNCT")]).astype(
         int
-    )[0:nexits]
+    )[:nexits]
     ODGTF = array([u[name] for name in u.keys() if name.startswith("ODGTF")]).astype(
         int
-    )[0:nexits]
+    )[:nexits]
     ODFVF = array([u[name] for name in u.keys() if name.startswith("ODFVF")]).astype(
         int
-    )[0:nexits]
+    )[:nexits]
 
     u = parameters["STATES"]
-    colin = array([u[name] for name in u.keys() if name.startswith("COLIN")]).astype(
-        float
-    )[0:nexits]
-    outdg = array([u[name] for name in u.keys() if name.startswith("OUTDG")]).astype(
-        float
-    )[0:nexits]
 
     # COLIND timeseries might come in as COLIND, COLIND0, etc. otherwise UCI default
     names = list(sorted([n for n in ts if n.startswith("COLIND")], reverse=True))
     df = DataFrame()
     for i, c in enumerate(ODFVF):
-        df[i] = ts[names.pop()][0:steps] if c < 0 else full(steps, c)
+        df[i] = ts[names.pop()][:steps] if c < 0 else full(steps, c)
     COLIND = df.to_numpy()
 
     # OUTDGT timeseries might come in as OUTDGT, OUTDGT0, etc. otherwise UCI default
     names = list(sorted([n for n in ts if n.startswith("OUTDG")], reverse=True))
     df = DataFrame()
     for i, c in enumerate(ODGTF):
-        df[i] = ts[names.pop()][0:steps] if c > 0 else zeros(steps)
+        df[i] = ts[names.pop()][:steps] if c > 0 else zeros(steps)
     OUTDGT = df.to_numpy()
 
     # generic SAVE table doesn't know nexits for output flows and rates
@@ -104,8 +99,8 @@ def hydr(siminfo, parameters, ts, ftables, state):
                 u[f"{key}{i + 1}"] = u[key]
             del u[key]
 
-    # optional - defined, but can't used accidently
-    for name in ("SOLRAD", "CLOUD", "DEWTEMP", "GATMP", "WIND"):
+    # optional - defined, but can't used accidentally
+    for name in ("SOLRAD", "CLOUD", "DEWTMP", "GATMP", "WIND"):
         if name not in ts:
             ts[name] = full(steps, nan)
 
@@ -145,7 +140,7 @@ def hydr(siminfo, parameters, ts, ftables, state):
     hsp2_local_py = state.hsp2_local_py
     # It appears necessary to load this here, instead of from main.py, otherwise,
     # _hydr_() does not recognize the function state_step_hydr()?
-    if hsp2_local_py != False:
+    if hsp2_local_py is True:
         from hsp2_local_py import state_step_hydr
     else:
         from hsp2.state.state_definitions import state_step_hydr
@@ -267,7 +262,7 @@ def _hydr_(
     colind[:] = COLIND[0, :]
 
     # numba limitation, ts can't have both 1-d and 2-d arrays in save Dict
-    O = zeros((steps, nexits))
+    O = zeros((steps, nexits))  # noqa E741
     OVOL = zeros((steps, nexits))
 
     ts["PRSUPY"] = PRSUPY = zeros(steps)
@@ -471,8 +466,6 @@ def _hydr_(
                     )
             else:
                 irrdem = 0.0
-            # o[irexit] = 0.0                                                   #???? not used anywhere, check if o[irexit]
-
         prsupy = PREC[step] * sarea
         if uunits == 2:
             prsupy = PREC[step] * sarea / 3.281
@@ -501,11 +494,11 @@ def _hydr_(
             o[:] = 0.0
             rovol = volt
 
-            if roseff > 0.0:  # numba limitation, cant combine into one line
+            if roseff > 0.0:
+                # numba limitation, cant combine into one line
                 ovol[:] = (rovol / roseff) * oseff[:]
             else:
                 ovol[:] = rovol / nexits
-
         else:  # case 1 or 2
             oint = volint * facta1  # == ointsp, so ointsp variable dropped
             if nodfv:
@@ -773,15 +766,14 @@ def demand(vol, rowFT, funct, nexits, delts, convf, colind, outdgt):
             od[i] = odfv
         elif odfv == 0.0 and odgt != 0.0:
             od[i] = odgt
-        else:
-            if funct[i] == 1:
-                od[i] = min(odfv, odgt)
-            elif funct[i] == 2:
-                od[i] = max(odfv, odgt)
-            elif funct[i] == 3:
-                od[i] = odfv + odgt
-            elif funct[i] == 4:
-                od[i] = max(odfv, (vol - odgt) / delts)
+        elif funct[i] == 1:
+            od[i] = min(odfv, odgt)
+        elif funct[i] == 2:
+            od[i] = max(odfv, odgt)
+        elif funct[i] == 3:
+            od[i] = odfv + odgt
+        elif funct[i] == 4:
+            od[i] = max(odfv, (vol - odgt) / delts)
     return od.sum(), od
 
 
@@ -834,18 +826,16 @@ def auxil(volumeFT, depthFT, sareaFT, indx, vol, length, stcor, AUX1FG, errors):
 def expand_HYDR_masslinks(flags, parameters, dat, recs):
     if flags["HYDR"]:
         # IVOL
-        rec = {}
-        rec["MFACTOR"] = dat.MFACTOR
-        rec["SGRPN"] = "HYDR"
-        if dat.SGRPN == "ROFLOW":
-            rec["SMEMN"] = "ROVOL"
-        else:
-            rec["SMEMN"] = "OVOL"
-        rec["SMEMSB1"] = dat.SMEMSB1
-        rec["SMEMSB2"] = dat.SMEMSB2
-        rec["TMEMN"] = "IVOL"
-        rec["TMEMSB1"] = dat.TMEMSB1
-        rec["TMEMSB2"] = dat.TMEMSB2
-        rec["SVOL"] = dat.SVOL
+        rec = {
+            "MFACTOR": dat.MFACTOR,
+            "SGRPN": "HYDR",
+            "SMEMN": "ROVOL" if dat.SGRPN == "ROFLOW" else "OVOL",
+            "SMEMSB1": dat.SMEMSB1,
+            "SMEMSB2": dat.SMEMSB2,
+            "TMEMN": "IVOL",
+            "TMEMSB1": dat.TMEMSB1,
+            "TMEMSB2": dat.TMEMSB2,
+            "SVOL": dat.SVOL,
+        }
         recs.append(rec)
     return recs
